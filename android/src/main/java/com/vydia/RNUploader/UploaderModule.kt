@@ -9,6 +9,9 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import com.facebook.react.BuildConfig
 import com.facebook.react.bridge.*
+import com.vydia.RNUploader.files.FileInfo
+import com.vydia.RNUploader.files.FileInfoProvider
+import com.vydia.RNUploader.files.FileInfoProviderImpl
 import net.gotev.uploadservice.UploadService
 import net.gotev.uploadservice.UploadServiceConfig.httpStack
 import net.gotev.uploadservice.UploadServiceConfig.initialize
@@ -22,8 +25,14 @@ import okhttp3.OkHttpClient
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
-  private val TAG = "UploaderBridge"
+private const val TAG = "UploaderBridge"
+
+class UploaderModule(
+  val reactContext: ReactApplicationContext
+): ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
+
+  private val fileInfoProvider: FileInfoProvider by lazy { FileInfoProviderImpl() }
+
   private var notificationChannelID = "BackgroundUploadChannel"
   private var isGlobalRequestObserver = false
 
@@ -37,87 +46,11 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
    */
   @ReactMethod
   fun getFileInfo(path: String?, promise: Promise) {
-    try {
-      val params = Arguments.createMap()
-      val fileInfo = File(path)
-      params.putString("name", fileInfo.name)
-      if (!fileInfo.exists() || !fileInfo.isFile) {
-        params.putBoolean("exists", false)
-      } else {
-        params.putBoolean("exists", true)
-        params.putString("size", fileInfo.length().toString()) //use string form of long because there is no putLong and converting to int results in a max size of 17.2 gb, which could happen.  Javascript will need to convert it to a number
-        val extension = MimeTypeMap.getFileExtensionFromUrl(path)
-        params.putString("extension", extension)
-        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase())
-        params.putString("mimeType", mimeType)
-      }
-      promise.resolve(params)
-    } catch (exc: Exception) {
-      exc.printStackTrace()
-      Log.e(TAG, exc.message, exc)
-      promise.reject(exc)
-    }
-  }
-
-  private fun configureUploadServiceHTTPStack(options: ReadableMap, promise: Promise) {
-    var followRedirects = true
-    var followSslRedirects = true
-    var retryOnConnectionFailure = true
-    var connectTimeout = 15
-    var writeTimeout = 30
-    var readTimeout = 30
-    //TODO: make 'cache' customizable
-    if (options.hasKey("followRedirects")) {
-      if (options.getType("followRedirects") != ReadableType.Boolean) {
-        promise.reject(IllegalArgumentException("followRedirects must be a boolean."))
-        return
-      }
-      followRedirects = options.getBoolean("followRedirects")
-    }
-    if (options.hasKey("followSslRedirects")) {
-      if (options.getType("followSslRedirects") != ReadableType.Boolean) {
-        promise.reject(IllegalArgumentException("followSslRedirects must be a boolean."))
-        return
-      }
-      followSslRedirects = options.getBoolean("followSslRedirects")
-    }
-    if (options.hasKey("retryOnConnectionFailure")) {
-      if (options.getType("retryOnConnectionFailure") != ReadableType.Boolean) {
-        promise.reject(IllegalArgumentException("retryOnConnectionFailure must be a boolean."))
-        return
-      }
-      retryOnConnectionFailure = options.getBoolean("retryOnConnectionFailure")
-    }
-    if (options.hasKey("connectTimeout")) {
-      if (options.getType("connectTimeout") != ReadableType.Number) {
-        promise.reject(IllegalArgumentException("connectTimeout must be a number."))
-        return
-      }
-      connectTimeout = options.getInt("connectTimeout")
-    }
-    if (options.hasKey("writeTimeout")) {
-      if (options.getType("writeTimeout") != ReadableType.Number) {
-        promise.reject(IllegalArgumentException("writeTimeout must be a number."))
-        return
-      }
-      writeTimeout = options.getInt("writeTimeout")
-    }
-    if (options.hasKey("readTimeout")) {
-      if (options.getType("readTimeout") != ReadableType.Number) {
-        promise.reject(IllegalArgumentException("readTimeout must be a number."))
-        return
-      }
-      readTimeout = options.getInt("readTimeout")
-    }
-    httpStack = OkHttpStack(OkHttpClient().newBuilder()
-            .followRedirects(followRedirects)
-            .followSslRedirects(followSslRedirects)
-            .retryOnConnectionFailure(retryOnConnectionFailure)
-            .connectTimeout(connectTimeout.toLong(), TimeUnit.SECONDS)
-            .writeTimeout(writeTimeout.toLong(), TimeUnit.SECONDS)
-            .readTimeout(readTimeout.toLong(), TimeUnit.SECONDS)
-            .cache(null)
-            .build())
+    fileInfoProvider.getFileInfo(
+      path = path,
+      onFileInfoObtained = { promise.resolve(it.toArgumentsMap()) },
+      onExceptionReceived = { promise.reject(it) }
+    )
   }
 
   /*
@@ -303,6 +236,67 @@ class UploaderModule(val reactContext: ReactApplicationContext) : ReactContextBa
       Log.e(TAG, exc.message, exc)
       promise.reject(exc)
     }
+  }
+
+  private fun configureUploadServiceHTTPStack(options: ReadableMap, promise: Promise) {
+    var followRedirects = true
+    var followSslRedirects = true
+    var retryOnConnectionFailure = true
+    var connectTimeout = 15
+    var writeTimeout = 30
+    var readTimeout = 30
+    //TODO: make 'cache' customizable
+    if (options.hasKey("followRedirects")) {
+      if (options.getType("followRedirects") != ReadableType.Boolean) {
+        promise.reject(IllegalArgumentException("followRedirects must be a boolean."))
+        return
+      }
+      followRedirects = options.getBoolean("followRedirects")
+    }
+    if (options.hasKey("followSslRedirects")) {
+      if (options.getType("followSslRedirects") != ReadableType.Boolean) {
+        promise.reject(IllegalArgumentException("followSslRedirects must be a boolean."))
+        return
+      }
+      followSslRedirects = options.getBoolean("followSslRedirects")
+    }
+    if (options.hasKey("retryOnConnectionFailure")) {
+      if (options.getType("retryOnConnectionFailure") != ReadableType.Boolean) {
+        promise.reject(IllegalArgumentException("retryOnConnectionFailure must be a boolean."))
+        return
+      }
+      retryOnConnectionFailure = options.getBoolean("retryOnConnectionFailure")
+    }
+    if (options.hasKey("connectTimeout")) {
+      if (options.getType("connectTimeout") != ReadableType.Number) {
+        promise.reject(IllegalArgumentException("connectTimeout must be a number."))
+        return
+      }
+      connectTimeout = options.getInt("connectTimeout")
+    }
+    if (options.hasKey("writeTimeout")) {
+      if (options.getType("writeTimeout") != ReadableType.Number) {
+        promise.reject(IllegalArgumentException("writeTimeout must be a number."))
+        return
+      }
+      writeTimeout = options.getInt("writeTimeout")
+    }
+    if (options.hasKey("readTimeout")) {
+      if (options.getType("readTimeout") != ReadableType.Number) {
+        promise.reject(IllegalArgumentException("readTimeout must be a number."))
+        return
+      }
+      readTimeout = options.getInt("readTimeout")
+    }
+    httpStack = OkHttpClient().newBuilder()
+      .followRedirects(followRedirects)
+      .followSslRedirects(followSslRedirects)
+      .retryOnConnectionFailure(retryOnConnectionFailure)
+      .connectTimeout(connectTimeout.toLong(), TimeUnit.SECONDS)
+      .writeTimeout(writeTimeout.toLong(), TimeUnit.SECONDS)
+      .readTimeout(readTimeout.toLong(), TimeUnit.SECONDS)
+      .cache(null)
+      .build()
   }
 
   // Customize the notification channel as you wish. This is only for a bare minimum example
