@@ -1,5 +1,7 @@
-package com.vydia.RNUploader.networking
+package com.vydia.RNUploader.networking.httpClient
 
+import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.ReadableType
 import com.vydia.RNUploader.files.*
 
 class HttpClientOptionsProviderImpl: HttpClientOptionsProvider {
@@ -35,7 +37,9 @@ class HttpClientOptionsProviderImpl: HttpClientOptionsProvider {
                 wrongOptionType(retryOnConnectionFailureWrongTypeMessage)
                 return
             }
-            httpClientOptions.retryOnConnectionFailure = options.getBoolean(retryOnConnectionFailureKey)
+            httpClientOptions.retryOnConnectionFailure = options.getBoolean(
+                retryOnConnectionFailureKey
+            )
         }
 
         //

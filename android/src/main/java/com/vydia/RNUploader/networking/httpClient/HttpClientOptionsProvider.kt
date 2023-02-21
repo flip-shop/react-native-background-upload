@@ -1,4 +1,6 @@
-package com.vydia.RNUploader.networking
+package com.vydia.RNUploader.networking.httpClient
+
+import com.facebook.react.bridge.ReadableMap
 
 interface HttpClientOptionsProvider {
     fun obtainHttpClientOptions(

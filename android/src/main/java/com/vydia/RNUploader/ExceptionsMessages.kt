@@ -10,6 +10,7 @@ const val retryOnConnectionFailureWrongTypeMessage = "retryOnConnectionFailure m
 const val connectTimeoutWrongTypeMessage = "connectTimeout must be a number."
 const val writeTimeoutWrongTypeMessage = "writeTimeout must be a number."
 const val readTimeoutWrongTypeMessage = "readTimeout must be a number."
+const val requestTypeWrongTypeMessage = "type should be string: raw or multipart."
 
 fun missingKeyMessage(key: String): String = "Missing '$key' field."
 fun keyNotStringMessage(key: String): String = "$key must be a string."

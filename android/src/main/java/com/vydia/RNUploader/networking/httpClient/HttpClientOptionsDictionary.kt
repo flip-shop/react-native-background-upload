@@ -1,4 +1,4 @@
-package com.vydia.RNUploader.networking
+package com.vydia.RNUploader.networking.httpClient
 
 const val followRedirectsKey = "followRedirects"
 const val followSslRedirectsKey = "followSslRedirects"

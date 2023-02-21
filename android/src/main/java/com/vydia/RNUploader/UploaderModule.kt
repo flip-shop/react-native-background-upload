@@ -6,34 +6,36 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import android.webkit.MimeTypeMap
-import com.facebook.react.BuildConfig
 import com.facebook.react.bridge.*
-import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
+import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
+import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
+import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProviderImpl
+import com.vydia.RNUploader.networking.request.options.RequestOptions
+import com.vydia.RNUploader.networking.request.options.RequestOptionsProvider
+import com.vydia.RNUploader.networking.request.options.RequestOptionsProviderImpl
 import com.vydia.RNUploader.upload.UploadOptionsValidator
 import com.vydia.RNUploader.upload.UploadOptionsValidatorImpl
-import net.gotev.uploadservice.UploadService
-import net.gotev.uploadservice.UploadServiceConfig.httpStack
-import net.gotev.uploadservice.UploadServiceConfig.initialize
-import net.gotev.uploadservice.data.UploadNotificationConfig
-import net.gotev.uploadservice.data.UploadNotificationStatusConfig
-import net.gotev.uploadservice.observer.request.GlobalRequestObserver
-import net.gotev.uploadservice.protocols.binary.BinaryUploadRequest
-import net.gotev.uploadservice.protocols.multipart.MultipartUploadRequest
-import okhttp3.OkHttpClient
-import java.io.File
-import java.util.concurrent.TimeUnit
 
 private const val TAG = "UploaderBridge"
 private const val moduleName = "RNFileUploader"
 
 class UploaderModule(
-  val reactContext: ReactApplicationContext
+  private val reactContext: ReactApplicationContext
 ): ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
 
-  private val fileInfoProvider: FileInfoProvider by lazy { FileInfoProviderImpl() }
+  private var httpClientOptions: HttpClientOptions? = null
+  private var requestOptions: RequestOptions? = null
+
+  private val fileInfoProvider: FileInfoProvider
+    by lazy { FileInfoProviderImpl() }
+
+  private val httpClientOptionsProvider: HttpClientOptionsProvider
+    by lazy { HttpClientOptionsProviderImpl() }
+
+  private val requestOptionsProvider: RequestOptionsProvider
+    by lazy { RequestOptionsProviderImpl() }
 
   private val uploadOptionsValidator: UploadOptionsValidator by lazy { UploadOptionsValidatorImpl() }
 
@@ -68,27 +70,33 @@ class UploaderModule(
         promise.reject(IllegalArgumentException(it))
       },
       onValidationSuccess = {
-        //todo
+        httpClientOptionsProvider.obtainHttpClientOptions(
+          options = options,
+          httpOptionsObtained = { providedOptions ->
+            httpClientOptions = providedOptions
+          },
+          wrongOptionType = { exceptionMessage ->
+            promise.reject(IllegalArgumentException(exceptionMessage))
+          }
+        )
+      }
+    )
+
+    //configureUploadServiceHTTPStack(options, promise)
+
+    requestOptionsProvider.obtainRequestOptions(
+      options = options,
+      requestOptionsObtained = { obtainedOptions ->
+        requestOptions = obtainedOptions
+      },
+      onErrorObtained = { message ->
+        promise.reject(IllegalArgumentException(message))
       }
     )
 
 
-    configureUploadServiceHTTPStack(options, promise)
 
-
-    var requestType: String? = "raw"
-    if (options.hasKey("type")) {
-      requestType = options.getString("type")
-      if (requestType == null) {
-        promise.reject(java.lang.IllegalArgumentException("type must be string."))
-        return
-      }
-      if (requestType != "raw" && requestType != "multipart") {
-        promise.reject(java.lang.IllegalArgumentException("type should be string: raw or multipart."))
-        return
-      }
-    }
-
+    //todo continue...
 
     val notification: WritableMap = WritableNativeMap()
     notification.putBoolean("enabled", true)
@@ -106,12 +114,13 @@ class UploaderModule(
 
     createNotificationChannel()
 
-    initialize(application, notificationChannelID, BuildConfig.DEBUG)
+    //initialize(application, notificationChannelID, BuildConfig.DEBUG)
 
+    /*
     if(!isGlobalRequestObserver) {
       isGlobalRequestObserver = true
       GlobalRequestObserver(application, GlobalRequestObserverDelegate(reactContext))
-    }
+    }*/
 
     val url = options.getString("url")
     val filePath = options.getString("path")
@@ -239,22 +248,29 @@ class UploaderModule(
   }
 
   private fun configureUploadServiceHTTPStack(options: ReadableMap, promise: Promise) {
-    var followRedirects = true
-    var followSslRedirects = true
-    var retryOnConnectionFailure = true
-    var connectTimeout = 15
-    var writeTimeout = 30
-    var readTimeout = 30
 
-    httpStack = OkHttpClient().newBuilder()
-      .followRedirects(followRedirects)
-      .followSslRedirects(followSslRedirects)
-      .retryOnConnectionFailure(retryOnConnectionFailure)
-      .connectTimeout(connectTimeout.toLong(), TimeUnit.SECONDS)
-      .writeTimeout(writeTimeout.toLong(), TimeUnit.SECONDS)
-      .readTimeout(readTimeout.toLong(), TimeUnit.SECONDS)
-      .cache(null)
-      .build()
+    httpClientOptionsProvider.obtainHttpClientOptions(
+      options = options,
+      httpOptionsObtained = {
+        //todo
+        /**
+         OkHttpClient().newBuilder()
+        .followRedirects(followRedirects)
+        .followSslRedirects(followSslRedirects)
+        .retryOnConnectionFailure(retryOnConnectionFailure)
+        .connectTimeout(connectTimeout.toLong(), TimeUnit.SECONDS)
+        .writeTimeout(writeTimeout.toLong(), TimeUnit.SECONDS)
+        .readTimeout(readTimeout.toLong(), TimeUnit.SECONDS)
+        .cache(null)
+        .build()
+         */
+      },
+      wrongOptionType = { exceptionMessage ->
+        promise.reject(IllegalArgumentException(exceptionMessage))
+      }
+    )
+
+
   }
 
   // Customize the notification channel as you wish. This is only for a bare minimum example

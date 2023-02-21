@@ -46,10 +46,18 @@ android {
     lintOptions {
         abortOnError false
     }
+    sourceSets {
+        main {
+            java {
+                srcDirs 'src/main/java', 'src/test'
+            }
+        }
+    }
 }
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 def _ext = ext
@@ -70,6 +78,10 @@ dependencies {
     androidTestImplementation "androidx.work:work-testing:$work_version"
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.9.2"
 
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
+
+    testImplementation 'junit:junit:4.13.2'
 }

@@ -1,3 +1,6 @@
 package com.vydia.RNUploader
 
-val emptyString = ""
+const val emptyString = ""
+const val defaultConnectTimeout = 15
+const val defaultWriteTimeout = 15
+const val defaultReadTimeout = 30
