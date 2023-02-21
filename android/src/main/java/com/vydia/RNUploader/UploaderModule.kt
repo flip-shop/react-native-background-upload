@@ -12,13 +12,14 @@ import com.facebook.react.bridge.*
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
+import com.vydia.RNUploader.upload.UploadOptionsValidator
+import com.vydia.RNUploader.upload.UploadOptionsValidatorImpl
 import net.gotev.uploadservice.UploadService
 import net.gotev.uploadservice.UploadServiceConfig.httpStack
 import net.gotev.uploadservice.UploadServiceConfig.initialize
 import net.gotev.uploadservice.data.UploadNotificationConfig
 import net.gotev.uploadservice.data.UploadNotificationStatusConfig
 import net.gotev.uploadservice.observer.request.GlobalRequestObserver
-import net.gotev.uploadservice.okhttp.OkHttpStack
 import net.gotev.uploadservice.protocols.binary.BinaryUploadRequest
 import net.gotev.uploadservice.protocols.multipart.MultipartUploadRequest
 import okhttp3.OkHttpClient
@@ -26,6 +27,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "UploaderBridge"
+private const val moduleName = "RNFileUploader"
 
 class UploaderModule(
   val reactContext: ReactApplicationContext
@@ -33,12 +35,12 @@ class UploaderModule(
 
   private val fileInfoProvider: FileInfoProvider by lazy { FileInfoProviderImpl() }
 
+  private val uploadOptionsValidator: UploadOptionsValidator by lazy { UploadOptionsValidatorImpl() }
+
   private var notificationChannelID = "BackgroundUploadChannel"
   private var isGlobalRequestObserver = false
 
-  override fun getName(): String {
-    return "RNFileUploader"
-  }
+  override fun getName() = moduleName
 
   /*
   Gets file information for the path specified.  Example valid path is: /storage/extSdCard/DCIM/Camera/20161116_074726.mp4
@@ -59,25 +61,21 @@ class UploaderModule(
    */
   @ReactMethod
   fun startUpload(options: ReadableMap, promise: Promise) {
-    for (key in arrayOf("url", "path")) {
-      if (!options.hasKey(key)) {
-        promise.reject(java.lang.IllegalArgumentException("Missing '$key' field."))
-        return
+
+    uploadOptionsValidator.validate(
+      uploadOptions = options,
+      onMissingArgument = {
+        promise.reject(IllegalArgumentException(it))
+      },
+      onValidationSuccess = {
+        //todo
       }
-      if (options.getType(key) != ReadableType.String) {
-        promise.reject(java.lang.IllegalArgumentException("$key must be a string."))
-        return
-      }
-    }
-    if (options.hasKey("headers") && options.getType("headers") != ReadableType.Map) {
-      promise.reject(java.lang.IllegalArgumentException("headers must be a hash."))
-      return
-    }
-    if (options.hasKey("notification") && options.getType("notification") != ReadableType.Map) {
-      promise.reject(java.lang.IllegalArgumentException("notification must be a hash."))
-      return
-    }
+    )
+
+
     configureUploadServiceHTTPStack(options, promise)
+
+
     var requestType: String? = "raw"
     if (options.hasKey("type")) {
       requestType = options.getString("type")
@@ -90,6 +88,8 @@ class UploaderModule(
         return
       }
     }
+
+
     val notification: WritableMap = WritableNativeMap()
     notification.putBoolean("enabled", true)
     if (options.hasKey("notification")) {
@@ -245,49 +245,7 @@ class UploaderModule(
     var connectTimeout = 15
     var writeTimeout = 30
     var readTimeout = 30
-    //TODO: make 'cache' customizable
-    if (options.hasKey("followRedirects")) {
-      if (options.getType("followRedirects") != ReadableType.Boolean) {
-        promise.reject(IllegalArgumentException("followRedirects must be a boolean."))
-        return
-      }
-      followRedirects = options.getBoolean("followRedirects")
-    }
-    if (options.hasKey("followSslRedirects")) {
-      if (options.getType("followSslRedirects") != ReadableType.Boolean) {
-        promise.reject(IllegalArgumentException("followSslRedirects must be a boolean."))
-        return
-      }
-      followSslRedirects = options.getBoolean("followSslRedirects")
-    }
-    if (options.hasKey("retryOnConnectionFailure")) {
-      if (options.getType("retryOnConnectionFailure") != ReadableType.Boolean) {
-        promise.reject(IllegalArgumentException("retryOnConnectionFailure must be a boolean."))
-        return
-      }
-      retryOnConnectionFailure = options.getBoolean("retryOnConnectionFailure")
-    }
-    if (options.hasKey("connectTimeout")) {
-      if (options.getType("connectTimeout") != ReadableType.Number) {
-        promise.reject(IllegalArgumentException("connectTimeout must be a number."))
-        return
-      }
-      connectTimeout = options.getInt("connectTimeout")
-    }
-    if (options.hasKey("writeTimeout")) {
-      if (options.getType("writeTimeout") != ReadableType.Number) {
-        promise.reject(IllegalArgumentException("writeTimeout must be a number."))
-        return
-      }
-      writeTimeout = options.getInt("writeTimeout")
-    }
-    if (options.hasKey("readTimeout")) {
-      if (options.getType("readTimeout") != ReadableType.Number) {
-        promise.reject(IllegalArgumentException("readTimeout must be a number."))
-        return
-      }
-      readTimeout = options.getInt("readTimeout")
-    }
+
     httpStack = OkHttpClient().newBuilder()
       .followRedirects(followRedirects)
       .followSslRedirects(followSslRedirects)
