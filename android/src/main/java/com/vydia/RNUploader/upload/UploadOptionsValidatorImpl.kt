@@ -2,10 +2,9 @@ package com.vydia.RNUploader.upload
 
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
-import com.vydia.RNUploader.files.headersWrongTypeMessage
-import com.vydia.RNUploader.files.keyNotStringMessage
-import com.vydia.RNUploader.files.missingKeyMessage
-import com.vydia.RNUploader.files.notificationWrongTypeMessage
+import com.vydia.RNUploader.ReadableMapFieldState
+import com.vydia.RNUploader.files.*
+import com.vydia.RNUploader.obtainFieldState
 
 class UploadOptionsValidatorImpl: UploadOptionsValidator {
 
@@ -25,7 +24,7 @@ class UploadOptionsValidatorImpl: UploadOptionsValidator {
 
             // check whether url and path are string type
             if (uploadOptions.getType(key) != ReadableType.String) {
-                onMissingArgument(keyNotStringMessage(key))
+                onMissingArgument(keyWrongTypeMessage(key, ReadableType.String))
                 return
             }
         }
@@ -45,4 +44,54 @@ class UploadOptionsValidatorImpl: UploadOptionsValidator {
         //
         onValidationSuccess()
     }
+
+    override fun obtainUploadOptions(
+        options: ReadableMap,
+        uploadOptionsObtained: (UploadOptions) -> Unit,
+        uploadOptionsObtainError: (String) -> Unit
+    ) {
+        val uploadOptions = UploadOptions()
+
+        when(
+            obtainFieldState(
+                map = options,
+                fieldNameKey = urlKey,
+                requiredFieldType = ReadableType.String
+            )
+        ) {
+            ReadableMapFieldState.WrongType -> {
+                uploadOptionsObtainError(keyWrongTypeMessage(urlKey, ReadableType.String))
+                return
+            }
+            ReadableMapFieldState.NotExists -> {
+                uploadOptionsObtainError(missingKeyMessage(urlKey))
+                return
+            }
+            ReadableMapFieldState.Correct -> uploadOptions.uploadUrl = options.getString(urlKey)
+        }
+
+        when(
+            obtainFieldState(
+                map = options,
+                fieldNameKey = pathKey,
+                requiredFieldType = ReadableType.String
+            )
+        ) {
+            ReadableMapFieldState.WrongType -> {
+                uploadOptionsObtainError(keyWrongTypeMessage(pathKey, ReadableType.String))
+                return
+            }
+            ReadableMapFieldState.NotExists -> {
+                uploadOptionsObtainError(missingKeyMessage(pathKey))
+                return
+            }
+            ReadableMapFieldState.Correct ->
+                uploadOptions.fileToUploadPath = options.getString(pathKey)
+        }
+
+
+    }
+
+
+
 }

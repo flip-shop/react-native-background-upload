@@ -3,7 +3,7 @@ package com.vydia.RNUploader.upload
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
 import com.vydia.RNUploader.files.headersWrongTypeMessage
-import com.vydia.RNUploader.files.keyNotStringMessage
+import com.vydia.RNUploader.files.keyWrongTypeMessage
 import com.vydia.RNUploader.files.missingKeyMessage
 import com.vydia.RNUploader.files.notificationWrongTypeMessage
 import org.junit.Before
@@ -79,7 +79,7 @@ class UploadOptionsValidatorImplTest {
 
         validator.validate(mockOptions, onMissingArgument, onValidationSuccess)
 
-        verify(onMissingArgument).invoke(keyNotStringMessage(urlKey))
+        verify(onMissingArgument).invoke(keyWrongTypeMessage(urlKey))
         verifyNoMoreInteractions(onMissingArgument, onValidationSuccess)
     }
 
@@ -92,7 +92,7 @@ class UploadOptionsValidatorImplTest {
 
         validator.validate(mockOptions, onMissingArgument, onValidationSuccess)
 
-        verify(onMissingArgument).invoke(keyNotStringMessage(pathKey))
+        verify(onMissingArgument).invoke(keyWrongTypeMessage(pathKey))
         verifyNoMoreInteractions(onMissingArgument, onValidationSuccess)
     }
 

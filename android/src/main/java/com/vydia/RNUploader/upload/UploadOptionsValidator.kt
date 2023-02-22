@@ -8,4 +8,10 @@ interface UploadOptionsValidator {
         onMissingArgument: (String) -> Unit = {},
         onValidationSuccess: () -> Unit = {}
     )
+
+    fun obtainUploadOptions(
+        options: ReadableMap,
+        uploadOptionsObtained: (UploadOptions) -> Unit = {},
+        uploadOptionsObtainError: (String) -> Unit = {}
+    )
 }
