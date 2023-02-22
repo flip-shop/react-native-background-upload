@@ -10,17 +10,17 @@ private const val fileSizeKey = "size"
 private const val fileExistKey = "exists"
 
 data class FileInfo(
-    var fileName: String = "",
+    var name: String = "",
     var extension: String = "",
     var mimeType: String = "",
-    var fileSize: String = "",
+    var size: String = "",
     var exists: Boolean = false
 ) {
     fun toArgumentsMap(): WritableMap = Arguments.createMap().apply {
-        putString(fileNameKey, fileName)
+        putString(fileNameKey, name)
         putString(fileExtensionKey, extension)
         putString(fileMimeTypeKey, mimeType)
-        putString(fileSizeKey, fileSize)
+        putString(fileSizeKey, size)
         putBoolean(fileExistKey, exists)
     }
 }

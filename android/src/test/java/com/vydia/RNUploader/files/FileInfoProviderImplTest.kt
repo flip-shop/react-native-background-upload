@@ -58,11 +58,11 @@ class FileInfoProviderImplTest {
         val fileInfoArgumentCaptor = argumentCaptor<FileInfo>()
         verify(fileInfoObtainedCallback).invoke(fileInfoArgumentCaptor.capture())
         val fileInfo = fileInfoArgumentCaptor.firstValue
-        assertEquals("file.txt", fileInfo.fileName)
+        assertEquals("file.txt", fileInfo.name)
         assertEquals("txt", fileInfo.extension)
         assertEquals("text/plain", fileInfo.mimeType)
         assertTrue(fileInfo.exists)
-        assertTrue(fileInfo.fileSize.toLong() > 0L)
+        assertTrue(fileInfo.size.toLong() > 0L)
 
         // Verify that onExceptionReceived callback was not called
         verifyNoInteractions(exceptionReceivedCallback)

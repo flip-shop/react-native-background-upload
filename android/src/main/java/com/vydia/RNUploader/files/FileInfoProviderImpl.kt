@@ -20,11 +20,11 @@ class FileInfoProviderImpl(
             try {
                 val fileInfo = FileInfo()
 
-                fileInfo.fileName = filesHelper.getFileName(nonNullFilePath)
+                fileInfo.name = filesHelper.getFileName(nonNullFilePath)
                 fileInfo.extension = mimeTypeHelper.getFileExtensionFromUrl(nonNullFilePath)
                 fileInfo.mimeType = mimeTypeHelper.getMimeTypeFromExtension(fileInfo.extension)
                 fileInfo.exists = filesHelper.fileExists(nonNullFilePath)
-                fileInfo.fileSize = filesHelper.getFileSize(nonNullFilePath).toString()
+                fileInfo.size = filesHelper.getFileSize(nonNullFilePath).toString()
 
                 onFileInfoObtained(fileInfo)
 
