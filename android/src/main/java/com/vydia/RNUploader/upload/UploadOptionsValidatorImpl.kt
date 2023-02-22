@@ -43,6 +43,6 @@ class UploadOptionsValidatorImpl: UploadOptionsValidator {
         }
 
         //
-
+        onValidationSuccess()
     }
 }
