@@ -1,6 +1,7 @@
 package com.vydia.RNUploader.files
 
-import java.io.File
+import com.vydia.RNUploader.files.helpers.FilesHelper
+import com.vydia.RNUploader.files.helpers.MimeTypeHelper
 
 
 private const val TAG = "FileInfoProviderImpl"

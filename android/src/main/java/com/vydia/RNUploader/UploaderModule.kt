@@ -9,8 +9,8 @@ import android.util.Log
 import com.facebook.react.bridge.*
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
-import com.vydia.RNUploader.files.FilesHelperImpl
-import com.vydia.RNUploader.files.MimeTypeHelperImpl
+import com.vydia.RNUploader.files.helpers.FilesHelperImpl
+import com.vydia.RNUploader.files.helpers.MimeTypeHelperImpl
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProviderImpl

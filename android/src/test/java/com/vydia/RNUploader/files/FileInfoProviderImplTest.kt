@@ -1,5 +1,7 @@
 package com.vydia.RNUploader.files
 
+import com.vydia.RNUploader.files.helpers.FilesHelper
+import com.vydia.RNUploader.files.helpers.MimeTypeHelper
 import junit.framework.TestCase.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Before

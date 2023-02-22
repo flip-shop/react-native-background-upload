@@ -1,4 +1,4 @@
-package com.vydia.RNUploader.files
+package com.vydia.RNUploader.files.helpers
 
 interface MimeTypeHelper {
 
