@@ -8,7 +8,6 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter
-import net.gotev.uploadservice.UploadService
 
 class NotificationActionsReceiver : BroadcastReceiver() {
 
@@ -27,7 +26,7 @@ class NotificationActionsReceiver : BroadcastReceiver() {
 
   private fun onUserRequestedUploadCancellation(context: Context, uploadId: String) {
     Log.e("CANCEL_UPLOAD", "User requested cancellation of upload with ID: $uploadId")
-    UploadService.stopUpload(uploadId)
+    //UploadService.stopUpload(uploadId)
     val params = Arguments.createMap()
     params.putString("id", uploadId)
     sendEvent("cancelled", params, context)

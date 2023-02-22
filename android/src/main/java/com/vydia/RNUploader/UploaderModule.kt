@@ -9,6 +9,8 @@ import android.util.Log
 import com.facebook.react.bridge.*
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
+import com.vydia.RNUploader.files.FilesHelperImpl
+import com.vydia.RNUploader.files.MimeTypeHelperImpl
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProviderImpl
@@ -29,7 +31,12 @@ class UploaderModule(
   private var requestOptions: RequestOptions? = null
 
   private val fileInfoProvider: FileInfoProvider
-    by lazy { FileInfoProviderImpl() }
+    by lazy {
+      FileInfoProviderImpl(
+        mimeTypeHelper = MimeTypeHelperImpl(),
+        filesHelper = FilesHelperImpl()
+      )
+    }
 
   private val httpClientOptionsProvider: HttpClientOptionsProvider
     by lazy { HttpClientOptionsProviderImpl() }
@@ -122,6 +129,7 @@ class UploaderModule(
       GlobalRequestObserver(application, GlobalRequestObserverDelegate(reactContext))
     }*/
 
+    /*
     val url = options.getString("url")
     val filePath = options.getString("path")
     val method = if (options.hasKey("method") && options.getType("method") == ReadableType.String) options.getString("method") else "POST"
@@ -145,6 +153,8 @@ class UploaderModule(
       }
       request.setMethod(method!!)
               .setMaxRetries(maxRetries)
+
+
       if (notification.getBoolean("enabled")) {
         val notificationConfig = UploadNotificationConfig(
                 notificationChannelId = notificationChannelID,
@@ -171,6 +181,8 @@ class UploaderModule(
           notificationConfig
         }
       }
+
+
       if (options.hasKey("parameters")) {
         if (requestType == "raw") {
           promise.reject(java.lang.IllegalArgumentException("Parameters supported only in multipart type"))
@@ -187,6 +199,8 @@ class UploaderModule(
           request.addParameter(key, parameters.getString(key)!!)
         }
       }
+
+
       if (options.hasKey("headers")) {
         val headers = options.getMap("headers")
         val keys = headers!!.keySetIterator()
@@ -199,6 +213,8 @@ class UploaderModule(
           request.addHeader(key, headers.getString(key)!!)
         }
       }
+
+
       if (customUploadId != null)
         request.setUploadID(customUploadId)
 
@@ -208,7 +224,7 @@ class UploaderModule(
       exc.printStackTrace()
       Log.e(TAG, exc.message, exc)
       promise.reject(exc)
-    }
+    }*/
   }
 
   /*
@@ -223,7 +239,7 @@ class UploaderModule(
       return
     }
     try {
-      UploadService.stopUpload(cancelUploadId)
+      //UploadService.stopUpload(cancelUploadId)
       promise.resolve(true)
     } catch (exc: java.lang.Exception) {
       exc.printStackTrace()
@@ -238,7 +254,7 @@ class UploaderModule(
   @ReactMethod
   fun stopAllUploads(promise: Promise) {
     try {
-      UploadService.stopAllUploads()
+      //UploadService.stopAllUploads()
       promise.resolve(true)
     } catch (exc: java.lang.Exception) {
       exc.printStackTrace()

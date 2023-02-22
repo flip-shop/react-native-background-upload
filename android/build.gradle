@@ -1,7 +1,7 @@
 buildscript {
     ext {
         kotlinVersion = '1.8.0'
-        buildToolsVersion = '29.0.2'
+        buildToolsVersion = '30.0.2'
         compileSdkVersion = 29
         targetSdkVersion = 29
         minSdkVersion = 18
@@ -13,30 +13,21 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.4'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath 'com.android.tools.build:gradle:7.0.4'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
     }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-
-def DEFAULT_COMPILE_SDK_VERSION = 28
-def DEFAULT_BUILD_TOOLS_VERSION = "28.0.3"
-def DEFAULT_TARGET_SDK_VERSION = 28
-
-def safeExtGet(prop, fallback) {
-    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
-}
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
-    buildToolsVersion safeExtGet('buildToolsVersion', DEFAULT_BUILD_TOOLS_VERSION)
+    compileSdkVersion findProperty('compileSdkVersion') ?: 28
+    buildToolsVersion findProperty('buildToolsVersion') ?: "28.0.3"
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion safeExtGet('targetSdkVersion', DEFAULT_TARGET_SDK_VERSION)
+        targetSdkVersion findProperty('targetSdkVersion') ?: 28
         versionCode 1
         versionName "1.0"
         ndk {
@@ -49,7 +40,7 @@ android {
     sourceSets {
         main {
             java {
-                srcDirs 'src/main/java', 'src/test'
+                resources.srcDirs 'src/main/java', 'src/test', 'src/test/java'
             }
         }
     }
@@ -57,6 +48,7 @@ android {
 
 repositories {
     mavenCentral()
+    google()
     jcenter()
 }
 
@@ -65,9 +57,14 @@ def _ext = ext
 def _kotlinVersion = _ext.has('detoxKotlinVersion') ? _ext.detoxKotlinVersion : '1.3.10'
 def _kotlinStdlib = _ext.has('detoxKotlinStdlib') ? _ext.detoxKotlinStdlib : 'kotlin-stdlib-jdk8'
 
+
 dependencies {
 
     def work_version = "2.8.0"
+    def androidXTestVersion = "1.5.0"
+    def mockitoVersion = "5.1.1"
+    def mockitoKotlinVersion = "4.1.0"
+    def mockkVersion = "1.13.4"
 
     implementation "androidx.core:core-ktx:1.9.0"
     implementation 'com.facebook.react:react-native:+'
@@ -83,5 +80,15 @@ dependencies {
 
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
 
+    // Required -- JUnit 4 framework
     testImplementation 'junit:junit:4.13.2'
+    // Optional -- Robolectric environment
+    testImplementation "androidx.test:core:$androidXTestVersion"
+    testImplementation "androidx.test:core-ktx:$androidXTestVersion"
+    // Optional -- Mockito framework
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    // Optional -- mockito-kotlin
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    // Optional -- Mockk framework
+    testImplementation "io.mockk:mockk:$mockkVersion"
 }

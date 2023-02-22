@@ -1,14 +1,14 @@
 package com.vydia.RNUploader.files
 
-import android.util.Log
-import android.webkit.MimeTypeMap
-import com.vydia.RNUploader.emptyString
 import java.io.File
 
 
 private const val TAG = "FileInfoProviderImpl"
 
-class FileInfoProviderImpl: FileInfoProvider {
+class FileInfoProviderImpl(
+    private val mimeTypeHelper: MimeTypeHelper,
+    private val filesHelper: FilesHelper
+): FileInfoProvider {
 
     override fun getFileInfo(
         path: String?,
@@ -18,20 +18,18 @@ class FileInfoProviderImpl: FileInfoProvider {
         path?.let { nonNullFilePath ->
             try {
                 val fileInfo = FileInfo()
-                val file = File(nonNullFilePath)
 
-                fileInfo.fileName = file.name
-                fileInfo.extension = MimeTypeMap.getFileExtensionFromUrl(path)
-                fileInfo.mimeType = MimeTypeMap.getSingleton()
-                    .getMimeTypeFromExtension(fileInfo.extension) ?: emptyString
-                fileInfo.exists = file.exists() && file.isFile
-                fileInfo.fileSize = file.length().toString()
+                fileInfo.fileName = filesHelper.getFileName(nonNullFilePath)
+                fileInfo.extension = mimeTypeHelper.getFileExtensionFromUrl(nonNullFilePath)
+                fileInfo.mimeType = mimeTypeHelper.getMimeTypeFromExtension(fileInfo.extension)
+                fileInfo.exists = filesHelper.fileExists(nonNullFilePath)
+                fileInfo.fileSize = filesHelper.getFileSize(nonNullFilePath).toString()
 
                 onFileInfoObtained(fileInfo)
 
             } catch (exc: Exception) {
                 exc.printStackTrace()
-                Log.e(TAG, exc.message, exc)
+                //Log.e(TAG, exc.message, exc)
                 onExceptionReceived(exc)
             }
 

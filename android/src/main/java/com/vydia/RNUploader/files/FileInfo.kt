@@ -1,5 +1,8 @@
 package com.vydia.RNUploader.files
 
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.WritableMap
+
 private const val fileNameKey = "name"
 private const val fileExtensionKey = "extension"
 private const val fileMimeTypeKey = "mimeType"

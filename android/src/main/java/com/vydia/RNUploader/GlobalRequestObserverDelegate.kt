@@ -6,15 +6,13 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter
-import net.gotev.uploadservice.data.UploadInfo
-import net.gotev.uploadservice.network.ServerResponse
-import net.gotev.uploadservice.observer.request.RequestObserverDelegate
 
-class GlobalRequestObserverDelegate(reactContext: ReactApplicationContext) : RequestObserverDelegate {
+class GlobalRequestObserverDelegate(reactContext: ReactApplicationContext) {
   private val TAG = "UploadReceiver"
 
   private var reactContext: ReactApplicationContext = reactContext
 
+  /*
   override fun onCompleted(context: Context, uploadInfo: UploadInfo) {
   }
 
@@ -62,5 +60,5 @@ class GlobalRequestObserverDelegate(reactContext: ReactApplicationContext) : Req
   private fun sendEvent(eventName: String, params: WritableMap?, context: Context) {
     reactContext?.getJSModule(RCTDeviceEventEmitter::class.java)?.emit("RNFileUploader-$eventName", params)
             ?: Log.e(TAG, "sendEvent() failed due reactContext == null!")
-  }
+  }*/
 }
