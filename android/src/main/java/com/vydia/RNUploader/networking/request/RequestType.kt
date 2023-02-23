@@ -1,7 +1,7 @@
 package com.vydia.RNUploader.networking.request
 
-private const val rawRequestType = "RAW"
-private const val multipartRequestType = "MULTIPART"
+private const val rawRequestType = "raw"
+private const val multipartRequestType = "multipart"
 
 sealed class RequestType(typeName: String) {
     object Raw: RequestType(rawRequestType)

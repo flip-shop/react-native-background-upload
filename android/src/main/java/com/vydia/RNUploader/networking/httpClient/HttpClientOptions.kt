@@ -8,7 +8,7 @@ data class HttpClientOptions(
     var followRedirects: Boolean = true,
     var followSslRedirects: Boolean = true,
     var retryOnConnectionFailure: Boolean = true,
-    var connectTimeout: Int = defaultConnectTimeout,
-    var writeTimeout: Int = defaultWriteTimeout,
-    var readTimeout: Int = defaultReadTimeout
+    var connectTimeout: Long = defaultConnectTimeout,
+    var writeTimeout: Long = defaultWriteTimeout,
+    var readTimeout: Long = defaultReadTimeout
 )

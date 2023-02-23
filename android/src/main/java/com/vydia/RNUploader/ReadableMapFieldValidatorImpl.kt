@@ -5,7 +5,10 @@ import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
 
 
-
+/**
+ * Function using to obtain field from [ReadableMap] with specific type
+ * Returns [ReadableMapFieldState] depends on that field exists and type is as required
+ */
 fun obtainFieldState(
     map: ReadableMap,
     fieldNameKey: String,
