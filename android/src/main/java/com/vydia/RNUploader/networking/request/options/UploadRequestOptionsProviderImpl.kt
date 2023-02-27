@@ -5,8 +5,6 @@ import com.facebook.react.bridge.ReadableType
 import com.vydia.RNUploader.ReadableMapFieldState
 import com.vydia.RNUploader.emptyString
 import com.vydia.RNUploader.files.*
-import com.vydia.RNUploader.networking.request.RequestType
-import com.vydia.RNUploader.networking.request.requestTypeFromString
 import com.vydia.RNUploader.obtainFieldState
 import com.vydia.RNUploader.toMap
 
@@ -80,7 +78,7 @@ class UploadRequestOptionsProviderImpl: UploadRequestOptionsProvider {
                         options.getString(requestFieldNameKey) ?: emptyString
 
                     requestTypeKey -> uploadRequestOptions.requestType =
-                        requestTypeFromString(options.getString(requestTypeKey))
+                        options.getString(requestTypeKey) ?: emptyString
 
                     parametersKey -> uploadRequestOptions.params =
                         options.getMap(parametersKey)?.toMap() ?: mapOf()

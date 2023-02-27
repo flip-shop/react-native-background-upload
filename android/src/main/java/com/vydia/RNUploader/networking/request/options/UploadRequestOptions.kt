@@ -1,7 +1,6 @@
 package com.vydia.RNUploader.networking.request.options
 
 import com.vydia.RNUploader.emptyString
-import com.vydia.RNUploader.networking.request.RequestType
 
 data class UploadRequestOptions(
     var uploadUrl: String = emptyString,
@@ -11,6 +10,6 @@ data class UploadRequestOptions(
     var maxRetries: Int = 1,
     var customUploadId: String = emptyString,
     var requestFieldName: String = emptyString,
-    var requestType: RequestType = RequestType.Raw,
+    var requestType: String = emptyString,
     var params: Map<String, String> = mapOf()
 )

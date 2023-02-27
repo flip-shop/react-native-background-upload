@@ -1,7 +1,9 @@
 package com.vydia.RNUploader.files
 
+import com.facebook.react.bridge.ReadableMap
+
 interface FileInfoProvider {
-    fun getFileInfo(
+    fun getFileInfoFromPath(
         path: String?,
         onFileInfoObtained: (obtainedFileInfo: FileInfo) -> Unit = {},
         onExceptionReceived: (exception: Exception) -> Unit = {}

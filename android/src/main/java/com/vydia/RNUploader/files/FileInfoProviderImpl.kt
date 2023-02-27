@@ -1,17 +1,19 @@
 package com.vydia.RNUploader.files
 
+import com.facebook.react.bridge.ReadableMap
 import com.vydia.RNUploader.files.helpers.FilesHelper
 import com.vydia.RNUploader.files.helpers.MimeTypeHelper
 
 
 private const val TAG = "FileInfoProviderImpl"
 
+
 class FileInfoProviderImpl(
     private val mimeTypeHelper: MimeTypeHelper,
     private val filesHelper: FilesHelper
 ): FileInfoProvider {
 
-    override fun getFileInfo(
+    override fun getFileInfoFromPath(
         path: String?,
         onFileInfoObtained: (obtainedFileInfo: FileInfo) -> Unit,
         onExceptionReceived: (exception: Exception) -> Unit

@@ -91,7 +91,7 @@ class UploadRequestOptionsProviderImplTest {
         assertEquals(mockMaxRetries, obtainedOptions.maxRetries)
         assertEquals(mockUploadId, obtainedOptions.customUploadId)
         assertEquals(mockRequestFieldName, obtainedOptions.requestFieldName)
-        assertEquals(RequestType.Multipart, obtainedOptions.requestType)
+        assertEquals(multipartRequestType, obtainedOptions.requestType)
     }
 
 

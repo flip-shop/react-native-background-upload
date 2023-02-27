@@ -1,7 +1,9 @@
 package com.vydia.RNUploader.worker
 
 import android.content.Context
+import android.util.Log.d
 import androidx.work.*
+import com.vydia.RNUploader.TAG
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.helpers.deserializeFromJson
 import com.vydia.RNUploader.files.helpers.serializeToJson
@@ -44,6 +46,11 @@ class UploadWorker(
             return Result.failure()
         }
 
+        d(TAG, "doWork uploadFileInfo = $uploadFileInfo")
+        d(TAG, "doWork requestOptions = $requestOptions")
+        d(TAG, "doWork httpClientOptions = $httpClientOptions")
+
+        /*
         uploadJob?.let { job ->
 
             CoroutineScope(Dispatchers.IO + job).launch {
@@ -63,7 +70,7 @@ class UploadWorker(
                     }
                 )
             }
-        }
+        }*/
 
         return Result.success()
     }

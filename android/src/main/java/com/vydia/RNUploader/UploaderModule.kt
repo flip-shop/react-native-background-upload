@@ -1,13 +1,15 @@
 package com.vydia.RNUploader
 
-import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.util.Log.d
+import androidx.work.Configuration
+import androidx.work.WorkManager
 import com.facebook.react.bridge.*
+import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
 import com.vydia.RNUploader.files.helpers.FilesHelperImpl
@@ -21,14 +23,16 @@ import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProvi
 import com.vydia.RNUploader.notifications.NotificationsConfig
 import com.vydia.RNUploader.notifications.NotificationsConfigProvider
 import com.vydia.RNUploader.notifications.NotificationsConfigProviderImpl
+import com.vydia.RNUploader.worker.UploadWorker
 
-private const val TAG = "UploaderBridge"
+const val TAG = "UploaderBridge"
 private const val moduleName = "RNFileUploader"
 
 class UploaderModule(
   private val reactContext: ReactApplicationContext
 ): ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
 
+  private var fileInfo: FileInfo? = null
   private var httpClientOptions: HttpClientOptions? = null
   private var uploadRequestOptions: UploadRequestOptions? = null
   private var notificationsConfig: NotificationsConfig? = null
@@ -61,7 +65,7 @@ class UploaderModule(
    */
   @ReactMethod
   fun getFileInfo(path: String?, promise: Promise) {
-    fileInfoProvider.getFileInfo(
+    fileInfoProvider.getFileInfoFromPath(
       path = path,
       onFileInfoObtained = { promise.resolve(it.toArgumentsMap()) },
       onExceptionReceived = { promise.reject(it) }
@@ -123,11 +127,50 @@ class UploaderModule(
       }
     )
 
+    uploadRequestOptions?.fileToUploadPath?.let {
+      fileInfoProvider.getFileInfoFromPath(
+        path = it,
+        onFileInfoObtained = { info ->
+          fileInfo = info
+        },
+        onExceptionReceived = { e ->
+          d(TAG,"fileInfoProvider errorObtained $it")
+          promise.reject(Exception(e))
+        }
+      )
+    }
+
+    if(fileInfo == null) {
+      d(TAG,"fileInfo == null")
+    }
+
+
+    startWorker()
+
     if(notificationsConfig == null) {
       d(TAG,"notificationsConfig == null")
       return
     }
+  }
 
+
+  private fun startWorker() {
+    if(!WorkManager.isInitialized()) {
+      WorkManager.initialize(reactContext, Configuration.Builder().build())
+    }
+
+    fileInfo?.let { fileInfo ->
+      uploadRequestOptions?.let { requestOptions ->
+        httpClientOptions?.let { httpOptions ->
+          UploadWorker.enqueue(
+            WorkManager.getInstance(reactContext),
+            fileInfo = fileInfo,
+            requestOptions = requestOptions,
+            httpClientOptions = httpOptions
+          )
+        }
+      }
+    }
   }
 
   /*
