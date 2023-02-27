@@ -46,11 +46,7 @@ class UploadWorker(
             return Result.failure()
         }
 
-        d(TAG, "doWork uploadFileInfo = $uploadFileInfo")
-        d(TAG, "doWork requestOptions = $requestOptions")
-        d(TAG, "doWork httpClientOptions = $httpClientOptions")
 
-        /*
         uploadJob?.let { job ->
 
             CoroutineScope(Dispatchers.IO + job).launch {
@@ -70,7 +66,7 @@ class UploadWorker(
                     }
                 )
             }
-        }*/
+        }
 
         return Result.success()
     }

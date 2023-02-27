@@ -52,15 +52,30 @@ class UploadRepository {
                     }
                 )
 
-                val body = MultipartBody.Part.createFormData(
+                // create file part of upload form
+                val filePart = MultipartBody.Part.createFormData(
                     name = requestOptions.requestFieldName,
                     filename = tempFile.name,
                     body = requestBody
                 )
 
+                // create body builder
+                val bodyBuilder = MultipartBody.Builder()
+
+                // add file as a param
+                bodyBuilder.addPart(filePart)
+
+                // add other params
+                requestOptions.params.forEach {
+                    bodyBuilder.addFormDataPart(it.key, it.value)
+                }
+
                 val requestBuilder = Request.Builder()
                     .url(requestOptions.uploadUrl)
-                    .method(requestOptions.method, body.body)
+                    .method(
+                        requestOptions.method,
+                        bodyBuilder.build()
+                    )
 
                 requestOptions.headers.forEach { headersMapEntry ->
                     requestBuilder.addHeader(headersMapEntry.key, headersMapEntry.value)
