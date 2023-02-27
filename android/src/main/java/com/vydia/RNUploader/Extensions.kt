@@ -1,6 +1,6 @@
 package com.vydia.RNUploader
 
-import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.*
 
 fun ReadableMap.toMap(): Map<String, String> {
     val map = mutableMapOf<String, String>()

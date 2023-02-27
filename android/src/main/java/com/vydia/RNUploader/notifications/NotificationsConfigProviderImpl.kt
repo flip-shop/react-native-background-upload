@@ -12,6 +12,5 @@ class NotificationsConfigProviderImpl: NotificationsConfigProvider {
         val config = NotificationsConfig()
 
 
-
     }
 }

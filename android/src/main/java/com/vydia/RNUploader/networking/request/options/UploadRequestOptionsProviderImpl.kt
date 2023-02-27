@@ -26,7 +26,7 @@ class UploadRequestOptionsProviderImpl: UploadRequestOptionsProvider {
 
         for(key in arrayOf(
             urlKey, pathKey, headersKey, methodKey,
-            maxRetriesKey, customUploadIdKey, requestFieldNameKey, requestTypeKey
+            maxRetriesKey, customUploadIdKey, requestFieldNameKey, requestTypeKey, parametersKey
         )
         ) {
             when(
@@ -36,6 +36,7 @@ class UploadRequestOptionsProviderImpl: UploadRequestOptionsProvider {
                     requiredFieldType = when(key) {
                         maxRetriesKey -> ReadableType.Number
                         headersKey -> ReadableType.Map
+                        parametersKey -> ReadableType.Map
                         else -> ReadableType.String
                     }
                 )
@@ -57,26 +58,32 @@ class UploadRequestOptionsProviderImpl: UploadRequestOptionsProvider {
                     return
                 }
                 ReadableMapFieldState.Correct -> when(key) {
-                    urlKey ->
-                        uploadRequestOptions.uploadUrl = options.getString(urlKey) ?:  emptyString
-                    pathKey ->
-                        uploadRequestOptions.fileToUploadPath = options.getString(pathKey) ?: emptyString
-                    headersKey ->
-                        uploadRequestOptions.headers = options.getMap(headersKey)?.toMap() ?: mapOf()
-                    methodKey ->
-                        uploadRequestOptions.method = options.getString(methodKey) ?: emptyString
-                    maxRetriesKey ->
-                        uploadRequestOptions.maxRetries = options.getInt(maxRetriesKey)
-                    customUploadIdKey ->
-                        uploadRequestOptions.customUploadId = options.getString(customUploadIdKey) ?: emptyString
-                    requestFieldNameKey ->
-                        uploadRequestOptions.requestFieldName = options.getString(
-                            requestFieldNameKey
-                        ) ?: emptyString
-                    requestTypeKey ->
-                        uploadRequestOptions.requestType = requestTypeFromString(options.getString(
-                            requestTypeKey
-                        ))
+
+                    urlKey -> uploadRequestOptions.uploadUrl =
+                        options.getString(urlKey) ?:  emptyString
+
+                    pathKey -> uploadRequestOptions.fileToUploadPath =
+                        options.getString(pathKey) ?: emptyString
+
+                    headersKey -> uploadRequestOptions.headers =
+                        options.getMap(headersKey)?.toMap() ?: mapOf()
+
+                    methodKey -> uploadRequestOptions.method =
+                        options.getString(methodKey) ?: emptyString
+
+                    maxRetriesKey -> uploadRequestOptions.maxRetries = options.getInt(maxRetriesKey)
+
+                    customUploadIdKey -> uploadRequestOptions.customUploadId =
+                        options.getString(customUploadIdKey) ?: emptyString
+
+                    requestFieldNameKey -> uploadRequestOptions.requestFieldName =
+                        options.getString(requestFieldNameKey) ?: emptyString
+
+                    requestTypeKey -> uploadRequestOptions.requestType =
+                        requestTypeFromString(options.getString(requestTypeKey))
+
+                    parametersKey -> uploadRequestOptions.params =
+                        options.getMap(parametersKey)?.toMap() ?: mapOf()
                 }
             }
         }

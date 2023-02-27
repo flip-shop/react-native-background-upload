@@ -1,5 +1,6 @@
 package com.vydia.RNUploader.networking.request
 
+import com.facebook.react.bridge.JavaOnlyMap
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
 import com.vydia.RNUploader.*
@@ -46,8 +47,8 @@ class UploadRequestOptionsProviderImplTest {
         `when`(mockOptions.getString(pathKey)).thenReturn(mockFilePath)
 
         `when`(mockOptions.hasKey(headersKey)).thenReturn(true)
-        `when`(mockOptions.getType(headersKey)).thenReturn(ReadableType.String)
-        `when`(mockOptions.getString(headersKey)).thenReturn(mockHeaders)
+        `when`(mockOptions.getType(headersKey)).thenReturn(ReadableType.Map)
+        `when`(mockOptions.getMap(headersKey)).thenReturn(JavaOnlyMap.from(mockHeaders))
 
         `when`(mockOptions.hasKey(methodKey)).thenReturn(true)
         `when`(mockOptions.getType(methodKey)).thenReturn(ReadableType.String)
@@ -375,7 +376,7 @@ class UploadRequestOptionsProviderImplTest {
         `when`(mockOptions.getType(pathKey)).thenReturn(ReadableType.String)
 
         `when`(mockOptions.hasKey(headersKey)).thenReturn(true)
-        `when`(mockOptions.getType(headersKey)).thenReturn(ReadableType.String)
+        `when`(mockOptions.getType(headersKey)).thenReturn(ReadableType.Map)
 
         `when`(mockOptions.hasKey(methodKey)).thenReturn(true)
         `when`(mockOptions.getType(methodKey)).thenReturn(ReadableType.String)
@@ -408,7 +409,7 @@ class UploadRequestOptionsProviderImplTest {
         `when`(mockOptions.getType(pathKey)).thenReturn(ReadableType.String)
 
         `when`(mockOptions.hasKey(headersKey)).thenReturn(true)
-        `when`(mockOptions.getType(headersKey)).thenReturn(ReadableType.String)
+        `when`(mockOptions.getType(headersKey)).thenReturn(ReadableType.Map)
 
         `when`(mockOptions.hasKey(methodKey)).thenReturn(true)
         `when`(mockOptions.getType(methodKey)).thenReturn(ReadableType.String)

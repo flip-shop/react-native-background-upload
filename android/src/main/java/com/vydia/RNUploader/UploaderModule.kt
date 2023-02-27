@@ -75,37 +75,58 @@ class UploaderModule(
   @ReactMethod
   fun startUpload(options: ReadableMap, promise: Promise) {
 
+    d(TAG,"startUpload options = $options")
+
     uploadRequestOptionsProvider.obtainUploadOptions(
       options = options,
-      uploadOptionsObtained = { uploadRequestOptions = it },
-      uploadOptionsObtainError = { promise.reject(IllegalArgumentException(it)) }
+      uploadOptionsObtained = {
+        d(TAG,"uploadOptionsObtained $it")
+        uploadRequestOptions = it
+      },
+      uploadOptionsObtainError = {
+        d(TAG,"uploadOptionsObtainError $it")
+        promise.reject(IllegalArgumentException(it))
+      }
     )
 
     if(uploadRequestOptions == null) {
+      d(TAG,"uploadRequestOptions == null")
       return
     }
 
     httpClientOptionsProvider.obtainHttpClientOptions(
       options = options,
-      httpOptionsObtained = { httpClientOptions = it },
-      wrongOptionType = { promise.reject(IllegalArgumentException(it)) }
+      httpOptionsObtained = {
+        d(TAG,"httpOptionsObtained $it")
+        httpClientOptions = it
+      },
+      wrongOptionType = {
+        d(TAG,"obtainHttpClientOptions wrongOptionType $it")
+        promise.reject(IllegalArgumentException(it))
+      }
     )
 
     if(httpClientOptions == null) {
+      d(TAG,"httpClientOptions == null")
       return
     }
 
     notificationsConfigProvider.provide(
       options = options,
-      optionsObtained = { notificationsConfig = it },
-      errorObtained = { promise.reject(Exception(it)) }
+      optionsObtained = {
+        d(TAG,"notificationsConfigProvider optionsObtained $it")
+        notificationsConfig = it
+      },
+      errorObtained = {
+        d(TAG,"notificationsConfigProvider errorObtained $it")
+        promise.reject(Exception(it))
+      }
     )
 
     if(notificationsConfig == null) {
+      d(TAG,"notificationsConfig == null")
       return
     }
-
-    d("lolTag","START UPLOAD HEH")
 
   }
 

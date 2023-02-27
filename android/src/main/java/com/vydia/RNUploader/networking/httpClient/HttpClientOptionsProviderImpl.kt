@@ -48,7 +48,7 @@ class HttpClientOptionsProviderImpl: HttpClientOptionsProvider {
                 wrongOptionType(connectTimeoutWrongTypeMessage)
                 return
             }
-            httpClientOptions.connectTimeout = options.getInt(connectTimeoutKey)
+            httpClientOptions.connectTimeout = options.getInt(connectTimeoutKey).toLong()
         }
 
         //
@@ -57,7 +57,7 @@ class HttpClientOptionsProviderImpl: HttpClientOptionsProvider {
                 wrongOptionType(writeTimeoutWrongTypeMessage)
                 return
             }
-            httpClientOptions.writeTimeout = options.getInt(writeTimeoutKey)
+            httpClientOptions.writeTimeout = options.getInt(writeTimeoutKey).toLong()
         }
 
         //
@@ -66,7 +66,7 @@ class HttpClientOptionsProviderImpl: HttpClientOptionsProvider {
                 wrongOptionType(readTimeoutWrongTypeMessage)
                 return
             }
-            httpClientOptions.readTimeout = options.getInt(readTimeoutKey)
+            httpClientOptions.readTimeout = options.getInt(readTimeoutKey).toLong()
         }
 
         //
