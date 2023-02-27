@@ -8,6 +8,7 @@ import com.vydia.RNUploader.files.*
 import com.vydia.RNUploader.networking.request.RequestType
 import com.vydia.RNUploader.networking.request.requestTypeFromString
 import com.vydia.RNUploader.obtainFieldState
+import com.vydia.RNUploader.toMap
 
 class UploadRequestOptionsProviderImpl: UploadRequestOptionsProvider {
 
@@ -57,21 +58,21 @@ class UploadRequestOptionsProviderImpl: UploadRequestOptionsProvider {
                 }
                 ReadableMapFieldState.Correct -> when(key) {
                     urlKey ->
-                        uploadRequestOptions.uploadUrl = options.getString(urlKey)
+                        uploadRequestOptions.uploadUrl = options.getString(urlKey) ?:  emptyString
                     pathKey ->
-                        uploadRequestOptions.fileToUploadPath = options.getString(pathKey)
+                        uploadRequestOptions.fileToUploadPath = options.getString(pathKey) ?: emptyString
                     headersKey ->
-                        uploadRequestOptions.headers = options.getMap(headersKey)
+                        uploadRequestOptions.headers = options.getMap(headersKey)?.toMap() ?: mapOf()
                     methodKey ->
-                        uploadRequestOptions.method = options.getString(methodKey)
+                        uploadRequestOptions.method = options.getString(methodKey) ?: emptyString
                     maxRetriesKey ->
                         uploadRequestOptions.maxRetries = options.getInt(maxRetriesKey)
                     customUploadIdKey ->
-                        uploadRequestOptions.customUploadId = options.getString(customUploadIdKey)
+                        uploadRequestOptions.customUploadId = options.getString(customUploadIdKey) ?: emptyString
                     requestFieldNameKey ->
                         uploadRequestOptions.requestFieldName = options.getString(
                             requestFieldNameKey
-                        )
+                        ) ?: emptyString
                     requestTypeKey ->
                         uploadRequestOptions.requestType = requestTypeFromString(options.getString(
                             requestTypeKey

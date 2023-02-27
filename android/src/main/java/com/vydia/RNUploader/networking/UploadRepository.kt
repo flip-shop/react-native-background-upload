@@ -2,6 +2,7 @@ package com.vydia.RNUploader.networking
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log.d
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.helpers.FilesHelper
 import com.vydia.RNUploader.files.helpers.FilesHelperImpl
@@ -14,6 +15,7 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+private val TAG = "UploadRepository"
 class UploadRepository {
 
     private val filesHelper: FilesHelper by lazy {
@@ -77,6 +79,7 @@ class UploadRepository {
 
                 httpClient.newCall(request).enqueue(object: Callback {
                     override fun onFailure(call: Call, e: IOException) {
+                        d(TAG,"upload onFailure ${e.message}")
                         onError(e)
                     }
 
@@ -86,8 +89,10 @@ class UploadRepository {
                 })
             }
         } catch (e: IOException) {
+            d(TAG,"upload exception ${e.message}")
             onError(e)
         } finally {
+            d(TAG,"upload finally")
             tempFile.delete()
         }
     }

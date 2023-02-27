@@ -70,6 +70,8 @@ class UploadWorker(
 
     override fun onStopped() {
         super.onStopped()
+        uploadJob?.cancel()
+        uploadJob = null
     }
 
 

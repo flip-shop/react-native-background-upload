@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import android.util.Log.d
 import com.facebook.react.bridge.*
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
@@ -103,6 +104,8 @@ class UploaderModule(
     if(notificationsConfig == null) {
       return
     }
+
+    d("lolTag","START UPLOAD HEH")
 
   }
 
