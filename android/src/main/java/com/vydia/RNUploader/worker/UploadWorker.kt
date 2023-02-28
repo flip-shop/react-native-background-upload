@@ -46,23 +46,20 @@ class UploadWorker(
             return Result.failure()
         }
 
-
         uploadJob?.let { job ->
-
             CoroutineScope(Dispatchers.IO + job).launch {
                 uploadRepository.upload(
-                    context = applicationContext,
                     fileInfo = uploadFileInfo,
                     requestOptions = requestOptions,
                     httpClientOptions = httpClientOptions,
                     onProgress = { progress ->
-                        //todo update notification
+                        d(TAG, "upload progress update: $progress")
                     },
                     onResponse = {
-                        //todo
+                        d(TAG, "upload onResponse: ${it.body}")
                     },
                     onError = {
-                        //todo
+                        d(TAG, "upload onError: ${it.message}")
                     }
                 )
             }
@@ -84,7 +81,6 @@ class UploadWorker(
         private const val requestOptionsKey = "REQUEST_OPTIONS"
         private const val httpClientOptionsKey = "HTTP_CLIENT_OPTIONS"
         private const val uniqueWorkName = "FileUploadWork-"
-
 
         fun enqueue(
             workManager: WorkManager,

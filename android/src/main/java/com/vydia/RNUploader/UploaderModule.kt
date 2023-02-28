@@ -9,6 +9,7 @@ import android.util.Log.d
 import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.facebook.react.bridge.*
+import com.vydia.RNUploader.di.koinInjector
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
@@ -24,6 +25,9 @@ import com.vydia.RNUploader.notifications.NotificationsConfig
 import com.vydia.RNUploader.notifications.NotificationsConfigProvider
 import com.vydia.RNUploader.notifications.NotificationsConfigProviderImpl
 import com.vydia.RNUploader.worker.UploadWorker
+import org.koin.core.Koin
+import org.koin.core.context.startKoin
+import org.koin.java.KoinJavaComponent.inject
 
 const val TAG = "UploaderBridge"
 private const val moduleName = "RNFileUploader"
@@ -38,26 +42,30 @@ class UploaderModule(
   private var notificationsConfig: NotificationsConfig? = null
 
   private val fileInfoProvider: FileInfoProvider
-    by lazy {
-      FileInfoProviderImpl(
-        mimeTypeHelper = MimeTypeHelperImpl(),
-        filesHelper = FilesHelperImpl()
-      )
-    }
+    by inject(FileInfoProviderImpl::class.java)
 
   private val httpClientOptionsProvider: HttpClientOptionsProvider
-    by lazy { HttpClientOptionsProviderImpl() }
+    by inject(HttpClientOptionsProviderImpl::class.java)
 
   private val uploadRequestOptionsProvider: UploadRequestOptionsProvider
-    by lazy { UploadRequestOptionsProviderImpl() }
+    by inject(UploadRequestOptionsProviderImpl::class.java)
 
   private val notificationsConfigProvider: NotificationsConfigProvider
-    by lazy { NotificationsConfigProviderImpl() }
+    by inject(NotificationsConfigProviderImpl::class.java)
 
   private var notificationChannelID = "BackgroundUploadChannel"
   private var isGlobalRequestObserver = false
 
   override fun getName() = moduleName
+
+
+  init {
+    d(TAG,"INIT")
+
+    startKoin {
+      modules(koinInjector)
+    }
+  }
 
   /*
   Gets file information for the path specified.  Example valid path is: /storage/extSdCard/DCIM/Camera/20161116_074726.mp4
@@ -147,10 +155,11 @@ class UploaderModule(
 
     startWorker()
 
+    /*
     if(notificationsConfig == null) {
       d(TAG,"notificationsConfig == null")
       return
-    }
+    }*/
   }
 
 

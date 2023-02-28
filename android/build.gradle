@@ -65,6 +65,8 @@ dependencies {
     def mockitoVersion = "5.1.1"
     def mockitoKotlinVersion = "4.1.0"
     def mockkVersion = "1.13.4"
+    def koin_version = "3.3.3"
+    def retrofit_version = "2.9.0"
 
     implementation "androidx.core:core-ktx:1.9.0"
     implementation 'com.facebook.react:react-native:+'
@@ -77,6 +79,9 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation "com.squareup.okhttp3:logging-interceptor:4.9.2"
     implementation 'com.google.code.gson:gson:2.8.9'
+    implementation "io.insert-koin:koin-core:$koin_version"
+    implementation "io.insert-koin:koin-android:$koin_version"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
 
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
 
@@ -91,4 +96,8 @@ dependencies {
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     // Optional -- Mockk framework
     testImplementation "io.mockk:mockk:$mockkVersion"
+    // Koin Test features
+    testImplementation "io.insert-koin:koin-test:$koin_version"
+    // Koin for JUnit 4
+    testImplementation "io.insert-koin:koin-test-junit4:$koin_version"
 }

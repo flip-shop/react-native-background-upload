@@ -52,7 +52,7 @@ class GlobalRequestObserverDelegate(reactContext: ReactApplicationContext) {
     params.putString("responseBody", serverResponse.bodyString)
     params.putMap("responseHeaders", headers)
     sendEvent("completed", params, context)
-  }
+  }*/
 
   /**
    * Sends an event to the JS module.
@@ -60,5 +60,5 @@ class GlobalRequestObserverDelegate(reactContext: ReactApplicationContext) {
   private fun sendEvent(eventName: String, params: WritableMap?, context: Context) {
     reactContext?.getJSModule(RCTDeviceEventEmitter::class.java)?.emit("RNFileUploader-$eventName", params)
             ?: Log.e(TAG, "sendEvent() failed due reactContext == null!")
-  }*/
+  }
 }
