@@ -1,4 +1,4 @@
-package com.vydia.RNUploader.notifications
+package com.vydia.RNUploader.notifications.data
 
 sealed class NotificationType {
     class Progress(val progress: Int): NotificationType()

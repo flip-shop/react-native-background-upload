@@ -1,4 +1,4 @@
-package com.vydia.RNUploader.notifications
+package com.vydia.RNUploader.notifications.config
 
 import com.facebook.react.bridge.ReadableMap
 

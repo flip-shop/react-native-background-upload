@@ -13,20 +13,17 @@ import com.vydia.RNUploader.di.koinInjector
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
-import com.vydia.RNUploader.files.helpers.FilesHelperImpl
-import com.vydia.RNUploader.files.helpers.MimeTypeHelperImpl
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProviderImpl
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptions
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProvider
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProviderImpl
-import com.vydia.RNUploader.notifications.NotificationsConfig
-import com.vydia.RNUploader.notifications.NotificationsConfigProvider
-import com.vydia.RNUploader.notifications.NotificationsConfigProviderImpl
+import com.vydia.RNUploader.notifications.config.NotificationsConfig
+import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
+import com.vydia.RNUploader.notifications.config.NotificationsConfigProviderImpl
 import com.vydia.RNUploader.worker.UploadWorker
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.inject
 
@@ -40,6 +37,8 @@ class UploaderModule(
   private var httpClientOptions: HttpClientOptions? = null
   private var uploadRequestOptions: UploadRequestOptions? = null
   private var notificationsConfig: NotificationsConfig? = null
+
+  private var koinStarted = false
 
   private val fileInfoProvider: FileInfoProvider
     by inject(FileInfoProviderImpl::class.java)
@@ -61,9 +60,12 @@ class UploaderModule(
 
   init {
     d(TAG,"INIT")
-    startKoin {
-      androidContext(reactContext)
-      modules(koinInjector)
+    if(!koinStarted) {
+      startKoin {
+        androidContext(reactContext)
+        modules(koinInjector)
+      }
+      koinStarted = true
     }
   }
 
@@ -86,7 +88,6 @@ class UploaderModule(
    */
   @ReactMethod
   fun startUpload(options: ReadableMap, promise: Promise) {
-
     d(TAG,"startUpload options = $options")
 
     uploadRequestOptionsProvider.obtainUploadOptions(
@@ -135,6 +136,11 @@ class UploaderModule(
       }
     )
 
+    if(notificationsConfig == null) {
+      d(TAG,"notificationsConfig == null")
+      return
+    }
+
     uploadRequestOptions?.fileToUploadPath?.let {
       fileInfoProvider.getFileInfoFromPath(
         path = it,
@@ -152,16 +158,10 @@ class UploaderModule(
       d(TAG,"fileInfo == null")
     }
 
+    reactContext.addLifecycleEventListener(this) // why we need this?
 
     startWorker()
-
     promise.resolve(uploadRequestOptions?.customUploadId)
-
-    /*
-    if(notificationsConfig == null) {
-      d(TAG,"notificationsConfig == null")
-      return
-    }*/
   }
 
 
@@ -185,15 +185,8 @@ class UploaderModule(
   }
 
   /*
-      val notification: WritableMap = WritableNativeMap()
-    notification.putBoolean("enabled", true)
-    if (options.hasKey("notification")) {
-      notification.merge(options.getMap("notification")!!)
-    }
 
-    val application = reactContext.applicationContext as Application
 
-    reactContext.addLifecycleEventListener(this)
 
     if (notification.hasKey("notificationChannel")) {
       notificationChannelID = notification.getString("notificationChannel")!!
