@@ -2,11 +2,7 @@ package com.vydia.RNUploader.networking.request.options
 
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
-import com.vydia.RNUploader.ReadableMapFieldState
-import com.vydia.RNUploader.emptyString
-import com.vydia.RNUploader.files.*
-import com.vydia.RNUploader.obtainFieldState
-import com.vydia.RNUploader.toMap
+import com.vydia.RNUploader.*
 
 class UploadRequestOptionsProviderImpl: UploadRequestOptionsProvider {
 

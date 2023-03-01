@@ -2,7 +2,7 @@ package com.vydia.RNUploader.networking.httpClient
 
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
-import com.vydia.RNUploader.files.*
+import com.vydia.RNUploader.*
 
 class HttpClientOptionsProviderImpl: HttpClientOptionsProvider {
     override fun obtainHttpClientOptions(

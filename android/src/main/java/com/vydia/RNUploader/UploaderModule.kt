@@ -25,12 +25,12 @@ import com.vydia.RNUploader.notifications.NotificationsConfig
 import com.vydia.RNUploader.notifications.NotificationsConfigProvider
 import com.vydia.RNUploader.notifications.NotificationsConfigProviderImpl
 import com.vydia.RNUploader.worker.UploadWorker
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.inject
 
 const val TAG = "UploaderBridge"
-private const val moduleName = "RNFileUploader"
 
 class UploaderModule(
   private val reactContext: ReactApplicationContext
@@ -61,8 +61,8 @@ class UploaderModule(
 
   init {
     d(TAG,"INIT")
-
     startKoin {
+      androidContext(reactContext)
       modules(koinInjector)
     }
   }
@@ -154,6 +154,8 @@ class UploaderModule(
 
 
     startWorker()
+
+    promise.resolve(uploadRequestOptions?.customUploadId)
 
     /*
     if(notificationsConfig == null) {
@@ -316,32 +318,6 @@ class UploaderModule(
       Log.e(TAG, exc.message, exc)
       promise.reject(exc)
     }
-  }
-
-  private fun configureUploadServiceHTTPStack(options: ReadableMap, promise: Promise) {
-
-    httpClientOptionsProvider.obtainHttpClientOptions(
-      options = options,
-      httpOptionsObtained = {
-        //todo
-        /**
-         OkHttpClient().newBuilder()
-        .followRedirects(followRedirects)
-        .followSslRedirects(followSslRedirects)
-        .retryOnConnectionFailure(retryOnConnectionFailure)
-        .connectTimeout(connectTimeout.toLong(), TimeUnit.SECONDS)
-        .writeTimeout(writeTimeout.toLong(), TimeUnit.SECONDS)
-        .readTimeout(readTimeout.toLong(), TimeUnit.SECONDS)
-        .cache(null)
-        .build()
-         */
-      },
-      wrongOptionType = { exceptionMessage ->
-        promise.reject(IllegalArgumentException(exceptionMessage))
-      }
-    )
-
-
   }
 
   // Customize the notification channel as you wish. This is only for a bare minimum example

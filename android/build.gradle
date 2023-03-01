@@ -81,7 +81,6 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation "io.insert-koin:koin-core:$koin_version"
     implementation "io.insert-koin:koin-android:$koin_version"
-    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
 
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
 

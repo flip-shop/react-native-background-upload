@@ -4,8 +4,8 @@ import com.facebook.react.bridge.JavaOnlyMap
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
 import com.vydia.RNUploader.*
-import com.vydia.RNUploader.files.keyWrongTypeMessage
-import com.vydia.RNUploader.files.missingKeyMessage
+import com.vydia.RNUploader.keyWrongTypeMessage
+import com.vydia.RNUploader.missingKeyMessage
 import com.vydia.RNUploader.networking.request.options.*
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull

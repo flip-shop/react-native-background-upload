@@ -1,8 +1,8 @@
 package com.vydia.RNUploader.files
 
-import com.facebook.react.bridge.ReadableMap
 import com.vydia.RNUploader.files.helpers.FilesHelper
 import com.vydia.RNUploader.files.helpers.MimeTypeHelper
+import com.vydia.RNUploader.pathNullExceptionMessage
 
 
 private const val TAG = "FileInfoProviderImpl"
