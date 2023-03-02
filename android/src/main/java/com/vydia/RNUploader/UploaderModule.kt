@@ -1,9 +1,5 @@
 package com.vydia.RNUploader
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.os.Build
 import android.util.Log
 import android.util.Log.d
 import androidx.work.Configuration
@@ -22,12 +18,14 @@ import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProvi
 import com.vydia.RNUploader.notifications.config.NotificationsConfig
 import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
 import com.vydia.RNUploader.notifications.config.NotificationsConfigProviderImpl
+import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
+import com.vydia.RNUploader.notifications.manager.NotificationChannelManagerImpl
 import com.vydia.RNUploader.worker.UploadWorker
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.inject
 
-const val TAG = "UploaderBridge"
+private const val TAG = "UploaderModule"
 
 class UploaderModule(
   private val reactContext: ReactApplicationContext
@@ -52,8 +50,8 @@ class UploaderModule(
   private val notificationsConfigProvider: NotificationsConfigProvider
     by inject(NotificationsConfigProviderImpl::class.java)
 
-  private var notificationChannelID = "BackgroundUploadChannel"
-  private var isGlobalRequestObserver = false
+  private val notificationChannelManager: NotificationChannelManager
+    by inject(NotificationChannelManagerImpl::class.java)
 
   override fun getName() = moduleName
 
@@ -61,6 +59,7 @@ class UploaderModule(
   init {
     d(TAG,"INIT")
     if(!koinStarted) {
+      d(TAG,"startKoin")
       startKoin {
         androidContext(reactContext)
         modules(koinInjector)
@@ -126,9 +125,10 @@ class UploaderModule(
 
     notificationsConfigProvider.provide(
       options = options,
-      optionsObtained = {
-        d(TAG,"notificationsConfigProvider optionsObtained $it")
-        notificationsConfig = it
+      optionsObtained = { config ->
+        d(TAG,"notificationsConfigProvider optionsObtained $config")
+        notificationsConfig = config
+        notificationChannelManager.createChannel()
       },
       errorObtained = {
         d(TAG,"notificationsConfigProvider errorObtained $it")
@@ -167,115 +167,28 @@ class UploaderModule(
 
   private fun startWorker() {
     if(!WorkManager.isInitialized()) {
-      WorkManager.initialize(reactContext, Configuration.Builder().build())
+      WorkManager.initialize(
+        reactContext,
+        Configuration.Builder().build()
+      )
     }
 
     fileInfo?.let { fileInfo ->
       uploadRequestOptions?.let { requestOptions ->
         httpClientOptions?.let { httpOptions ->
-          UploadWorker.enqueue(
-            WorkManager.getInstance(reactContext),
-            fileInfo = fileInfo,
-            requestOptions = requestOptions,
-            httpClientOptions = httpOptions
-          )
+          notificationsConfig?.let { notificationsConfig ->
+            UploadWorker.enqueue(
+              WorkManager.getInstance(reactContext),
+              fileInfo = fileInfo,
+              requestOptions = requestOptions,
+              httpClientOptions = httpOptions,
+              notificationsConfig = notificationsConfig
+            )
+          }
         }
       }
     }
   }
-
-  /*
-
-
-
-    if (notification.hasKey("notificationChannel")) {
-      notificationChannelID = notification.getString("notificationChannel")!!
-    }
-
-    createNotificationChannel()
-
-    //initialize(application, notificationChannelID, BuildConfig.DEBUG)
-
-
-    /*
-    if(!isGlobalRequestObserver) {
-      isGlobalRequestObserver = true
-      GlobalRequestObserver(application, GlobalRequestObserverDelegate(reactContext))
-    }*/
-
-
-
-    if (notification.getBoolean("enabled")) {
-      val notificationConfig = UploadNotificationConfig(
-              notificationChannelId = notificationChannelID,
-              isRingToneEnabled = notification.hasKey("enableRingTone") && notification.getBoolean("enableRingTone"),
-              progress = UploadNotificationStatusConfig(
-                      title = if (notification.hasKey("onProgressTitle")) notification.getString("onProgressTitle")!! else "",
-                      message = if (notification.hasKey("onProgressMessage")) notification.getString("onProgressMessage")!! else ""
-              ),
-              success = UploadNotificationStatusConfig(
-                      title = if (notification.hasKey("onCompleteTitle")) notification.getString("onCompleteTitle")!! else "",
-                      message = if (notification.hasKey("onCompleteMessage")) notification.getString("onCompleteMessage")!! else "",
-                      autoClear = notification.hasKey("autoClear") && notification.getBoolean("autoClear")
-              ),
-              error = UploadNotificationStatusConfig(
-                      title = if (notification.hasKey("onErrorTitle")) notification.getString("onErrorTitle")!! else "",
-                      message = if (notification.hasKey("onErrorMessage")) notification.getString("onErrorMessage")!! else ""
-              ),
-              cancelled = UploadNotificationStatusConfig(
-                      title = if (notification.hasKey("onCancelledTitle")) notification.getString("onCancelledTitle")!! else "",
-                      message = if (notification.hasKey("onCancelledMessage")) notification.getString("onCancelledMessage")!! else ""
-              )
-      )
-      request.setNotificationConfig { _, _ ->
-        notificationConfig
-      }
-    }
-
-
-    if (options.hasKey("parameters")) {
-      if (requestType == "raw") {
-        promise.reject(java.lang.IllegalArgumentException("Parameters supported only in multipart type"))
-        return
-      }
-      val parameters = options.getMap("parameters")
-      val keys = parameters!!.keySetIterator()
-      while (keys.hasNextKey()) {
-        val key = keys.nextKey()
-        if (parameters.getType(key) != ReadableType.String) {
-          promise.reject(java.lang.IllegalArgumentException("Parameters must be string key/values. Value was invalid for '$key'"))
-          return
-        }
-        request.addParameter(key, parameters.getString(key)!!)
-      }
-    }
-
-
-      if (options.hasKey("headers")) {
-        val headers = options.getMap("headers")
-        val keys = headers!!.keySetIterator()
-        while (keys.hasNextKey()) {
-          val key = keys.nextKey()
-          if (headers.getType(key) != ReadableType.String) {
-            promise.reject(java.lang.IllegalArgumentException("Headers must be string key/values.  Value was invalid for '$key'"))
-            return
-          }
-          request.addHeader(key, headers.getString(key)!!)
-        }
-      }
-
-
-      if (customUploadId != null)
-        request.setUploadID(customUploadId)
-
-      val uploadId = request.startUpload()
-      promise.resolve(uploadId)
-    } catch (exc: java.lang.Exception) {
-      exc.printStackTrace()
-      Log.e(TAG, exc.message, exc)
-      promise.reject(exc)
-    }
-   */
 
   /*
    * Cancels file upload
@@ -284,12 +197,13 @@ class UploaderModule(
    */
   @ReactMethod
   fun cancelUpload(cancelUploadId: String?, promise: Promise) {
+    d(TAG, "cancelUpload!!!")
     if (cancelUploadId !is String) {
       promise.reject(java.lang.IllegalArgumentException("Upload ID must be a string"))
       return
     }
     try {
-      //UploadService.stopUpload(cancelUploadId)
+      WorkManager.getInstance(reactContext).cancelAllWorkByTag(cancelUploadId)
       promise.resolve(true)
     } catch (exc: java.lang.Exception) {
       exc.printStackTrace()
@@ -304,7 +218,7 @@ class UploaderModule(
   @ReactMethod
   fun stopAllUploads(promise: Promise) {
     try {
-      //UploadService.stopAllUploads()
+      WorkManager.getInstance(reactContext).cancelAllWork()
       promise.resolve(true)
     } catch (exc: java.lang.Exception) {
       exc.printStackTrace()
@@ -313,25 +227,15 @@ class UploaderModule(
     }
   }
 
-  // Customize the notification channel as you wish. This is only for a bare minimum example
-  private fun createNotificationChannel() {
-    if (Build.VERSION.SDK_INT >= 26) {
-      val channel = NotificationChannel(
-              notificationChannelID,
-              "Background Upload Channel",
-              NotificationManager.IMPORTANCE_LOW
-      )
-      val manager = reactApplicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-      manager.createNotificationChannel(channel)
-    }
-  }
-
   override fun onHostResume() {
+    d(TAG,"onHostResume")
   }
 
   override fun onHostPause() {
+    d(TAG,"onHostPause")
   }
 
   override fun onHostDestroy() {
+    d(TAG,"onHostDestroy")
   }
 }

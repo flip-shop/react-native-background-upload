@@ -5,16 +5,15 @@ import android.util.Log.d
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import com.vydia.RNUploader.TAG
 import com.vydia.RNUploader.emitEventErrorJsModuleNull
 
+private const val TAG = "EventsPublisher"
 class EventsPublisherImpl(
     private val context: Context
 ): EventsPublisher {
 
     override fun sendEvent(event: UploadEvents, params: WritableMap?) {
         (context as? ReactApplicationContext)?.let { reactContext ->
-            d(TAG,"context correct ! sendEvent ${event.name} params = $params")
 
             val jsModule = reactContext.getJSModule(
                 DeviceEventManagerModule.RCTDeviceEventEmitter::class.java

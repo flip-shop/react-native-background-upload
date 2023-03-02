@@ -1,8 +1,11 @@
 package com.vydia.RNUploader.notifications.data
 
-sealed class NotificationType {
-    class Progress(val progress: Int): NotificationType()
-    object Success: NotificationType()
-    object Canceled: NotificationType()
-    object Error: NotificationType()
+import com.vydia.RNUploader.notificationCancelledId
+import com.vydia.RNUploader.notificationErrorId
+import com.vydia.RNUploader.notificationUploadProgressId
+
+sealed class NotificationType(val id: Int) {
+    object Progress: NotificationType(notificationUploadProgressId)
+    object Canceled: NotificationType(notificationCancelledId)
+    object Error: NotificationType(notificationErrorId)
 }

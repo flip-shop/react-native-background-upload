@@ -14,15 +14,24 @@ class NotificationsConfigProviderImpl: NotificationsConfigProvider {
         optionsObtained: (NotificationsConfig) -> Unit,
         errorObtained: (String) -> Unit
     ) {
+
         val notificationsConfig = NotificationsConfig()
+        val notificationsOptionsMap = options.getMap(notificationsMapKey)
+
+        //
+        if(notificationsOptionsMap == null) {
+            notificationsConfig.enabled = false
+            optionsObtained(notificationsConfig)
+            return
+        }
 
         for(key in notificationConfigKeySet) {
             when(
                 obtainFieldState(
-                    map = options,
+                    map = notificationsOptionsMap,
                     fieldNameKey = key,
                     requiredFieldType = when(key) {
-                        enabledKey, autoClearKey -> ReadableType.Boolean
+                        autoClearKey, enabledKey -> ReadableType.Boolean
                         else -> ReadableType.String
                     }
                 )
@@ -33,7 +42,7 @@ class NotificationsConfigProviderImpl: NotificationsConfigProvider {
                         keyWrongTypeMessage(
                             key = key,
                             type = when(key) {
-                                enabledKey, autoClearKey -> ReadableType.Boolean
+                                autoClearKey, enabledKey -> ReadableType.Boolean
                                 else -> ReadableType.String
                             }
                         )
@@ -43,21 +52,20 @@ class NotificationsConfigProviderImpl: NotificationsConfigProvider {
                 ReadableMapFieldState.NotExists -> errorObtained(missingKeyMessage(key))
 
                 ReadableMapFieldState.Correct -> when(key) {
-                    enabledKey -> notificationsConfig.enabled = options.getBoolean(key)
-                    autoClearKey -> notificationsConfig.autoClear = options.getBoolean(key)
-                    notificationChannelKey -> options.getString(key)?.let {
-                        notificationsConfig.notificationChannel = it
-                    }
+                    autoClearKey ->
+                        notificationsConfig.autoClear = notificationsOptionsMap.getBoolean(key)
+                    enabledKey ->
+                        notificationsConfig.enabled = notificationsOptionsMap.getBoolean(key)
                     onProgressTitleKey ->
-                        notificationsConfig.onProgressTitle = options.getString(key)
+                        notificationsConfig.onProgressTitle = notificationsOptionsMap.getString(key)
                     onErrorTitleKey ->
-                        notificationsConfig.onErrorTitle = options.getString(key)
+                        notificationsConfig.onErrorTitle = notificationsOptionsMap.getString(key)
                     onErrorMessageKey ->
-                        notificationsConfig.onErrorMessage = options.getString(key)
+                        notificationsConfig.onErrorMessage = notificationsOptionsMap.getString(key)
                     onCancelledTitleKey ->
-                        notificationsConfig.onCancelledTitle = options.getString(key)
+                        notificationsConfig.onCancelledTitle = notificationsOptionsMap.getString(key)
                     onCancelledMessageKey ->
-                        notificationsConfig.onCancelledMessage = options.getString(key)
+                        notificationsConfig.onCancelledMessage = notificationsOptionsMap.getString(key)
                 }
 
             }
