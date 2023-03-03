@@ -2,10 +2,10 @@ package com.vydia.RNUploader.notifications.config
 
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
-import com.vydia.RNUploader.ReadableMapFieldState
-import com.vydia.RNUploader.keyWrongTypeMessage
-import com.vydia.RNUploader.missingKeyMessage
-import com.vydia.RNUploader.obtainFieldState
+import com.vydia.RNUploader.helpers.ReadableMapFieldState
+import com.vydia.RNUploader.helpers.keyWrongTypeMessage
+import com.vydia.RNUploader.helpers.missingKeyMessage
+import com.vydia.RNUploader.helpers.obtainFieldState
 
 class NotificationsConfigProviderImpl: NotificationsConfigProvider {
 

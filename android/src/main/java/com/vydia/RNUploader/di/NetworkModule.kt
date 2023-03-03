@@ -1,6 +1,8 @@
 package com.vydia.RNUploader.di
 
-import com.vydia.RNUploader.networking.UploadRepository
+import com.vydia.RNUploader.networking.UploadRepositoryImpl
+import com.vydia.RNUploader.networking.httpClient.HttpClientProviderImpl
+import com.vydia.RNUploader.networking.request.UploadRequestProviderImpl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -35,8 +37,16 @@ val networkModule = module {
      */
 
     factory {
-        UploadRepository()
+        UploadRepositoryImpl()
     }
+
+    /**
+     *
+     */
+
+    single { HttpClientProviderImpl() }
+
+    single { UploadRequestProviderImpl() }
 
 
 }

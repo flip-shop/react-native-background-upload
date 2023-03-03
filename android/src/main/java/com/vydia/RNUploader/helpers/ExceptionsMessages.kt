@@ -1,4 +1,4 @@
-package com.vydia.RNUploader
+package com.vydia.RNUploader.helpers
 
 import com.facebook.react.bridge.ReadableType
 
@@ -14,6 +14,7 @@ const val requestTypeWrongTypeMessage = "type should be string: raw or multipart
 
 const val emitEventErrorJsModuleNull = "sendEvent() failed due getJSModule == null!"
 const val unknownExceptionMessage = "Unknown exception"
+const val uploadCanceled = "Canceled"
 
 fun missingKeyMessage(key: String): String = "Missing '$key' field."
 fun keyWrongTypeMessage(key: String, type: ReadableType): String = "'$key' must be a ${type.name}."

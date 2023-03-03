@@ -1,6 +1,6 @@
 package com.vydia.RNUploader.notifications.config
 
-import com.vydia.RNUploader.emptyString
+import com.vydia.RNUploader.helpers.emptyString
 
 
 

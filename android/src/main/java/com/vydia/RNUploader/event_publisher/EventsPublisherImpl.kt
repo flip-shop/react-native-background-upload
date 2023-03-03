@@ -5,7 +5,7 @@ import android.util.Log.d
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import com.vydia.RNUploader.emitEventErrorJsModuleNull
+import com.vydia.RNUploader.helpers.emitEventErrorJsModuleNull
 
 private const val TAG = "EventsPublisher"
 class EventsPublisherImpl(

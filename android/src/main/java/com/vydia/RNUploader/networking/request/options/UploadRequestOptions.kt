@@ -1,6 +1,6 @@
 package com.vydia.RNUploader.networking.request.options
 
-import com.vydia.RNUploader.emptyString
+import com.vydia.RNUploader.helpers.emptyString
 
 data class UploadRequestOptions(
     var uploadUrl: String = emptyString,

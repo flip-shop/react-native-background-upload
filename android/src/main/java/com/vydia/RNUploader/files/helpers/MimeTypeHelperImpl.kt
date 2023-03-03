@@ -1,7 +1,7 @@
 package com.vydia.RNUploader.files.helpers
 
 import android.webkit.MimeTypeMap
-import com.vydia.RNUploader.emptyString
+import com.vydia.RNUploader.helpers.emptyString
 
 class MimeTypeHelperImpl: MimeTypeHelper {
 

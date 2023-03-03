@@ -55,10 +55,7 @@ class ProgressRequestBody(
         }
     }
 
-    /**
-     * We are adding different logging interceptors base ond build type. See: [HttpUtils.createDefaultHttpClient]
-     */
-    private fun getIgnoreFirstNumberOfWriteToCalls(): Int = 0
+    private fun getIgnoreFirstNumberOfWriteToCalls(): Int = 1
 
 
 

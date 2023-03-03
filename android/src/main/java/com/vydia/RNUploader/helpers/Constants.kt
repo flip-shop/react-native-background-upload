@@ -1,4 +1,4 @@
-package com.vydia.RNUploader
+package com.vydia.RNUploader.helpers
 
 const val moduleName = "RNFileUploader"
 const val defaultNotificationChannelId = "RNFileUploaderChannel"
@@ -12,3 +12,5 @@ const val defaultConnectTimeout = 15L
 const val defaultWriteTimeout = 15L
 const val defaultReadTimeout = 30L
 const val maxUploadProgress = 100
+const val notificationProgressCancelActionText = "Cancel"
+const val cancelUploadBroadcastRequestCode = 9999

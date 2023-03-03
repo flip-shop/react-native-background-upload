@@ -1,8 +1,8 @@
 package com.vydia.RNUploader.networking.httpClient
 
-import com.vydia.RNUploader.defaultConnectTimeout
-import com.vydia.RNUploader.defaultReadTimeout
-import com.vydia.RNUploader.defaultWriteTimeout
+import com.vydia.RNUploader.helpers.defaultConnectTimeout
+import com.vydia.RNUploader.helpers.defaultReadTimeout
+import com.vydia.RNUploader.helpers.defaultWriteTimeout
 
 data class HttpClientOptions(
     var followRedirects: Boolean = true,

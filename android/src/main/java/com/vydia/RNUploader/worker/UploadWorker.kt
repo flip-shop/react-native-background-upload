@@ -1,24 +1,25 @@
 package com.vydia.RNUploader.worker
 
 import android.content.Context
-import android.util.Log.d
+import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.work.*
 import com.facebook.react.bridge.Arguments
-import com.vydia.RNUploader.emptyString
+import com.google.common.util.concurrent.ListenableFuture
 import com.vydia.RNUploader.event_publisher.*
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.helpers.deserializeFromJson
 import com.vydia.RNUploader.files.helpers.serializeToJson
-import com.vydia.RNUploader.unknownExceptionMessage
+import com.vydia.RNUploader.helpers.responseOk
+import com.vydia.RNUploader.helpers.unknownExceptionMessage
+import com.vydia.RNUploader.helpers.uploadCanceled
 import com.vydia.RNUploader.networking.UploadRepository
+import com.vydia.RNUploader.networking.UploadRepositoryImpl
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptions
 import com.vydia.RNUploader.notifications.config.NotificationsConfig
-import com.vydia.RNUploader.notifications.data.BackgroundUploadNotification
 import com.vydia.RNUploader.notifications.data.NotificationType
 import com.vydia.RNUploader.notifications.manager.NotificationCreator
 import com.vydia.RNUploader.notifications.manager.NotificationCreatorImpl
-import com.vydia.RNUploader.responseOk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,14 +31,17 @@ private const val TAG = "UploadWorker"
 class UploadWorker(
     appContext: Context,
     params: WorkerParameters
-): Worker(appContext, params) {
+): ListenableWorker(appContext, params) {
 
     //
     private var uploadJob: Job? = null
 
     //
+    private var uploadId: String? = null
+
+    //
     private val uploadRepository: UploadRepository
-        by inject(UploadRepository::class.java)
+        by inject(UploadRepositoryImpl::class.java)
 
     //
     private val eventsPublisher: EventsPublisher
@@ -47,13 +51,7 @@ class UploadWorker(
     private val notificationsCreator: NotificationCreator
         by inject(NotificationCreatorImpl::class.java)
 
-    //
-    private var uploadId: String? = null
-
-
-    override fun doWork(): Result {
-
-        uploadJob = Job()
+    override fun startWork(): ListenableFuture<Result> {
 
         val uploadFileInfo = inputData.getString(fileInfoKey)?.let {
             deserializeFromJson<FileInfo>(it)
@@ -71,115 +69,151 @@ class UploadWorker(
             deserializeFromJson<NotificationsConfig>(it)
         }
 
-        if(uploadFileInfo == null || requestOptions == null ||
+        return if(uploadFileInfo == null || requestOptions == null ||
             httpClientOptions == null || notificationsConfig == null) {
-            return Result.failure()
-        }
+            CallbackToFutureAdapter.getFuture { completer -> completer.set(Result.failure()) }
+        }else {
+            CallbackToFutureAdapter.getFuture { completer ->
 
-        uploadId = requestOptions.customUploadId
+                uploadId = requestOptions.customUploadId
+                uploadJob = Job()
 
-        uploadJob?.let { job ->
-            CoroutineScope(Dispatchers.IO + job).launch {
-                uploadRepository.upload(
-                    fileInfo = uploadFileInfo,
-                    requestOptions = requestOptions,
-                    httpClientOptions = httpClientOptions,
-                    onProgress = { progress ->
-
-                        //
-                        eventsPublisher.sendEvent(
-                            event = UploadEvents.UploadProgress,
-                            params = Arguments.createMap().apply {
-                                putString(uploadIdParamName, uploadId)
-                                putInt(uploadProgressParamName, progress)
-                            }
-                        )
-
-                        //
-                        notificationsCreator.displayNotification(
-                            notification = BackgroundUploadNotification(
-                                type = NotificationType.Progress,
-                                title = notificationsConfig.onProgressTitle,
-                                body = null,
-                                progress = progress
-                            ),
-                            notificationsConfig = notificationsConfig
-                        )
-                    },
-                    onResponse = { response ->
-
-                        //
-                        eventsPublisher.sendEvent(
-                            event = UploadEvents.UploadSuccess,
-                            params = Arguments.createMap().apply {
-                                putString(uploadIdParamName, uploadId)
-                                putInt(uploadResponseCodeParamName, response.code)
-                                putString(uploadResponseBodyParamName, response.body?.string())
-                                putString(uploadResponseHeadersParamName, response.headers.toString())
-                            }
-                        )
-
-                        //
-                        notificationsCreator.removeNotification(NotificationType.Progress)
-
-                        //
-                        if(response.code != responseOk) {
-                            notificationsCreator.displayNotification(
-                                notification = BackgroundUploadNotification(
-                                    type = NotificationType.Error,
-                                    title = notificationsConfig.onErrorTitle,
-                                    body = notificationsConfig.onErrorMessage
-                                ),
-                                notificationsConfig = notificationsConfig
-                            )
-                        }
-
-                        //
-                        d(TAG, "upload onResponse: ${response.body}")
-                    },
-                    onError = {
-
-                        //
-                        eventsPublisher.sendEvent(
-                            event = UploadEvents.UploadError,
-                            params = Arguments.createMap().apply {
-                                putString(uploadIdParamName, uploadId)
-                                putString(
-                                    uploadErrorMessageParamName,
-                                    it.message ?: unknownExceptionMessage
+                uploadJob?.let { job ->
+                    CoroutineScope(Dispatchers.IO + job).launch {
+                        uploadRepository.upload(
+                            fileInfo = uploadFileInfo,
+                            requestOptions = requestOptions,
+                            httpClientOptions = httpClientOptions,
+                            onProgress = {
+                                handleProgressUpdate(
+                                    progress = it,
+                                    notificationsConfig = notificationsConfig
                                 )
+                            },
+                            onResponse = {
+                                handleResponse(
+                                    response = it,
+                                    notificationsConfig = notificationsConfig
+                                )
+                                completer.set(Result.success())
+                            },
+                            onError = {
+                                handleError(
+                                    exception = it,
+                                    notificationsConfig = notificationsConfig
+                                )
+                                completer.set(Result.failure())
                             }
                         )
-
-                        //
-                        notificationsCreator.removeNotification(NotificationType.Progress)
-
-                        //
-                        notificationsCreator.displayNotification(
-                            notification = BackgroundUploadNotification(
-                                type = NotificationType.Error,
-                                title = notificationsConfig.onErrorTitle,
-                                body = notificationsConfig.onErrorMessage
-                            ),
-                            notificationsConfig = notificationsConfig
-                        )
-
-                        //
-                        d(TAG, "upload onError: ${it.message}")
                     }
-                )
+                }
             }
         }
-
-        return Result.success()
     }
 
     override fun onStopped() {
         super.onStopped()
+        uploadRepository.cancelUpload()
         uploadJob?.cancel()
         uploadJob = null
     }
 
+
+    /**
+     * Private functions
+     */
+    private fun handleProgressUpdate(progress: Int, notificationsConfig: NotificationsConfig) {
+        //
+        eventsPublisher.sendEvent(
+            event = UploadEvents.UploadProgress,
+            params = Arguments.createMap().apply {
+                putString(uploadIdParamName, uploadId)
+                putInt(uploadProgressParamName, progress)
+            }
+        )
+
+        //
+        notificationsCreator.displayNotification(
+            notificationType = NotificationType.Progress(
+                progress = progress,
+                uploadId = uploadId
+            ),
+            notificationsConfig = notificationsConfig
+        )
+    }
+
+    private fun handleResponse(response: Response, notificationsConfig: NotificationsConfig) {
+
+        //
+        eventsPublisher.sendEvent(
+            event = UploadEvents.UploadSuccess,
+            params = Arguments.createMap().apply {
+                putString(uploadIdParamName, uploadId)
+                putInt(uploadResponseCodeParamName, response.code)
+                putString(uploadResponseBodyParamName, response.body?.string())
+                putString(uploadResponseHeadersParamName, response.headers.toString())
+            }
+        )
+
+        //
+        notificationsCreator.removeNotification(NotificationType.Progress())
+
+        //
+        if(response.code != responseOk) {
+            notificationsCreator.displayNotification(
+                notificationType = NotificationType.Error,
+                notificationsConfig = notificationsConfig
+            )
+        }
+    }
+
+    private fun handleError(exception: Exception, notificationsConfig: NotificationsConfig) {
+
+        //
+        notificationsCreator.removeNotification(NotificationType.Progress())
+
+        if(exception.message == uploadCanceled) {
+
+            //
+            notificationsCreator.displayNotification(
+                notificationType = NotificationType.Canceled,
+                notificationsConfig = notificationsConfig
+            )
+
+            //
+            eventsPublisher.sendEvent(
+                event = UploadEvents.UploadCanceled,
+                params = Arguments.createMap().apply {
+                    putString(uploadIdParamName, uploadId)
+                }
+            )
+
+        }else {
+
+            //
+            notificationsCreator.displayNotification(
+                notificationType = NotificationType.Error,
+                notificationsConfig = notificationsConfig
+            )
+
+            //
+            eventsPublisher.sendEvent(
+                event = UploadEvents.UploadError,
+                params = Arguments.createMap().apply {
+                    putString(uploadIdParamName, uploadId)
+                    putString(
+                        uploadErrorMessageParamName,
+                        exception.message ?: unknownExceptionMessage
+                    )
+                }
+            )
+        }
+    }
+
+
+    /**
+     *
+     */
     companion object {
 
         private const val fileInfoKey = "FILE_INFO"

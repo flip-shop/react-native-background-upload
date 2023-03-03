@@ -2,7 +2,7 @@ package com.vydia.RNUploader.networking.httpClient
 
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableType
-import com.vydia.RNUploader.*
+import com.vydia.RNUploader.helpers.*
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

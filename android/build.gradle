@@ -75,6 +75,7 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:$work_version"
     // optional - Test helpers
     androidTestImplementation "androidx.work:work-testing:$work_version"
+    implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
 
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation "com.squareup.okhttp3:logging-interceptor:4.9.2"

@@ -5,8 +5,8 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.RemoteException
-import com.vydia.RNUploader.defaultNotificationChannelId
-import com.vydia.RNUploader.defaultNotificationChannelName
+import com.vydia.RNUploader.helpers.defaultNotificationChannelId
+import com.vydia.RNUploader.helpers.defaultNotificationChannelName
 
 class NotificationChannelManagerImpl(
     private val context: Context

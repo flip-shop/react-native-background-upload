@@ -1,5 +1,6 @@
 package com.vydia.RNUploader
 
+import android.content.IntentFilter
 import android.util.Log
 import android.util.Log.d
 import androidx.work.Configuration
@@ -9,15 +10,19 @@ import com.vydia.RNUploader.di.koinInjector
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
+import com.vydia.RNUploader.helpers.moduleName
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProviderImpl
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptions
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProvider
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProviderImpl
+import com.vydia.RNUploader.notifications.NotificationActionsReceiver
 import com.vydia.RNUploader.notifications.config.NotificationsConfig
 import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
 import com.vydia.RNUploader.notifications.config.NotificationsConfigProviderImpl
+import com.vydia.RNUploader.notifications.data.ACTION_CANCEL_UPLOAD
+import com.vydia.RNUploader.notifications.data.INTENT_ACTION
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManagerImpl
 import com.vydia.RNUploader.worker.UploadWorker
@@ -31,12 +36,11 @@ class UploaderModule(
   private val reactContext: ReactApplicationContext
 ): ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
 
+  private var koinStarted = false
   private var fileInfo: FileInfo? = null
   private var httpClientOptions: HttpClientOptions? = null
   private var uploadRequestOptions: UploadRequestOptions? = null
   private var notificationsConfig: NotificationsConfig? = null
-
-  private var koinStarted = false
 
   private val fileInfoProvider: FileInfoProvider
     by inject(FileInfoProviderImpl::class.java)
@@ -53,6 +57,11 @@ class UploaderModule(
   private val notificationChannelManager: NotificationChannelManager
     by inject(NotificationChannelManagerImpl::class.java)
 
+  private val notificationActionsReceiver: NotificationActionsReceiver
+    by lazy { NotificationActionsReceiver {
+      WorkManager.getInstance(reactContext).cancelAllWorkByTag(it) }
+    }
+
   override fun getName() = moduleName
 
 
@@ -66,6 +75,8 @@ class UploaderModule(
       }
       koinStarted = true
     }
+
+    reactContext.addLifecycleEventListener(this)
   }
 
   /*
@@ -91,74 +102,32 @@ class UploaderModule(
 
     uploadRequestOptionsProvider.obtainUploadOptions(
       options = options,
-      uploadOptionsObtained = {
-        d(TAG,"uploadOptionsObtained $it")
-        uploadRequestOptions = it
-      },
-      uploadOptionsObtainError = {
-        d(TAG,"uploadOptionsObtainError $it")
-        promise.reject(IllegalArgumentException(it))
-      }
+      uploadOptionsObtained = { uploadRequestOptions = it },
+      uploadOptionsObtainError = { promise.reject(IllegalArgumentException(it)) }
     )
-
-    if(uploadRequestOptions == null) {
-      d(TAG,"uploadRequestOptions == null")
-      return
-    }
 
     httpClientOptionsProvider.obtainHttpClientOptions(
       options = options,
-      httpOptionsObtained = {
-        d(TAG,"httpOptionsObtained $it")
-        httpClientOptions = it
-      },
-      wrongOptionType = {
-        d(TAG,"obtainHttpClientOptions wrongOptionType $it")
-        promise.reject(IllegalArgumentException(it))
-      }
+      httpOptionsObtained = { httpClientOptions = it },
+      wrongOptionType = { promise.reject(IllegalArgumentException(it)) }
     )
-
-    if(httpClientOptions == null) {
-      d(TAG,"httpClientOptions == null")
-      return
-    }
 
     notificationsConfigProvider.provide(
       options = options,
-      optionsObtained = { config ->
-        d(TAG,"notificationsConfigProvider optionsObtained $config")
-        notificationsConfig = config
+      optionsObtained = {
+        notificationsConfig = it
         notificationChannelManager.createChannel()
       },
-      errorObtained = {
-        d(TAG,"notificationsConfigProvider errorObtained $it")
-        promise.reject(Exception(it))
-      }
+      errorObtained = { promise.reject(Exception(it)) }
     )
 
-    if(notificationsConfig == null) {
-      d(TAG,"notificationsConfig == null")
-      return
-    }
-
-    uploadRequestOptions?.fileToUploadPath?.let {
+    uploadRequestOptions?.fileToUploadPath?.let { filePath ->
       fileInfoProvider.getFileInfoFromPath(
-        path = it,
-        onFileInfoObtained = { info ->
-          fileInfo = info
-        },
-        onExceptionReceived = { e ->
-          d(TAG,"fileInfoProvider errorObtained $it")
-          promise.reject(Exception(e))
-        }
+        path = filePath,
+        onFileInfoObtained = { fileInfo = it },
+        onExceptionReceived = { promise.reject(Exception(it)) }
       )
     }
-
-    if(fileInfo == null) {
-      d(TAG,"fileInfo == null")
-    }
-
-    reactContext.addLifecycleEventListener(this) // why we need this?
 
     startWorker()
     promise.resolve(uploadRequestOptions?.customUploadId)
@@ -229,6 +198,10 @@ class UploaderModule(
 
   override fun onHostResume() {
     d(TAG,"onHostResume")
+    reactContext.registerReceiver(
+      notificationActionsReceiver,
+      IntentFilter(ACTION_CANCEL_UPLOAD)
+    )
   }
 
   override fun onHostPause() {
@@ -237,5 +210,6 @@ class UploaderModule(
 
   override fun onHostDestroy() {
     d(TAG,"onHostDestroy")
+    reactContext.unregisterReceiver(notificationActionsReceiver)
   }
 }

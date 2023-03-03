@@ -1,4 +1,4 @@
-package com.vydia.RNUploader
+package com.vydia.RNUploader.helpers
 
 sealed class ReadableMapFieldState {
     object Correct: ReadableMapFieldState()
