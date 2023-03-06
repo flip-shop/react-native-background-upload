@@ -11,9 +11,9 @@ const val onCancelledMessageKey = "onCancelledMessage"
 
 val notificationConfigKeySet = arrayOf(
     autoClearKey,
+    enabledKey,
     onProgressTitleKey,
     onErrorTitleKey,
-    enabledKey,
     onErrorMessageKey,
     onCancelledTitleKey,
     onCancelledMessageKey

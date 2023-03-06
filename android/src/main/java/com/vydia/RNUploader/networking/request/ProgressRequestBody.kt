@@ -2,21 +2,26 @@ package com.vydia.RNUploader.networking.request
 
 
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import okio.*
 import java.io.File
 import java.io.FileInputStream
 
 class ProgressRequestBody(
-    private val contentType: MediaType,
-    private val file: File,
+    private val contentType: String,
+    private val filePath: String,
     private val onUploadProgress: (progress: Int) -> Unit
 ) : RequestBody() {
 
     private var numWriteToCalls = 0
 
+    private val file by lazy {
+        File(filePath)
+    }
+
     override fun contentType(): MediaType {
-        return contentType
+        return contentType.toMediaType()
     }
 
     override fun contentLength(): Long {

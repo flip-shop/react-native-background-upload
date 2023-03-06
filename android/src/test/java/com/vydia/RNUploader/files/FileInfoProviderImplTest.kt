@@ -48,7 +48,7 @@ class FileInfoProviderImplTest {
         whenever(filesHelper.getFileSize(path)).doReturn(1L)
         whenever(filesHelper.fileExists(path)).doReturn(true)
 
-        fileInfoProvider.getFileInfo(
+        fileInfoProvider.getFileInfoFromPath(
             path,
             fileInfoObtainedCallback,
             exceptionReceivedCallback
@@ -70,7 +70,7 @@ class FileInfoProviderImplTest {
 
     @Test
     fun `getFileInfo with null path`() {
-        fileInfoProvider.getFileInfo(
+        fileInfoProvider.getFileInfoFromPath(
             path = null,
             onFileInfoObtained = fileInfoObtainedCallback,
             onExceptionReceived = exceptionReceivedCallback

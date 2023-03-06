@@ -25,6 +25,8 @@ class NotificationsConfigProviderImpl: NotificationsConfigProvider {
             return
         }
 
+
+
         for(key in notificationConfigKeySet) {
             when(
                 obtainFieldState(
@@ -47,9 +49,13 @@ class NotificationsConfigProviderImpl: NotificationsConfigProvider {
                             }
                         )
                     )
+                    return
                 }
 
-                ReadableMapFieldState.NotExists -> errorObtained(missingKeyMessage(key))
+                ReadableMapFieldState.NotExists -> {
+                    errorObtained(missingKeyMessage(key))
+                    return
+                }
 
                 ReadableMapFieldState.Correct -> when(key) {
                     autoClearKey ->

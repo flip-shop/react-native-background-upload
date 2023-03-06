@@ -16,8 +16,8 @@ class UploadRequestProviderImpl: UploadRequestProvider {
     ): Request {
         //
         val requestBody = ProgressRequestBody(
-            contentType = fileInfo.mimeType.toMediaType(),
-            file = File(requestOptions.fileToUploadPath),
+            contentType = fileInfo.mimeType,
+            filePath = requestOptions.fileToUploadPath,
             onUploadProgress = { progress ->
                 onProgress(progress)
             }

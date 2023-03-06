@@ -20,3 +20,9 @@ val mockedRequestParams = mapOf(
     Pair("video","{\"name\":\"63cfb32875689a001ac1e7e7\",\"uri\":\"file:///data/user/0/cache/56aaf5e6-a6ea-4c0b-9c52-32ce24add65c.mp4\",\"type\":\"undefined\"}"),
     Pair("items","[{\"item\":\"63cfb32875689a001ac1e7e7\"}]")
 )
+
+const val mockOnProgressTitle = "OnProgressTitle"
+const val mockOnErrorTitle = "OnErrorTitle"
+const val mockOnErrorMessage = "OnErrorMessage"
+const val mockOnCancelledTitle = "OnCancelTitle"
+const val mockOnCancelledMessage = "OnCancelMessage"

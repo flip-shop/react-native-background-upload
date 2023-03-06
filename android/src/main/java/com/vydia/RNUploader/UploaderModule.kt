@@ -21,8 +21,7 @@ import com.vydia.RNUploader.notifications.NotificationActionsReceiver
 import com.vydia.RNUploader.notifications.config.NotificationsConfig
 import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
 import com.vydia.RNUploader.notifications.config.NotificationsConfigProviderImpl
-import com.vydia.RNUploader.notifications.data.ACTION_CANCEL_UPLOAD
-import com.vydia.RNUploader.notifications.data.INTENT_ACTION
+import com.vydia.RNUploader.notifications.data.ACTION_UPLOAD_CANCEL
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManagerImpl
 import com.vydia.RNUploader.worker.UploadWorker
@@ -66,7 +65,7 @@ class UploaderModule(
 
 
   init {
-    d(TAG,"INIT")
+    d(TAG,"INIT koinStarted? = $koinStarted")
     if(!koinStarted) {
       d(TAG,"startKoin")
       startKoin {
@@ -200,7 +199,7 @@ class UploaderModule(
     d(TAG,"onHostResume")
     reactContext.registerReceiver(
       notificationActionsReceiver,
-      IntentFilter(ACTION_CANCEL_UPLOAD)
+      IntentFilter(ACTION_UPLOAD_CANCEL)
     )
   }
 
