@@ -34,9 +34,6 @@ class UploadWorker(
 ): ListenableWorker(appContext, params) {
 
     //
-    private var notificationProgressDisplayed = false
-
-    //
     private var uploadJob: Job? = null
 
     //
@@ -135,11 +132,7 @@ class UploadWorker(
             }
         )
 
-        if(notificationProgressDisplayed) {
-            return
-        }
         //
-        notificationProgressDisplayed = true
         notificationsCreator.displayNotification(
             notificationType = NotificationType.Progress(
                 progress = progress,

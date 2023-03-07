@@ -26,6 +26,7 @@ import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManagerImpl
 import com.vydia.RNUploader.worker.UploadWorker
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.inject
 
@@ -65,9 +66,8 @@ class UploaderModule(
 
 
   init {
-    d(TAG,"INIT koinStarted? = $koinStarted")
     if(!koinStarted) {
-      d(TAG,"startKoin")
+
       startKoin {
         androidContext(reactContext)
         modules(koinInjector)
