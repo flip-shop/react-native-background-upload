@@ -86,7 +86,6 @@ class UploaderModule(
     )
 
     if(uploadRequestOptions == null) {
-      promise.reject(Exception(uploadRequestOptionsNullExceptionsMessage))
       return
     }
 
@@ -97,7 +96,6 @@ class UploaderModule(
     )
 
     if(httpClientOptions == null) {
-      promise.reject(Exception(httpClientOptionsExceptionsMessage))
       return
     }
 
@@ -111,7 +109,6 @@ class UploaderModule(
     )
 
     if(notificationsConfig == null) {
-      promise.reject(Exception(notificationsConfigExceptionsMessage))
       return
     }
 
@@ -124,7 +121,6 @@ class UploaderModule(
     }
 
     if(fileInfo == null) {
-      promise.reject(Exception(fileInfoNullExceptionsMessage))
       return
     }
 

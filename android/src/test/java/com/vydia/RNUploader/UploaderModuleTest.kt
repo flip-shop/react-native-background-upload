@@ -5,6 +5,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
+import com.vydia.RNUploader.helpers.uploadRequestOptionsNullExceptionsMessage
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptions
@@ -16,6 +17,7 @@ import com.vydia.RNUploader.worker.UploadWorkerInitializer
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.`when`
@@ -23,6 +25,8 @@ import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.whenever
 
 @RunWith(MockitoJUnitRunner::class)
 class UploaderModuleTest {
@@ -68,18 +72,8 @@ class UploaderModuleTest {
     private val httpClientOptions = HttpClientOptions()
     private val notificationsConfig = NotificationsConfig()
 
-    @Mock
-    private lateinit var onError: (String) -> Unit
-
-    @Mock
-    private lateinit var uploadOptionsObtained: (UploadRequestOptions) -> Unit
-
-    @Mock
-    private lateinit var httpClientOptionsObtained: (HttpClientOptions) -> Unit
-
-    @Mock
-    private lateinit var notificationsConfigObtained: (NotificationsConfig) -> Unit
-
+    private val errorMessage = "Error Message"
+    private val errorException = IllegalArgumentException(errorMessage)
 
     @Before
     fun setUp() {
@@ -154,14 +148,22 @@ class UploaderModuleTest {
     }
 
     @Test
-    fun `test startUpload method with invalid options`() {
+    fun `test startUpload method with obtainUploadOptions error`() {
 
+        `when`(mockUploadRequestOptionsProvider.obtainUploadOptions(any(), any(), any())
+        ).thenAnswer {
+            val errorObtained: (String) -> Unit = it.getArgument(2)
+            errorObtained(errorMessage)
+        }
 
-
-        // Act
         uploaderModule.startUpload(mockOptions, mockPromise)
 
-
+        verify(mockUploadRequestOptionsProvider).obtainUploadOptions(any(), any(), any())
+        verify(mockPromise).reject(errorException)
+        verifyNoInteractions(mockHttpClientOptionsProvider)
+        verifyNoInteractions(mockNotificationsConfigProvider)
+        verifyNoInteractions(mockFileInfoProvider)
+        verifyNoInteractions(mockWorkerInitializer)
     }
 
     @Test
