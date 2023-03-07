@@ -1,35 +1,78 @@
-package com.vydia.RNUploader;
+package com.vydia.RNUploader
 
-import com.facebook.react.ReactPackage;
-import com.facebook.react.bridge.JavaScriptModule;
-import com.facebook.react.bridge.NativeModule;
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.uimanager.ViewManager;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.facebook.react.ReactPackage
+import com.facebook.react.bridge.JavaScriptModule
+import com.facebook.react.bridge.NativeModule
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.uimanager.ViewManager
+import com.vydia.RNUploader.di.koinInjector
+import com.vydia.RNUploader.files.FileInfoProvider
+import com.vydia.RNUploader.files.FileInfoProviderImpl
+import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
+import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProviderImpl
+import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProvider
+import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProviderImpl
+import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
+import com.vydia.RNUploader.notifications.config.NotificationsConfigProviderImpl
+import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
+import com.vydia.RNUploader.notifications.manager.NotificationChannelManagerImpl
+import com.vydia.RNUploader.worker.UploadWorkerInitializer
+import com.vydia.RNUploader.worker.UploadWorkerInitializerImpl
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
+import org.koin.java.KoinJavaComponent.inject
 
 /**
  * Created by stephen on 12/8/16.
  */
-public class UploaderReactPackage implements ReactPackage {
+class UploaderReactPackage : ReactPackage {
 
-  // Deprecated in RN 0.47, @todo remove after < 0.47 support remove
-  public List<Class<? extends JavaScriptModule>> createJSModules() {
-    return Collections.emptyList();
-  }
+    private val fileInfoProvider: FileInfoProvider
+            by inject(FileInfoProviderImpl::class.java)
 
-  @Override
-  public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-    return Collections.emptyList();
-  }
+    private val httpClientOptionsProvider: HttpClientOptionsProvider
+            by inject(HttpClientOptionsProviderImpl::class.java)
 
-  @Override
-  public List<NativeModule> createNativeModules(
-          ReactApplicationContext reactContext) {
-    List<NativeModule> modules = new ArrayList<>();
-    modules.add(new UploaderModule(reactContext));
-    return modules;
-  }
+    private val uploadRequestOptionsProvider: UploadRequestOptionsProvider
+            by inject(UploadRequestOptionsProviderImpl::class.java)
+
+    private val notificationsConfigProvider: NotificationsConfigProvider
+            by inject(NotificationsConfigProviderImpl::class.java)
+
+    private val notificationChannelManager: NotificationChannelManager
+            by inject(NotificationChannelManagerImpl::class.java)
+
+    private val uploadWorkerInitializer: UploadWorkerInitializer
+            by inject(UploadWorkerInitializerImpl::class.java)
+
+    // Deprecated in RN 0.47, @todo remove after < 0.47 support remove
+    fun createJSModules(): List<Class<out JavaScriptModule?>> {
+        return emptyList()
+    }
+
+    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
+        return emptyList()
+    }
+
+    override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
+        val modules: MutableList<NativeModule> = ArrayList()
+
+        startKoin {
+            androidContext(reactContext)
+            modules(koinInjector)
+        }
+
+        modules.add(
+            UploaderModule(
+                reactContext = reactContext,
+                fileInfoProvider = fileInfoProvider,
+                httpClientOptionsProvider = httpClientOptionsProvider,
+                uploadRequestOptionsProvider = uploadRequestOptionsProvider,
+                notificationsConfigProvider = notificationsConfigProvider,
+                notificationChannelManager = notificationChannelManager,
+                uploadWorkerInitializer = uploadWorkerInitializer
+            )
+        )
+        return modules
+    }
 }

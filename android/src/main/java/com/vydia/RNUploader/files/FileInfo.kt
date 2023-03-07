@@ -1,6 +1,7 @@
 package com.vydia.RNUploader.files
 
 import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.JavaOnlyMap
 import com.facebook.react.bridge.WritableMap
 
 private const val fileNameKey = "name"
@@ -16,7 +17,7 @@ data class FileInfo(
     var size: String = "",
     var exists: Boolean = false
 ) {
-    fun toArgumentsMap(): WritableMap = Arguments.createMap().apply {
+    fun toArgumentsMap(): WritableMap = JavaOnlyMap().apply {
         putString(fileNameKey, name)
         putString(fileExtensionKey, extension)
         putString(fileMimeTypeKey, mimeType)

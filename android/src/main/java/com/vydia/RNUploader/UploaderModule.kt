@@ -10,7 +10,7 @@ import com.vydia.RNUploader.di.koinInjector
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
-import com.vydia.RNUploader.helpers.moduleName
+import com.vydia.RNUploader.helpers.*
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProviderImpl
@@ -25,6 +25,7 @@ import com.vydia.RNUploader.notifications.data.ACTION_UPLOAD_CANCEL
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManagerImpl
 import com.vydia.RNUploader.worker.UploadWorker
+import com.vydia.RNUploader.worker.UploadWorkerInitializer
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
@@ -33,29 +34,14 @@ import org.koin.java.KoinJavaComponent.inject
 private const val TAG = "UploaderModule"
 
 class UploaderModule(
-  private val reactContext: ReactApplicationContext
+  private val reactContext: ReactApplicationContext,
+  private val fileInfoProvider: FileInfoProvider,
+  private val httpClientOptionsProvider: HttpClientOptionsProvider,
+  private val uploadRequestOptionsProvider: UploadRequestOptionsProvider,
+  private val notificationsConfigProvider: NotificationsConfigProvider,
+  private val notificationChannelManager: NotificationChannelManager,
+  private val uploadWorkerInitializer: UploadWorkerInitializer
 ): ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
-
-  private var koinStarted = false
-  private var fileInfo: FileInfo? = null
-  private var httpClientOptions: HttpClientOptions? = null
-  private var uploadRequestOptions: UploadRequestOptions? = null
-  private var notificationsConfig: NotificationsConfig? = null
-
-  private val fileInfoProvider: FileInfoProvider
-    by inject(FileInfoProviderImpl::class.java)
-
-  private val httpClientOptionsProvider: HttpClientOptionsProvider
-    by inject(HttpClientOptionsProviderImpl::class.java)
-
-  private val uploadRequestOptionsProvider: UploadRequestOptionsProvider
-    by inject(UploadRequestOptionsProviderImpl::class.java)
-
-  private val notificationsConfigProvider: NotificationsConfigProvider
-    by inject(NotificationsConfigProviderImpl::class.java)
-
-  private val notificationChannelManager: NotificationChannelManager
-    by inject(NotificationChannelManagerImpl::class.java)
 
   private val notificationActionsReceiver: NotificationActionsReceiver
     by lazy { NotificationActionsReceiver {
@@ -64,17 +50,7 @@ class UploaderModule(
 
   override fun getName() = moduleName
 
-
   init {
-    if(!koinStarted) {
-
-      startKoin {
-        androidContext(reactContext)
-        modules(koinInjector)
-      }
-      koinStarted = true
-    }
-
     reactContext.addLifecycleEventListener(this)
   }
 
@@ -97,7 +73,11 @@ class UploaderModule(
    */
   @ReactMethod
   fun startUpload(options: ReadableMap, promise: Promise) {
-    d(TAG,"startUpload options = $options")
+
+    var uploadRequestOptions: UploadRequestOptions? = null
+    var httpClientOptions: HttpClientOptions? = null
+    var notificationsConfig: NotificationsConfig? = null
+    var fileInfo: FileInfo? = null
 
     uploadRequestOptionsProvider.obtainUploadOptions(
       options = options,
@@ -105,11 +85,21 @@ class UploaderModule(
       uploadOptionsObtainError = { promise.reject(IllegalArgumentException(it)) }
     )
 
+    if(uploadRequestOptions == null) {
+      promise.reject(Exception(uploadRequestOptionsNullExceptionsMessage))
+      return
+    }
+
     httpClientOptionsProvider.obtainHttpClientOptions(
       options = options,
       httpOptionsObtained = { httpClientOptions = it },
       wrongOptionType = { promise.reject(IllegalArgumentException(it)) }
     )
+
+    if(httpClientOptions == null) {
+      promise.reject(Exception(httpClientOptionsExceptionsMessage))
+      return
+    }
 
     notificationsConfigProvider.provide(
       options = options,
@@ -120,6 +110,11 @@ class UploaderModule(
       errorObtained = { promise.reject(Exception(it)) }
     )
 
+    if(notificationsConfig == null) {
+      promise.reject(Exception(notificationsConfigExceptionsMessage))
+      return
+    }
+
     uploadRequestOptions?.fileToUploadPath?.let { filePath ->
       fileInfoProvider.getFileInfoFromPath(
         path = filePath,
@@ -128,34 +123,27 @@ class UploaderModule(
       )
     }
 
-    startWorker()
-    promise.resolve(uploadRequestOptions?.customUploadId)
-  }
-
-
-  private fun startWorker() {
-    if(!WorkManager.isInitialized()) {
-      WorkManager.initialize(
-        reactContext,
-        Configuration.Builder().build()
-      )
+    if(fileInfo == null) {
+      promise.reject(Exception(fileInfoNullExceptionsMessage))
+      return
     }
 
-    fileInfo?.let { fileInfo ->
+    fileInfo?.let { info ->
       uploadRequestOptions?.let { requestOptions ->
         httpClientOptions?.let { httpOptions ->
-          notificationsConfig?.let { notificationsConfig ->
-            UploadWorker.enqueue(
-              WorkManager.getInstance(reactContext),
-              fileInfo = fileInfo,
+          notificationsConfig?.let { config ->
+            uploadWorkerInitializer.startWorker(
+              fileInfo = info,
               requestOptions = requestOptions,
               httpClientOptions = httpOptions,
-              notificationsConfig = notificationsConfig
+              notificationsConfig = config
             )
           }
         }
       }
     }
+
+    promise.resolve(uploadRequestOptions?.customUploadId)
   }
 
   /*

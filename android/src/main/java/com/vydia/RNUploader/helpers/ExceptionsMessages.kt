@@ -16,5 +16,10 @@ const val emitEventErrorJsModuleNull = "sendEvent() failed due getJSModule == nu
 const val unknownExceptionMessage = "Unknown exception"
 const val uploadCanceled = "Canceled"
 
+const val fileInfoNullExceptionsMessage = "fileInfo must not be null"
+const val uploadRequestOptionsNullExceptionsMessage = "uploadRequestOptions must not be null"
+const val httpClientOptionsExceptionsMessage = "httpClientOptions must not be null"
+const val notificationsConfigExceptionsMessage = "notificationsConfig must not be null"
+
 fun missingKeyMessage(key: String): String = "Missing '$key' field."
 fun keyWrongTypeMessage(key: String, type: ReadableType): String = "'$key' must be a ${type.name}."
