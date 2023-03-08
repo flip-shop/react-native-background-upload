@@ -3,33 +3,20 @@ package com.vydia.RNUploader
 import android.content.IntentFilter
 import android.util.Log
 import android.util.Log.d
-import androidx.work.Configuration
-import androidx.work.WorkManager
 import com.facebook.react.bridge.*
-import com.vydia.RNUploader.di.koinInjector
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
-import com.vydia.RNUploader.files.FileInfoProviderImpl
 import com.vydia.RNUploader.helpers.*
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
-import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProviderImpl
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptions
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProvider
-import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProviderImpl
 import com.vydia.RNUploader.notifications.NotificationActionsReceiver
 import com.vydia.RNUploader.notifications.config.NotificationsConfig
 import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
-import com.vydia.RNUploader.notifications.config.NotificationsConfigProviderImpl
 import com.vydia.RNUploader.notifications.data.ACTION_UPLOAD_CANCEL
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
-import com.vydia.RNUploader.notifications.manager.NotificationChannelManagerImpl
-import com.vydia.RNUploader.worker.UploadWorker
-import com.vydia.RNUploader.worker.UploadWorkerInitializer
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.Koin
-import org.koin.core.context.startKoin
-import org.koin.java.KoinJavaComponent.inject
+import com.vydia.RNUploader.worker.UploadWorkerManager
 
 private const val TAG = "UploaderModule"
 
@@ -40,13 +27,11 @@ class UploaderModule(
   private val uploadRequestOptionsProvider: UploadRequestOptionsProvider,
   private val notificationsConfigProvider: NotificationsConfigProvider,
   private val notificationChannelManager: NotificationChannelManager,
-  private val uploadWorkerInitializer: UploadWorkerInitializer
+  private val uploadWorkerManager: UploadWorkerManager
 ): ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
 
   private val notificationActionsReceiver: NotificationActionsReceiver
-    by lazy { NotificationActionsReceiver {
-      WorkManager.getInstance(reactContext).cancelAllWorkByTag(it) }
-    }
+    by lazy { NotificationActionsReceiver { uploadWorkerManager.cancelWorker(it) } }
 
   override fun getName() = moduleName
 
@@ -128,7 +113,7 @@ class UploaderModule(
       uploadRequestOptions?.let { requestOptions ->
         httpClientOptions?.let { httpOptions ->
           notificationsConfig?.let { config ->
-            uploadWorkerInitializer.startWorker(
+            uploadWorkerManager.startWorker(
               fileInfo = info,
               requestOptions = requestOptions,
               httpClientOptions = httpOptions,
@@ -149,17 +134,15 @@ class UploaderModule(
    */
   @ReactMethod
   fun cancelUpload(cancelUploadId: String?, promise: Promise) {
-    d(TAG, "cancelUpload!!!")
     if (cancelUploadId !is String) {
       promise.reject(java.lang.IllegalArgumentException("Upload ID must be a string"))
       return
     }
     try {
-      WorkManager.getInstance(reactContext).cancelAllWorkByTag(cancelUploadId)
+      uploadWorkerManager.cancelWorker(cancelUploadId)
       promise.resolve(true)
     } catch (exc: java.lang.Exception) {
       exc.printStackTrace()
-      Log.e(TAG, exc.message, exc)
       promise.reject(exc)
     }
   }
@@ -170,7 +153,7 @@ class UploaderModule(
   @ReactMethod
   fun stopAllUploads(promise: Promise) {
     try {
-      WorkManager.getInstance(reactContext).cancelAllWork()
+      uploadWorkerManager.cancelAllWorkers()
       promise.resolve(true)
     } catch (exc: java.lang.Exception) {
       exc.printStackTrace()

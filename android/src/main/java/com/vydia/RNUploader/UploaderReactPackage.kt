@@ -16,8 +16,8 @@ import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
 import com.vydia.RNUploader.notifications.config.NotificationsConfigProviderImpl
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManagerImpl
-import com.vydia.RNUploader.worker.UploadWorkerInitializer
-import com.vydia.RNUploader.worker.UploadWorkerInitializerImpl
+import com.vydia.RNUploader.worker.UploadWorkerManager
+import com.vydia.RNUploader.worker.UploadWorkerManagerImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.inject
@@ -42,8 +42,8 @@ class UploaderReactPackage : ReactPackage {
     private val notificationChannelManager: NotificationChannelManager
             by inject(NotificationChannelManagerImpl::class.java)
 
-    private val uploadWorkerInitializer: UploadWorkerInitializer
-            by inject(UploadWorkerInitializerImpl::class.java)
+    private val uploadWorkerManager: UploadWorkerManager
+            by inject(UploadWorkerManagerImpl::class.java)
 
     // Deprecated in RN 0.47, @todo remove after < 0.47 support remove
     fun createJSModules(): List<Class<out JavaScriptModule?>> {
@@ -70,7 +70,7 @@ class UploaderReactPackage : ReactPackage {
                 uploadRequestOptionsProvider = uploadRequestOptionsProvider,
                 notificationsConfigProvider = notificationsConfigProvider,
                 notificationChannelManager = notificationChannelManager,
-                uploadWorkerInitializer = uploadWorkerInitializer
+                uploadWorkerManager = uploadWorkerManager
             )
         )
         return modules

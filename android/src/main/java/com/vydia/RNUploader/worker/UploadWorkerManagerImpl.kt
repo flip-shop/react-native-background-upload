@@ -8,9 +8,9 @@ import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptions
 import com.vydia.RNUploader.notifications.config.NotificationsConfig
 
-class UploadWorkerInitializerImpl(
+class UploadWorkerManagerImpl(
     private val context: Context
-): UploadWorkerInitializer {
+): UploadWorkerManager {
 
     override fun startWorker(
         fileInfo: FileInfo,
@@ -32,5 +32,13 @@ class UploadWorkerInitializerImpl(
             httpClientOptions = httpClientOptions,
             notificationsConfig = notificationsConfig
         )
+    }
+
+    override fun cancelWorker(tag: String) {
+        WorkManager.getInstance(context).cancelAllWorkByTag(tag)
+    }
+
+    override fun cancelAllWorkers() {
+        WorkManager.getInstance(context).cancelAllWork()
     }
 }

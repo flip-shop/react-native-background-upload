@@ -5,7 +5,6 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
-import com.vydia.RNUploader.helpers.uploadRequestOptionsNullExceptionsMessage
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptions
@@ -13,11 +12,10 @@ import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProvi
 import com.vydia.RNUploader.notifications.config.NotificationsConfig
 import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
-import com.vydia.RNUploader.worker.UploadWorkerInitializer
+import com.vydia.RNUploader.worker.UploadWorkerManager
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.`when`
@@ -26,7 +24,6 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
-import org.mockito.kotlin.whenever
 
 @RunWith(MockitoJUnitRunner::class)
 class UploaderModuleTest {
@@ -50,7 +47,7 @@ class UploaderModuleTest {
     private lateinit var mockNotificationChannelManager: NotificationChannelManager
 
     @Mock
-    private lateinit var mockWorkerInitializer: UploadWorkerInitializer
+    private lateinit var mockWorkerManager: UploadWorkerManager
 
     @Mock
     private lateinit var mockOptions: ReadableMap
@@ -85,7 +82,7 @@ class UploaderModuleTest {
             mockUploadRequestOptionsProvider,
             mockNotificationsConfigProvider,
             mockNotificationChannelManager,
-            mockWorkerInitializer
+            mockWorkerManager
         )
     }
 
@@ -138,7 +135,7 @@ class UploaderModuleTest {
         verify(mockHttpClientOptionsProvider).obtainHttpClientOptions(any(), any(), any())
         verify(mockNotificationsConfigProvider).provide(any(), any(), any())
         verify(mockFileInfoProvider).getFileInfoFromPath(any(), any(), any())
-        verify(mockWorkerInitializer).startWorker(
+        verify(mockWorkerManager).startWorker(
             fileInfo,
             uploadRequestOptions,
             httpClientOptions,
@@ -163,21 +160,20 @@ class UploaderModuleTest {
         verifyNoInteractions(mockHttpClientOptionsProvider)
         verifyNoInteractions(mockNotificationsConfigProvider)
         verifyNoInteractions(mockFileInfoProvider)
-        verifyNoInteractions(mockWorkerInitializer)
+        verifyNoInteractions(mockWorkerManager)
     }
 
     @Test
     fun `test cancelUpload method with valid upload ID`() {
-        //TODO: write test case for cancelUpload method with valid upload ID
-    }
+        uploaderModule.cancelUpload("testId", mockPromise)
 
-    @Test
-    fun `test cancelUpload method with invalid upload ID`() {
-        //TODO: write test case for cancelUpload method with invalid upload ID
+        verify(mockWorkerManager).cancelWorker("testId")
+        verify(mockPromise).resolve(true)
     }
 
     @Test
     fun `test stopAllUploads method`() {
-        //TODO: write test case for stopAllUploads method
+        uploaderModule.stopAllUploads(mockPromise)
+        verify(mockWorkerManager).cancelAllWorkers()
     }
 }
