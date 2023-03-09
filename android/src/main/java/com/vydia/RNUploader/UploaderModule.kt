@@ -1,8 +1,6 @@
 package com.vydia.RNUploader
 
-import android.content.IntentFilter
 import android.util.Log
-import android.util.Log.d
 import com.facebook.react.bridge.*
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
@@ -11,33 +9,24 @@ import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptions
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptionsProvider
-import com.vydia.RNUploader.notifications.NotificationActionsReceiver
 import com.vydia.RNUploader.notifications.config.NotificationsConfig
 import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
-import com.vydia.RNUploader.notifications.data.ACTION_UPLOAD_CANCEL
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
 import com.vydia.RNUploader.worker.UploadWorkerManager
 
 private const val TAG = "UploaderModule"
 
 class UploaderModule(
-  private val reactContext: ReactApplicationContext,
+  reactContext: ReactApplicationContext,
   private val fileInfoProvider: FileInfoProvider,
   private val httpClientOptionsProvider: HttpClientOptionsProvider,
   private val uploadRequestOptionsProvider: UploadRequestOptionsProvider,
   private val notificationsConfigProvider: NotificationsConfigProvider,
   private val notificationChannelManager: NotificationChannelManager,
   private val uploadWorkerManager: UploadWorkerManager
-): ReactContextBaseJavaModule(reactContext), LifecycleEventListener {
-
-  private val notificationActionsReceiver: NotificationActionsReceiver
-    by lazy { NotificationActionsReceiver { uploadWorkerManager.cancelWorker(it) } }
+): ReactContextBaseJavaModule(reactContext) {
 
   override fun getName() = moduleName
-
-  init {
-    reactContext.addLifecycleEventListener(this)
-  }
 
   /*
   Gets file information for the path specified.  Example valid path is: /storage/extSdCard/DCIM/Camera/20161116_074726.mp4
@@ -160,22 +149,5 @@ class UploaderModule(
       Log.e(TAG, exc.message, exc)
       promise.reject(exc)
     }
-  }
-
-  override fun onHostResume() {
-    d(TAG,"onHostResume")
-    reactContext.registerReceiver(
-      notificationActionsReceiver,
-      IntentFilter(ACTION_UPLOAD_CANCEL)
-    )
-  }
-
-  override fun onHostPause() {
-    d(TAG,"onHostPause")
-  }
-
-  override fun onHostDestroy() {
-    d(TAG,"onHostDestroy")
-    reactContext.unregisterReceiver(notificationActionsReceiver)
   }
 }
