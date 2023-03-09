@@ -5,7 +5,7 @@ import com.vydia.RNUploader.helpers.moduleName
 const val progressUpdate = "progress"
 const val uploadCompleted = "completed"
 const val uploadError = "error"
-const val uploadCanceled = "canceled"
+const val uploadCanceled = "cancelled"
 
 sealed class UploadEvents(val name: String) {
     object UploadProgress: UploadEvents("$moduleName-$progressUpdate")
