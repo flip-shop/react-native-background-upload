@@ -13,9 +13,5 @@ class HttpClientProviderImpl: HttpClientProvider {
             .connectTimeout(options.connectTimeout, TimeUnit.SECONDS)
             .writeTimeout(options.writeTimeout, TimeUnit.SECONDS)
             .readTimeout(options.readTimeout, TimeUnit.SECONDS)
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
-                }
-            ).build()
+            .build()
 }
