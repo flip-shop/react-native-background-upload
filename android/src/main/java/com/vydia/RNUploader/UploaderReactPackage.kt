@@ -5,7 +5,6 @@ import com.facebook.react.bridge.JavaScriptModule
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewManager
-import com.vydia.RNUploader.di.koinInjector
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
@@ -18,8 +17,6 @@ import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManagerImpl
 import com.vydia.RNUploader.worker.UploadWorkerManager
 import com.vydia.RNUploader.worker.UploadWorkerManagerImpl
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.inject
 
 /**
