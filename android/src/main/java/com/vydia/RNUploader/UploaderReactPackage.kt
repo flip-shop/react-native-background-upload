@@ -55,8 +55,6 @@ class UploaderReactPackage : ReactPackage {
     }
 
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        KoinInitializer.init(reactContext)
-
         val modules: MutableList<NativeModule> = ArrayList()
         modules.add(
             UploaderModule(
