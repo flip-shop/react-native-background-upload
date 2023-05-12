@@ -438,6 +438,20 @@ RCT_EXPORT_METHOD(POCcancelUpload:(NSString *)cancelUploadId resolve:(RCTPromise
     return _urlSession;
 }
 
+- (NSURLSession *)POCurlSession:(NSString *)groupId {
+    if (!_urlSession) {
+        NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:BACKGROUND_SESSION_ID];
+        
+        if (groupId.length > 0) {
+            sessionConfiguration.sharedContainerIdentifier = groupId;
+        }
+        
+        _urlSession = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:self delegateQueue:nil];
+    }
+
+    return _urlSession;
+}
+
 #pragma NSURLSessionTaskDelegate
 
 - (void)URLSession:(NSURLSession *)session
