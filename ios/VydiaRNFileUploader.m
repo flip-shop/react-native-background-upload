@@ -317,6 +317,24 @@ RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseRe
     resolve([NSNumber numberWithBool:YES]);
 }
 
+RCT_EXPORT_METHOD(POCcancelUpload:(NSString *)cancelUploadId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+  __weak typeof(self) weakSelf = self;
+
+  [_urlSession getTasksWithCompletionHandler:^(NSArray<NSURLSessionDataTask *> *dataTasks,
+                                               NSArray<NSURLSessionUploadTask *> *uploadTasks,
+                                               NSArray<NSURLSessionDownloadTask *> *downloadTasks) {
+    __strong typeof(self) strongSelf = weakSelf;
+
+    for (NSURLSessionTask *task in uploadTasks) {
+      if ([task.taskDescription isEqualToString:cancelUploadId]){
+        [task cancel];
+        [strongSelf removeFilesForUpload:cancelUploadId];
+      }
+    }
+    resolve(@(YES));
+  }];
+}
+
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
                          path:(NSString *)path
                          parameters:(NSDictionary *)parameters
