@@ -257,6 +257,12 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
             NSString *uuidStr = [[NSUUID UUID] UUIDString];
             [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", uuidStr] forHTTPHeaderField:@"Content-Type"];
 
+         //   NSInputStream *httpBody = [self createBodyWithBoundary:uuidStr path:fileURI parameters: parameters fieldName:fieldName];
+         //   [request setHTTPBodyStream:httpBody];
+            
+            NSString *uuidStr = [[NSUUID UUID] UUIDString];
+            [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", uuidStr] forHTTPHeaderField:@"Content-Type"];
+
             NSData *httpBody = [self createBodyWithBoundary:uuidStr path:fileURI parameters: parameters fieldName:fieldName];
             [request setHTTPBodyStream: [NSInputStream inputStreamWithData:httpBody]];
             [request setValue:[NSString stringWithFormat:@"%zd", httpBody.length] forHTTPHeaderField:@"Content-Length"];
@@ -349,6 +355,57 @@ RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseRe
     [httpBody appendData:[[NSString stringWithFormat:@"--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
 
     return httpBody;
+}
+
+//- Proof of concept
+
+- (NSInputStream *)POCcreateBodyWithBoundary:(NSString *)boundary
+                                     path:(NSString *)path
+                               parameters:(NSDictionary *)parameters
+                                fieldName:(NSString *)fieldName {
+
+    NSInputStream *fileStream = [NSInputStream inputStreamWithFileAtPath:path];
+
+    if (!fileStream) return nil;
+    
+    [fileStream open];
+
+    // Escape non-latin characters in filename
+    NSString *escapedPath = [path stringByAddingPercentEncodingWithAllowedCharacters: NSCharacterSet.URLQueryAllowedCharacterSet];
+
+    // Resolve path
+    NSURL *fileUri = [NSURL URLWithString:escapedPath];
+    
+    NSString *filename  = [path lastPathComponent];
+    NSString *mimetype  = [self guessMIMETypeFromFileName:path];
+
+    // Prepare for multipart form data
+    NSMutableData *httpBodyStart = [NSMutableData data];
+    NSMutableData *httpBodyEnd = [NSMutableData data];
+
+    // Add parameters
+    [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *parameterKey, NSString *parameterValue, BOOL *stop) {
+        [httpBodyStart appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [httpBodyStart appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", parameterKey] dataUsingEncoding:NSUTF8StringEncoding]];
+        [httpBodyStart appendData:[[NSString stringWithFormat:@"%@\r\n", parameterValue] dataUsingEncoding:NSUTF8StringEncoding]];
+    }];
+
+    // Add file
+    [httpBodyStart appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    [httpBodyStart appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\n", fieldName, filename] dataUsingEncoding:NSUTF8StringEncoding]];
+    [httpBodyStart appendData:[[NSString stringWithFormat:@"Content-Type: %@\r\n\r\n", mimetype] dataUsingEncoding:NSUTF8StringEncoding]];
+
+    // Add end boundary
+    [httpBodyEnd appendData:[@"\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    [httpBodyEnd appendData:[[NSString stringWithFormat:@"--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+
+    // Create NSInputStream from NSData objects and the file stream
+    NSInputStream *httpBodyStartStream = [NSInputStream inputStreamWithData:httpBodyStart];
+    NSInputStream *httpBodyEndStream = [NSInputStream inputStreamWithData:httpBodyEnd];
+
+    NSInputStream *inputStream = [NSInputStream inputStreamWithInputStreams:@[httpBodyStartStream, fileStream, httpBodyEndStream]];
+
+    return inputStream;
 }
 
 - (NSURLSession *)urlSession: (NSString *) groupId {
