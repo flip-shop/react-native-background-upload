@@ -308,7 +308,6 @@ RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseRe
 
         for (NSURLSessionTask *uploadTask in uploadTasks) {
             if ([uploadTask.taskDescription isEqualToString:cancelUploadId]){
-                // == checks if references are equal, while isEqualToString checks the string value
                 [uploadTask cancel];
                 [strongSelf removeFilesForUpload:cancelUploadId];
             }
@@ -333,6 +332,25 @@ RCT_EXPORT_METHOD(POCcancelUpload:(NSString *)cancelUploadId resolve:(RCTPromise
     }
     resolve(@(YES));
   }];
+}
+
+RCT_EXPORT_METHOD(POC2cancelUpload:(NSString *)cancelUploadId
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+    __weak typeof(self) weakSelf = self;
+    
+    NSArray *uploadTasks = self.urlSession.uploadTasks;
+    
+    for (NSURLSessionTask *uploadTask in uploadTasks) {
+        if ([uploadTask.taskDescription isEqualToString:cancelUploadId]) {
+            [uploadTask cancel];
+            
+            [self removeFilesForUpload:cancelUploadId];
+        }
+    }
+    
+    resolve(@YES);
 }
 
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
