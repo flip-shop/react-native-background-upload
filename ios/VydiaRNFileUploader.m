@@ -334,25 +334,6 @@ RCT_EXPORT_METHOD(POCcancelUpload:(NSString *)cancelUploadId resolve:(RCTPromise
   }];
 }
 
-RCT_EXPORT_METHOD(POC2cancelUpload:(NSString *)cancelUploadId
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
-{
-    __weak typeof(self) weakSelf = self;
-    
-    NSArray *uploadTasks = self.urlSession.uploadTasks;
-    
-    for (NSURLSessionTask *uploadTask in uploadTasks) {
-        if ([uploadTask.taskDescription isEqualToString:cancelUploadId]) {
-            [uploadTask cancel];
-            
-            [self removeFilesForUpload:cancelUploadId];
-        }
-    }
-    
-    resolve(@YES);
-}
-
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
                          path:(NSString *)path
                          parameters:(NSDictionary *)parameters
@@ -459,7 +440,6 @@ RCT_EXPORT_METHOD(POC2cancelUpload:(NSString *)cancelUploadId
 - (NSURLSession *)POCurlSession:(NSString *)groupId {
     if (!_urlSession) {
         NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:BACKGROUND_SESSION_ID];
-        
         if (groupId.length > 0) {
             sessionConfiguration.sharedContainerIdentifier = groupId;
         }
