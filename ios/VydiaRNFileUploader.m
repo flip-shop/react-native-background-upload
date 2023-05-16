@@ -442,30 +442,30 @@ didCompleteWithError:(NSError *)error {
     NSMutableDictionary *data = [NSMutableDictionary dictionaryWithObjectsAndKeys:task.taskDescription, @"id", nil];
     NSURLSessionDataTask *uploadTask = (NSURLSessionDataTask *)task;
     NSHTTPURLResponse *response = (NSHTTPURLResponse *)uploadTask.response;
-    if (response != nil)
-    {
-        [data setObject:[NSNumber numberWithInteger:response.statusCode] forKey:@"responseCode"];
+    
+    if (response != nil) {
+        [data setObject:@(response.statusCode) forKey:@"responseCode"];
     }
-    //Add data that was collected earlier by the didReceiveData method
-    NSMutableData *responseData = _responsesData[@(task.taskIdentifier)];
-    if (responseData) {
-        [_responsesData removeObjectForKey:@(task.taskIdentifier)];
 
-        NSString *response = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
-        [data setObject:response forKey:@"responseBody"];
+    //Add data that was collected earlier by the didReceiveData method
+
+    NSMutableData *responseData = _responsesData[@(task.taskIdentifier)];
+    [_responsesData removeObjectForKey:@(task.taskIdentifier)];
+    
+    if (responseData) {
+        NSString *responseString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
+        [data setObject:responseString forKey:@"responseBody"];
     } else {
         [data setObject:[NSNull null] forKey:@"responseBody"];
     }
-
+    
     [self removeFilesForUpload:task.taskDescription];
-
-    if (error == nil)
-    {
+    
+    if (error == nil) {
         [self _sendEventWithName:@"RNFileUploader-completed" body:data];
-    }
-    else
-    {
+    } else {
         [data setObject:error.localizedDescription forKey:@"error"];
+        
         if (error.code == NSURLErrorCancelled) {
             [self _sendEventWithName:@"RNFileUploader-cancelled" body:data];
         } else {
