@@ -480,11 +480,17 @@ didCompleteWithError:(NSError *)error {
     totalBytesSent:(int64_t)totalBytesSent
 totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
     float progress = -1;
-    if (totalBytesExpectedToSend > 0) //see documentation.  For unknown size it's -1 (NSURLSessionTransferSizeUnknown)
-    {
-        progress = 100.0 * (float)totalBytesSent / (float)totalBytesExpectedToSend;
+    
+    if (totalBytesExpectedToSend > 0) { //see documentation.  For unknown size it's -1 (NSURLSessionTransferSizeUnknown)
+        progress = (float)totalBytesSent / (float)totalBytesExpectedToSend * 100.0;
     }
-    [self _sendEventWithName:@"RNFileUploader-progress" body:@{ @"id": task.taskDescription, @"progress": [NSNumber numberWithFloat:progress] }];
+    
+    NSDictionary *bodyData = @{
+        @"id": task.taskDescription,
+        @"progress": @(progress)
+    };
+    
+    [self _sendEventWithName:@"RNFileUploader-progress" body:bodyData];
 }
 
 - (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask didReceiveData:(NSData *)data {
