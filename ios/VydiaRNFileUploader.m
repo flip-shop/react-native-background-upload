@@ -301,37 +301,21 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
  * Event "cancelled" will be fired when upload is cancelled.
  */
 RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
-  __weak typeof(self) weakSelf = self;
-
-    [_urlSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
-      __strong typeof(self) strongSelf = weakSelf;
-
-        for (NSURLSessionTask *uploadTask in uploadTasks) {
-            if ([uploadTask.taskDescription isEqualToString:cancelUploadId]){
-                [uploadTask cancel];
+    __weak typeof(self) weakSelf = self;
+    
+    [_urlSession getTasksWithCompletionHandler:^(NSArray *dataTasks,
+                                                 NSArray *uploadTasks,
+                                                 NSArray *downloadTasks) {
+        __strong typeof(self) strongSelf = weakSelf;
+        
+        for (NSURLSessionTask *task in uploadTasks) {
+            if ([task.taskDescription isEqualToString:cancelUploadId]) {
+                [task cancel];
                 [strongSelf removeFilesForUpload:cancelUploadId];
             }
         }
+        resolve(@(YES));
     }];
-    resolve([NSNumber numberWithBool:YES]);
-}
-
-RCT_EXPORT_METHOD(POCcancelUpload:(NSString *)cancelUploadId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
-  __weak typeof(self) weakSelf = self;
-
-  [_urlSession getTasksWithCompletionHandler:^(NSArray<NSURLSessionDataTask *> *dataTasks,
-                                               NSArray<NSURLSessionUploadTask *> *uploadTasks,
-                                               NSArray<NSURLSessionDownloadTask *> *downloadTasks) {
-    __strong typeof(self) strongSelf = weakSelf;
-
-    for (NSURLSessionTask *task in uploadTasks) {
-      if ([task.taskDescription isEqualToString:cancelUploadId]){
-        [task cancel];
-        [strongSelf removeFilesForUpload:cancelUploadId];
-      }
-    }
-    resolve(@(YES));
-  }];
 }
 
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
