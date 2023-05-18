@@ -178,20 +178,20 @@ RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)r
 }
 
 - (void)removeFilesForUpload:(NSString *)uploadId {
-  NSFileManager *manager = [NSFileManager defaultManager];
-  NSError *error;
+    NSFileManager *manager = [NSFileManager defaultManager];
+    NSError *error = nil;
 
-  NSURL *fileUrl = _filesMap[uploadId];
+    NSURL *fileURL = _filesMap[uploadId];
 
-  if (!fileUrl) {
-    return;
-  }
+    if (fileURL == nil) {
+        return;
+    }
 
-  if (![manager removeItemAtURL:fileUrl error:&error]) {
-    NSLog(@"Cannot delete file at path %@. Error: %@", fileUrl.absoluteString, error.localizedDescription);
-  }
+    if (![manager removeItemAtURL:fileURL error:&error]) {
+        NSLog(@"Cannot delete file at path %@. Error: %@", fileURL.absoluteString, error.localizedDescription);
+    }
 
-  [_filesMap removeObjectForKey:uploadId];
+    [_filesMap removeObjectForKey:uploadId];
 }
 
 /*
