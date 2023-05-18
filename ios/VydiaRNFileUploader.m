@@ -348,6 +348,9 @@ RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseRe
 
     NSString *filename  = [path lastPathComponent];
     NSString *mimetype  = [self guessMIMETypeFromFileName:path];
+    
+    /// enumarateKeysAndObjectsUsingBlock is faster than normal for-loop.
+    /// https://www.mikeash.com/pyblog/friday-qa-2010-04-09-comparison-of-objective-c-enumeration-techniques.html
 
     [parameters enumerateKeysAndObjectsUsingBlock:^(NSString *parameterKey, NSString *parameterValue, BOOL *stop) {
         [httpBody appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
