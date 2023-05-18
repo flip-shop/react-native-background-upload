@@ -143,39 +143,44 @@ RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)r
 }
 
 - (NSURL *)saveMultipartUploadDataToDisk:(NSString *)uploadId data:(NSData *)data {
-  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-  NSString *cacheDirectory = [paths objectAtIndex:0];
-  NSString *path = [NSString stringWithFormat:@"%@.multipart", uploadId];
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    NSString *cacheDirectory = paths.firstObject;
+    NSString *path = [NSString stringWithFormat:@"%@.multipart", uploadId];
 
-  NSString *uploaderDirectory = [cacheDirectory stringByAppendingPathComponent:@"/uploader"];
+    NSString *uploaderDirectory = [cacheDirectory stringByAppendingPathComponent:@"uploader"];
+//    NSString *uploaderDirectory = [cacheDirectory stringByAppendingPathComponent:@"/uploader"];
 
-  NSString *filePath = [uploaderDirectory stringByAppendingPathComponent:path];
-  NSLog(@"Path to save: %@", filePath);
+    NSString *filePath = [uploaderDirectory stringByAppendingPathComponent:path];
+    NSLog(@"Path to save: %@", filePath);
 
-  NSFileManager *manager = [NSFileManager defaultManager];
-  NSError *error;
+    NSFileManager *manager = [NSFileManager defaultManager];
+    NSError *error = nil;
 
-  //Remove file if needed
-  if ([manager fileExistsAtPath:filePath]) {
-    [manager removeItemAtPath:filePath error:&error];
-    if (error) {
-      NSLog(@"Cannot delete file at path: %@. Error: %@", filePath, error.localizedDescription);
-      return nil;
+    // Remove file if needed
+    if ([manager fileExistsAtPath:filePath]) {
+        if (![manager removeItemAtPath:filePath error:&error]) {
+            NSLog(@"Cannot delete file at path: %@. Error: %@", filePath, error.localizedDescription);
+            return nil;
+        }
     }
-  }
-  //Create directory if needed
-  if (![manager fileExistsAtPath:uploaderDirectory] && [manager createDirectoryAtPath:uploaderDirectory withIntermediateDirectories:NO attributes:nil error:&error]) {
-    NSLog(@"Cannot save data at path %@. Error: %@", filePath, error.localizedDescription);
-    return nil;
-  }
-  //Save NSData to file
-  if (![data writeToFile:filePath options:NSDataWritingAtomic error:&error]) {
-    NSLog(@"Cannot save data at path %@. Error: %@", filePath, error.localizedDescription);
-    return nil;
-  }
 
-  return [NSURL fileURLWithPath:filePath];
+    // Create directory if needed
+    if (![manager fileExistsAtPath:uploaderDirectory]) {
+        if (![manager createDirectoryAtPath:uploaderDirectory withIntermediateDirectories:NO attributes:nil error:&error]) {
+            NSLog(@"Cannot save data at path %@. Error: %@", filePath, error.localizedDescription);
+            return nil;
+        }
+    }
+
+    // Save NSData to file
+    if (![data writeToFile:filePath options:NSDataWritingAtomic error:&error]) {
+        NSLog(@"Cannot save data at path %@. Error: %@", filePath, error.localizedDescription);
+        return nil;
+    }
+
+    return [NSURL fileURLWithPath:filePath];
 }
+
 
 - (void)removeFilesForUpload:(NSString *)uploadId {
     NSFileManager *manager = [NSFileManager defaultManager];
