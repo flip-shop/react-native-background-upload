@@ -143,6 +143,35 @@ RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)r
     }];
 }
 
+- (void)POCcopyAssetToFile:(NSString *)assetUrl completionHandler:(void (^)(NSString * _Nullable tempFileUrl, NSError * _Nullable error))completionHandler {
+    NSURL *url = [NSURL URLWithString:assetUrl];
+    PHAsset *asset = [PHAsset fetchAssetsWithALAssetURLs:@[url] options:nil].lastObject;
+    
+    if (!asset) {
+        NSDictionary *details = @{ NSLocalizedDescriptionKey: @"Asset could not be fetched. Are you missing permissions?" };
+        NSError *error = [NSError errorWithDomain:@"RNUploader" code:5 userInfo:details];
+        completionHandler(nil, error);
+        return;
+    }
+    
+    PHAssetResource *assetResource = [[PHAssetResource assetResourcesForAsset:asset] firstObject];
+    NSString *pathToWrite = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
+    NSURL *pathURL = [NSURL fileURLWithPath:pathToWrite];
+    NSString *fileURI = pathURL.absoluteString;
+    
+    PHAssetResourceRequestOptions *options = [PHAssetResourceRequestOptions new];
+    options.networkAccessAllowed = YES;
+    
+    [[PHAssetResourceManager defaultManager] writeDataForAssetResource:assetResource toFile:pathURL options:options completionHandler:^(NSError * _Nullable error) {
+        if (error == nil) {
+            completionHandler(fileURI, nil);
+        } else {
+            completionHandler(nil, error);
+        }
+    }];
+}
+
+
 - (NSURL *)saveMultipartUploadDataToDisk:(NSString *)uploadId data:(NSData *)data {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     NSString *cacheDirectory = paths.firstObject;
