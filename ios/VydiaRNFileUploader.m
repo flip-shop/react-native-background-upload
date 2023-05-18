@@ -54,40 +54,8 @@ NSURLSession *_urlSession = nil;
  Gets file information for the path specified.  Example valid path is: file:///var/mobile/Containers/Data/Application/3C8A0EFB-A316-45C0-A30A-761BF8CCF2F8/tmp/trim.A5F76017-14E9-4890-907E-36A045AF9436.MOV
  Returns an object such as: {mimeType: "video/quicktime", size: 2569900, exists: true, name: "trim.AF9A9225-FC37-416B-A25B-4EDB8275A625.MOV", extension: "MOV"}
  */
+
 RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
-{
-    @try {
-        // Escape non latin characters in filename
-        NSString *escapedPath = [path stringByAddingPercentEncodingWithAllowedCharacters: NSCharacterSet.URLQueryAllowedCharacterSet];
-       
-        NSURL *fileUri = [NSURL URLWithString:escapedPath];
-        NSString *pathWithoutProtocol = [fileUri path];
-        NSString *name = [fileUri lastPathComponent];
-        NSString *extension = [name pathExtension];
-        bool exists = [[NSFileManager defaultManager] fileExistsAtPath:pathWithoutProtocol];
-        NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys: name, @"name", nil];
-        [params setObject:extension forKey:@"extension"];
-        [params setObject:[NSNumber numberWithBool:exists] forKey:@"exists"];
-
-        if (exists)
-        {
-            [params setObject:[self guessMIMETypeFromFileName:name] forKey:@"mimeType"];
-            NSError* error;
-            NSDictionary<NSFileAttributeKey, id> *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:pathWithoutProtocol error:&error];
-            if (error == nil)
-            {
-                unsigned long long fileSize = [attributes fileSize];
-                [params setObject:[NSNumber numberWithLong:fileSize] forKey:@"size"];
-            }
-        }
-        resolve(params);
-    }
-    @catch (NSException *exception) {
-        reject(@"RN Uploader", exception.name, nil);
-    }
-}
-
-RCT_EXPORT_METHOD(POCgetFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
     @try {
         // Escape non-latin characters in the filename
