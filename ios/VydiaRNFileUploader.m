@@ -20,6 +20,7 @@ static int uploadId = 0;
 static RCTEventEmitter* staticEventEmitter = nil;
 static NSString *BACKGROUND_SESSION_ID = @"ReactNativeBackgroundUpload";
 NSURLSession *_urlSession = nil;
+NSFileManager *fileManager = nil;
 
 + (BOOL)requiresMainQueueSetup {
     return NO;
@@ -31,6 +32,7 @@ NSURLSession *_urlSession = nil;
     staticEventEmitter = self;
     _responsesData = [NSMutableDictionary dictionary];
     _filesMap = @{}.mutableCopy;
+      fileManager = [NSFileManager defaultManager];
   }
   return self;
 }
@@ -66,8 +68,7 @@ RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)r
         NSString *pathWithoutProtocol = [fileUri path];
         NSString *name = [fileUri lastPathComponent];
         NSString *extension = [name pathExtension];
-        
-        NSFileManager *fileManager = [NSFileManager defaultManager];
+
         bool exists = [fileManager fileExistsAtPath:pathWithoutProtocol];
         
         NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObject:name forKey:@"name"];
@@ -153,20 +154,19 @@ RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)r
     NSString *filePath = [uploaderDirectory stringByAppendingPathComponent:path];
     NSLog(@"Path to save: %@", filePath);
 
-    NSFileManager *manager = [NSFileManager defaultManager];
     NSError *error = nil;
 
     // Remove file if needed
-    if ([manager fileExistsAtPath:filePath]) {
-        if (![manager removeItemAtPath:filePath error:&error]) {
+    if ([fileManager fileExistsAtPath:filePath]) {
+        if (![fileManager removeItemAtPath:filePath error:&error]) {
             NSLog(@"Cannot delete file at path: %@. Error: %@", filePath, error.localizedDescription);
             return nil;
         }
     }
 
     // Create directory if needed
-    if (![manager fileExistsAtPath:uploaderDirectory]) {
-        if (![manager createDirectoryAtPath:uploaderDirectory withIntermediateDirectories:NO attributes:nil error:&error]) {
+    if (![fileManager fileExistsAtPath:uploaderDirectory]) {
+        if (![fileManager createDirectoryAtPath:uploaderDirectory withIntermediateDirectories:NO attributes:nil error:&error]) {
             NSLog(@"Cannot save data at path %@. Error: %@", filePath, error.localizedDescription);
             return nil;
         }
@@ -183,7 +183,6 @@ RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)r
 
 
 - (void)removeFilesForUpload:(NSString *)uploadId {
-    NSFileManager *manager = [NSFileManager defaultManager];
     NSError *error = nil;
 
     NSURL *fileURL = _filesMap[uploadId];
@@ -192,7 +191,7 @@ RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)r
         return;
     }
 
-    if (![manager removeItemAtURL:fileURL error:&error]) {
+    if (![fileManager removeItemAtURL:fileURL error:&error]) {
         NSLog(@"Cannot delete file at path %@. Error: %@", fileURL.absoluteString, error.localizedDescription);
     }
 
@@ -423,18 +422,6 @@ RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseRe
 ////    NSInputStream *inputStream = [NSInputStream inputStreamWithInputStreams:@[httpBodyStartStream, fileStream, httpBodyEndStream]];
 //
 //    return inputStream;
-//}
-
-//- (NSURLSession *)urlSession: (NSString *) groupId {
-//    if (_urlSession == nil) {
-//        NSURLSessionConfiguration *sessionConfiguration = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:BACKGROUND_SESSION_ID];
-//        if (groupId != nil && ![groupId isEqualToString:@""]) {
-//            sessionConfiguration.sharedContainerIdentifier = groupId;
-//        }
-//        _urlSession = [NSURLSession sessionWithConfiguration:sessionConfiguration delegate:self delegateQueue:nil];
-//    }
-//
-//    return _urlSession;
 //}
 
 - (NSURLSession *)urlSession:(NSString *)groupId {
