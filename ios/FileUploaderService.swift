@@ -14,6 +14,20 @@ import MobileCoreServices
 @objcMembers
 public class FileUploaderService: NSObject {
     
+    var _filesMap: [String: URL] = [:]
+    
+    func removeFilesForUpload(_ uploadId: String) {
+
+        if let fileURL = _filesMap[uploadId] {
+            do {
+                try FileManager.default.removeItem(at: fileURL)
+            } catch {
+                print("Cannot delete file at path \(fileURL.absoluteString). Error: \(error.localizedDescription)")
+            }
+            _filesMap.removeValue(forKey: uploadId)
+        }
+    }
+
     // MARK: - URLSessionDelegate
     
 //    func isEqual(_ object: Any?) -> Bool {
