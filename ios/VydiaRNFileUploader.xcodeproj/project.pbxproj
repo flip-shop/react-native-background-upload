@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		099C475E2A17F13C00F6ABF0 /* FileUploaderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 099C475D2A17F13C00F6ABF0 /* FileUploaderService.swift */; };
 		DCC748851E044F8700EA453E /* VydiaRNFileUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */; };
 /* End PBXBuildFile section */
 
@@ -24,6 +25,8 @@
 
 /* Begin PBXFileReference section */
 		014A3B5C1C6CF33500B6D375 /* libVydiaRNFileUploader.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libVydiaRNFileUploader.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		099C475C2A17F13C00F6ABF0 /* VydiaRNFileUploader-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VydiaRNFileUploader-Bridging-Header.h"; sourceTree = "<group>"; };
+		099C475D2A17F13C00F6ABF0 /* FileUploaderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileUploaderService.swift; sourceTree = "<group>"; };
 		DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VydiaRNFileUploader.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -42,7 +45,9 @@
 			isa = PBXGroup;
 			children = (
 				DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */,
+				099C475D2A17F13C00F6ABF0 /* FileUploaderService.swift */,
 				014A3B5D1C6CF33500B6D375 /* Products */,
+				099C475C2A17F13C00F6ABF0 /* VydiaRNFileUploader-Bridging-Header.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -85,6 +90,7 @@
 				TargetAttributes = {
 					014A3B5B1C6CF33500B6D375 = {
 						CreatedOnToolsVersion = 7.2.1;
+						LastSwiftMigration = 1420;
 					};
 				};
 			};
@@ -93,6 +99,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 014A3B531C6CF33500B6D375;
@@ -111,6 +118,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DCC748851E044F8700EA453E /* VydiaRNFileUploader.m in Sources */,
+				099C475E2A17F13C00F6ABF0 /* FileUploaderService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,30 +208,39 @@
 		014A3B661C6CF33500B6D375 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRCROOT)/../Example/node_modules/react-native/React/**",
 					"$(SRCROOT)/../../../ios/Pods/Headers/Public/**",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "VydiaRNFileUploader-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		014A3B671C6CF33500B6D375 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRCROOT)/../Example/node_modules/react-native/React/**",
 					"$(SRCROOT)/../../../ios/Pods/Headers/Public/**",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "VydiaRNFileUploader-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
