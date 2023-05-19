@@ -7,55 +7,60 @@
 //
 
 import Foundation
+import Photos
+import MobileCoreServices
 
-// MARK: - URLSessionDelegate
-
-class FileUploaderService: URLSessionDelegate {
-    func isEqual(_ object: Any?) -> Bool {
-        //
-    }
+@objc(FileUploaderService)
+@objcMembers
+public class FileUploaderService: NSObject {
     
-    var hash: Int = 0
+    // MARK: - URLSessionDelegate
     
-    var superclass: AnyClass?
-    
-    func `self`() -> Self {
-        //
-    }
-    
-    func perform(_ aSelector: Selector!) -> Unmanaged<AnyObject>! {
-        //
-    }
-    
-    func perform(_ aSelector: Selector!, with object: Any!) -> Unmanaged<AnyObject>! {
-        //
-    }
-    
-    func perform(_ aSelector: Selector!, with object1: Any!, with object2: Any!) -> Unmanaged<AnyObject>! {
-        //
-    }
-    
-    func isProxy() -> Bool {
-        //
-    }
-    
-    func isKind(of aClass: AnyClass) -> Bool {
-        //
-    }
-    
-    func isMember(of aClass: AnyClass) -> Bool {
-        //
-    }
-    
-    func conforms(to aProtocol: Protocol) -> Bool {
-        //
-    }
-    
-    func responds(to aSelector: Selector!) -> Bool {
-        //
-    }
-    
-    var description: String = ""
+//    func isEqual(_ object: Any?) -> Bool {
+//        //
+//    }
+//
+//    var hash: Int = 0
+//
+//    var superclass: AnyClass?
+//
+//    func `self`() -> Self {
+//        //
+//    }
+//
+//    func perform(_ aSelector: Selector!) -> Unmanaged<AnyObject>! {
+//        //
+//    }
+//
+//    func perform(_ aSelector: Selector!, with object: Any!) -> Unmanaged<AnyObject>! {
+//        //
+//    }
+//
+//    func perform(_ aSelector: Selector!, with object1: Any!, with object2: Any!) -> Unmanaged<AnyObject>! {
+//        //
+//    }
+//
+//    func isProxy() -> Bool {
+//        //
+//    }
+//
+//    func isKind(of aClass: AnyClass) -> Bool {
+//        //
+//    }
+//
+//    func isMember(of aClass: AnyClass) -> Bool {
+//        //
+//    }
+//
+//    func conforms(to aProtocol: Protocol) -> Bool {
+//        //
+//    }
+//
+//    func responds(to aSelector: Selector!) -> Bool {
+//        //
+//    }
+//
+//    var description: String = ""
     
     
 }
