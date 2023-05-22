@@ -116,34 +116,7 @@ RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)r
 /*
  Utility method to copy a PHAsset file into a local temp file, which can then be uploaded.
  */
-- (void)copyAssetToFile: (NSString *)assetUrl completionHandler: (void(^)(NSString *__nullable tempFileUrl, NSError *__nullable error))completionHandler {
-    NSURL *url = [NSURL URLWithString:assetUrl];
-    PHAsset *asset = [PHAsset fetchAssetsWithALAssetURLs:@[url] options:nil].lastObject;
-    if (!asset) {
-        NSMutableDictionary* details = [NSMutableDictionary dictionary];
-        [details setValue:@"Asset could not be fetched.  Are you missing permissions?" forKey:NSLocalizedDescriptionKey];
-        completionHandler(nil,  [NSError errorWithDomain:@"RNUploader" code:5 userInfo:details]);
-        return;
-    }
-    PHAssetResource *assetResource = [[PHAssetResource assetResourcesForAsset:asset] firstObject];
-    NSString *pathToWrite = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
-    NSURL *pathUrl = [NSURL fileURLWithPath:pathToWrite];
-    NSString *fileURI = pathUrl.absoluteString;
-
-    PHAssetResourceRequestOptions *options = [PHAssetResourceRequestOptions new];
-    options.networkAccessAllowed = YES;
-
-    [[PHAssetResourceManager defaultManager] writeDataForAssetResource:assetResource toFile:pathUrl options:options completionHandler:^(NSError * _Nullable e) {
-        if (e == nil) {
-            completionHandler(fileURI, nil);
-        }
-        else {
-            completionHandler(nil, e);
-        }
-    }];
-}
-
-- (void)POCcopyAssetToFile:(NSString *)assetUrl completionHandler:(void (^)(NSString * _Nullable tempFileUrl, NSError * _Nullable error))completionHandler {
+- (void)copyAssetToFile:(NSString *)assetUrl completionHandler:(void (^)(NSString * _Nullable tempFileUrl, NSError * _Nullable error))completionHandler {
     NSURL *url = [NSURL URLWithString:assetUrl];
     PHAsset *asset = [PHAsset fetchAssetsWithALAssetURLs:@[url] options:nil].lastObject;
     
