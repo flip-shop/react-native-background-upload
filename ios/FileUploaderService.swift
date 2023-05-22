@@ -19,6 +19,51 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     var _urlSession: URLSession? = nil
     static let BACKGROUND_SESSION_ID: String = "ReactNativeBackgroundUpload"
     
+    func saveMultipartUploadDataToDisk(uploadId: String, data: Data) -> URL? {
+        let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
+        guard let cacheDirectory = paths.first else {
+            return nil
+        }
+        
+        let path = "\(uploadId).multipart"
+        let uploaderDirectory = cacheDirectory.appendingPathComponent("uploader", isDirectory: true)
+        let filePath = uploaderDirectory.appendingPathComponent(path)
+        
+        print("Path to save: \(filePath.path)")
+        
+        let fileManager = FileManager.default
+        
+        // Remove file if needed
+        if fileManager.fileExists(atPath: filePath.path) {
+            do {
+                try fileManager.removeItem(at: filePath)
+            } catch {
+                print("Cannot delete file at path: \(filePath.path). Error: \(error.localizedDescription)")
+                return nil
+            }
+        }
+        
+        // Create directory if needed
+        if !fileManager.fileExists(atPath: uploaderDirectory.path) {
+            do {
+                try fileManager.createDirectory(at: uploaderDirectory, withIntermediateDirectories: false, attributes: nil)
+            } catch {
+                print("Cannot save data at path \(filePath.path). Error: \(error.localizedDescription)")
+                return nil
+            }
+        }
+        
+        // Save NSData to file
+        do {
+            try data.write(to: filePath, options: .atomic)
+        } catch {
+            print("Cannot save data at path \(filePath.path). Error: \(error.localizedDescription)")
+            return nil
+        }
+        
+        return filePath
+    }
+    
     func removeFilesForUpload(_ uploadId: String) {
 
         if let fileURL = _filesMap[uploadId] {
