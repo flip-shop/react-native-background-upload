@@ -10,7 +10,6 @@ import Foundation
 import Photos
 import MobileCoreServices
 
-
 //WIP: move to other place or external file.
 
 enum UploadError: Error {
@@ -31,6 +30,53 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     public override init() { //WIP!!!
         self.fileManager = FileManager()
+    }
+    
+    /*
+     Utility method to copy a PHAsset file into a local temp file, which can then be uploaded.
+     */
+    
+    func copyAssetToFile(assetUrl: String, completionHandler: @escaping (String?, Error?) -> Void) {
+        guard let url = URL(string: assetUrl) else {
+            let details = [NSLocalizedDescriptionKey: "Invalid asset URL"]
+            let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
+            completionHandler(nil, error)
+            return
+        }
+        
+        let fetchResult = PHAsset.fetchAssets(withALAssetURLs: [url], options: nil)
+        guard let asset = fetchResult.lastObject else {
+            let details = [NSLocalizedDescriptionKey: "Asset could not be fetched. Are you missing permissions?"]
+            let error = NSError(domain: "RNUploader", code: 5, userInfo: details)
+            completionHandler(nil, error)
+            return
+        }
+        
+        guard let assetResource = PHAssetResource.assetResources(for: asset).first else {
+            let details = [NSLocalizedDescriptionKey: "Failed to retrieve asset resource"]
+            let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
+            completionHandler(nil, error)
+            return
+        }
+        
+        let pathToWrite = NSTemporaryDirectory().appending(UUID().uuidString)
+        let pathURL = URL(fileURLWithPath: pathToWrite)
+        let fileURI = pathURL.absoluteString
+        
+        let options = PHAssetResourceRequestOptions()
+        
+        //if ios 15 //
+        options.isNetworkAccessAllowed = true
+        //else
+        //options.networkAccessAllowed = true
+        
+        PHAssetResourceManager.default().writeData(for: assetResource, toFile: pathURL, options: options) { error in
+            if let error = error {
+                completionHandler(nil, error)
+            } else {
+                completionHandler(fileURI, nil)
+            }
+        }
     }
     
     func saveMultipartUploadDataToDisk(uploadId: String, data: Data) throws -> URL {
@@ -136,7 +182,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
             //            _sendEvent(withName: "RNFileUploader-completed", body: data)
         }
     }
-
+    
     func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
         var progress: Float = -1
         
