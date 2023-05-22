@@ -15,6 +15,7 @@ import MobileCoreServices
 public class FileUploaderService: NSObject {
     
     var _filesMap: [String: URL] = [:]
+    var _responsesData: [Int: NSMutableData] = [:]
     
     func removeFilesForUpload(_ uploadId: String) {
 
