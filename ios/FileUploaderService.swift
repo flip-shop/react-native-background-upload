@@ -104,7 +104,6 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         return _urlSession!
     }
     
-    
     // MARK: - URLSessionDelegate
     
     func urlSession(_ session: URLSession,
@@ -140,9 +139,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
             //            _sendEvent(withName: "RNFileUploader-completed", body: data)
         }
     }
-    
-    
-    
+
     func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
         var progress: Float = -1
         
@@ -158,7 +155,6 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         //_sendEvent(withName: "RNFileUploader-progress", body: bodyData)
     }
     
-    
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         guard data.count > 0 else {
             return
@@ -173,58 +169,10 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         }
     }
     
-    
     func urlSession(_ session: URLSession, task: URLSessionTask, needNewBodyStream completionHandler: @escaping (InputStream?) -> Void) {
         let inputStream = task.originalRequest?.httpBodyStream
         
         completionHandler(inputStream)
     }
-    
-    //    func isEqual(_ object: Any?) -> Bool {
-    //        //
-    //    }
-    //
-    //    var hash: Int = 0
-    //
-    //    var superclass: AnyClass?
-    //
-    //    func `self`() -> Self {
-    //        //
-    //    }
-    //
-    //    func perform(_ aSelector: Selector!) -> Unmanaged<AnyObject>! {
-    //        //
-    //    }
-    //
-    //    func perform(_ aSelector: Selector!, with object: Any!) -> Unmanaged<AnyObject>! {
-    //        //
-    //    }
-    //
-    //    func perform(_ aSelector: Selector!, with object1: Any!, with object2: Any!) -> Unmanaged<AnyObject>! {
-    //        //
-    //    }
-    //
-    //    func isProxy() -> Bool {
-    //        //
-    //    }
-    //
-    //    func isKind(of aClass: AnyClass) -> Bool {
-    //        //
-    //    }
-    //
-    //    func isMember(of aClass: AnyClass) -> Bool {
-    //        //
-    //    }
-    //
-    //    func conforms(to aProtocol: Protocol) -> Bool {
-    //        //
-    //    }
-    //
-    //    func responds(to aSelector: Selector!) -> Bool {
-    //        //
-    //    }
-    //
-    //    var description: String = ""
-    
     
 }
