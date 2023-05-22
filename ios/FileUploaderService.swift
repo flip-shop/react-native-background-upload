@@ -31,6 +31,21 @@ public class FileUploaderService: NSObject {
 
     // MARK: - URLSessionDelegate
     
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        guard data.count > 0 else {
+            return
+        }
+
+        // Hold returned data so it can be picked up by the didCompleteWithError method later
+        if var responseData = _responsesData[dataTask.taskIdentifier] {
+            responseData.append(data)
+        } else {
+            let responseData = NSMutableData(data: data)
+            _responsesData[dataTask.taskIdentifier] = responseData
+        }
+    }
+
+    
     func urlSession(_ session: URLSession, task: URLSessionTask, needNewBodyStream completionHandler: @escaping (InputStream?) -> Void) {
         let inputStream = task.originalRequest?.httpBodyStream
         
