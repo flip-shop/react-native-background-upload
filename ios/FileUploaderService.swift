@@ -17,9 +17,16 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     var _filesMap: [String: URL] = [:]
     var _responsesData: [Int: NSMutableData] = [:]
     var _urlSession: URLSession? = nil
+    let _fileManager: FileManager
+    
+    public override init() { //WIP!!!
+        self._fileManager = FileManager()
+    }
+
     static let BACKGROUND_SESSION_ID: String = "ReactNativeBackgroundUpload"
     
     func saveMultipartUploadDataToDisk(uploadId: String, data: Data) -> URL? {
+        
         let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
         guard let cacheDirectory = paths.first else {
             return nil
@@ -31,12 +38,10 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         
         print("Path to save: \(filePath.path)")
         
-        let fileManager = FileManager.default
-        
         // Remove file if needed
-        if fileManager.fileExists(atPath: filePath.path) {
+        if _fileManager.fileExists(atPath: filePath.path) {
             do {
-                try fileManager.removeItem(at: filePath)
+                try _fileManager.removeItem(at: filePath)
             } catch {
                 print("Cannot delete file at path: \(filePath.path). Error: \(error.localizedDescription)")
                 return nil
@@ -44,9 +49,9 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         }
         
         // Create directory if needed
-        if !fileManager.fileExists(atPath: uploaderDirectory.path) {
+        if !_fileManager.fileExists(atPath: uploaderDirectory.path) {
             do {
-                try fileManager.createDirectory(at: uploaderDirectory, withIntermediateDirectories: false, attributes: nil)
+                try _fileManager.createDirectory(at: uploaderDirectory, withIntermediateDirectories: false, attributes: nil)
             } catch {
                 print("Cannot save data at path \(filePath.path). Error: \(error.localizedDescription)")
                 return nil
