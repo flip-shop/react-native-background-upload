@@ -30,6 +30,12 @@ public class FileUploaderService: NSObject {
 
     // MARK: - URLSessionDelegate
     
+    func urlSession(_ session: URLSession, task: URLSessionTask, needNewBodyStream completionHandler: @escaping (InputStream?) -> Void) {
+        let inputStream = task.originalRequest?.httpBodyStream
+        
+        completionHandler(inputStream)
+    }
+    
 //    func isEqual(_ object: Any?) -> Bool {
 //        //
 //    }
