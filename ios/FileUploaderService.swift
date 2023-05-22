@@ -12,7 +12,7 @@ import MobileCoreServices
 
 @objc(FileUploaderService)
 @objcMembers
-public class FileUploaderService: NSObject {
+public class FileUploaderService: NSObject, URLSessionDelegate {
     
     var _filesMap: [String: URL] = [:]
     var _responsesData: [Int: NSMutableData] = [:]
@@ -33,7 +33,7 @@ public class FileUploaderService: NSObject {
     
     func urlSession(groupId: String) -> URLSession {
         if _urlSession == nil {
-            let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: BACKGROUND_SESSION_ID)
+            let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: FileUploaderService.BACKGROUND_SESSION_ID) //check if this is ok.
             if !groupId.isEmpty {
                 sessionConfiguration.sharedContainerIdentifier = groupId
             }
