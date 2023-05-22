@@ -18,6 +18,7 @@ enum UploadError: Error {
     case dataSavingFailed
 }
 
+@available(iOS 12, *)
 @objc(FileUploaderService)
 @objcMembers
 public class FileUploaderService: NSObject, URLSessionDelegate {
@@ -35,7 +36,6 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     /*
      Utility method to copy a PHAsset file into a local temp file, which can then be uploaded.
      */
-    
     func copyAssetToFile(assetUrl: String, completionHandler: @escaping (String?, Error?) -> Void) {
         guard let url = URL(string: assetUrl) else {
             let details = [NSLocalizedDescriptionKey: "Invalid asset URL"]
@@ -65,11 +65,9 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         
         let options = PHAssetResourceRequestOptions()
         
-        //if ios 15 //
-        options.isNetworkAccessAllowed = true
-        //else
-        //options.networkAccessAllowed = true
-        
+//        if #available(iOS 15.0, *) ??? { WIP: see compability with Flip!!!!
+            options.isNetworkAccessAllowed = true
+    
         PHAssetResourceManager.default().writeData(for: assetResource, toFile: pathURL, options: options) { error in
             if let error = error {
                 completionHandler(nil, error)
