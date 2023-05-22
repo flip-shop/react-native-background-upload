@@ -16,6 +16,8 @@ public class FileUploaderService: NSObject {
     
     var _filesMap: [String: URL] = [:]
     var _responsesData: [Int: NSMutableData] = [:]
+    var _urlSession: URLSession? = nil
+    static let BACKGROUND_SESSION_ID: String = "ReactNativeBackgroundUpload"
     
     func removeFilesForUpload(_ uploadId: String) {
 
