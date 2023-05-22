@@ -30,6 +30,55 @@ public class FileUploaderService: NSObject {
     }
 
     // MARK: - URLSessionDelegate
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        var data: [String: Any] = ["id": task.taskDescription ?? ""]
+        if let uploadTask = task as? URLSessionDataTask,
+           let response = uploadTask.response as? HTTPURLResponse {
+            data["responseCode"] = response.statusCode
+        }
+        
+        // Add data that was collected earlier by the didReceiveData method
+        if let responseData = _responsesData[task.taskIdentifier] {
+            if let responseString = String(data: responseData as Data, encoding: .utf8) {
+                data["responseBody"] = responseString
+            } else {
+                data["responseBody"] = NSNull()
+            }
+            _responsesData.removeValue(forKey: task.taskIdentifier)
+        }
+        
+        removeFilesForUpload(task.taskDescription ?? "")
+        
+        if let error = error {
+            data["error"] = error.localizedDescription
+            
+            if (error as NSError).code == NSURLErrorCancelled {
+//                _sendEvent(withName: "RNFileUploader-cancelled", body: data)
+            } else {
+//                _sendEvent(withName: "RNFileUploader-error", body: data)
+            }
+        } else {
+//            _sendEvent(withName: "RNFileUploader-completed", body: data)
+        }
+    }
+    
+    
+    func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
+        var progress: Float = -1
+        
+        if totalBytesExpectedToSend > 0 {
+            progress = Float(totalBytesSent) / Float(totalBytesExpectedToSend) * 100.0
+        }
+        
+        let bodyData: [String: Any] = [
+            "id": task.taskDescription ?? "",
+            "progress": progress
+        ]
+        
+        //_sendEvent(withName: "RNFileUploader-progress", body: bodyData)
+    }
+
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         guard data.count > 0 else {
