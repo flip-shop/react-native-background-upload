@@ -34,6 +34,25 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     }
     
     /*
+     Borrowed from http://stackoverflow.com/questions/2439020/wheres-the-iphone-mime-type-database
+    */
+
+    func guessMIMETypeFromFileName(fileName: String) -> String {
+        let UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, fileName.pathExtension as CFString, nil)
+        let MIMEType = UTTypeCopyPreferredTagWithClass(UTI!.takeRetainedValue(), kUTTagClassMIMEType)
+
+        if UTI != nil {
+            UTI!.release()
+        }
+
+        if MIMEType == nil {
+            return "application/octet-stream"
+        }
+
+        return MIMEType!.takeRetainedValue() as String
+    }
+    
+    /*
      Utility method to copy a PHAsset file into a local temp file, which can then be uploaded.
      */
     func copyAssetToFile(assetUrl: String, completionHandler: @escaping (String?, Error?) -> Void) {
@@ -217,4 +236,80 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         completionHandler(inputStream)
     }
     
+}
+
+
+extension URL {
+    var mime: String {
+        guard
+            let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension as CFString, nil)
+        else { return "" }
+        let mime = uti.takeRetainedValue() as String
+        uti.release()
+        return mime
+    }
+}
+
+extension String {
+    
+    var guessMIMETypeFromFileName: String {
+        let UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension as CFString, nil)
+        let MIMEType = UTTypeCopyPreferredTagWithClass(UTI!.takeRetainedValue(), kUTTagClassMIMEType)
+        
+        if UTI != nil {
+            UTI!.release()
+        }
+        
+        if MIMEType == nil {
+            return "application/octet-stream"
+        }
+        
+        return MIMEType!.takeRetainedValue() as String
+    }
+    
+}
+
+import UniformTypeIdentifiers
+
+@available(iOS 14, *)
+extension NSURL {
+    public func mimeType() -> String {
+        if let pathExt = self.pathExtension,
+            let mimeType = UTType(filenameExtension: pathExt)?.preferredMIMEType {
+            return mimeType
+        }
+        else {
+            return "application/octet-stream"
+        }
+    }
+}
+
+@available(iOS 14, *)
+extension URL {
+    public func mimeType() -> String {
+        if let mimeType = UTType(filenameExtension: self.pathExtension)?.preferredMIMEType {
+            return mimeType
+        }
+        else {
+            return "application/octet-stream"
+        }
+    }
+}
+
+@available(iOS 14, *)
+extension NSString {
+    public func mimeType() -> String {
+        if let mimeType = UTType(filenameExtension: self.pathExtension)?.preferredMIMEType {
+            return mimeType
+        }
+        else {
+            return "application/octet-stream"
+        }
+    }
+}
+@available(iOS 14, *)
+extension String {
+    public func mimeType() -> String {
+        return (self as NSString).mimeType()
+    }
 }
