@@ -28,6 +28,20 @@ public class FileUploaderService: NSObject {
             _filesMap.removeValue(forKey: uploadId)
         }
     }
+    
+    func urlSession(groupId: String) -> URLSession {
+        if _urlSession == nil {
+            let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: BACKGROUND_SESSION_ID)
+            if !groupId.isEmpty {
+                sessionConfiguration.sharedContainerIdentifier = groupId
+            }
+            
+            _urlSession = URLSession(configuration: sessionConfiguration, delegate: self, delegateQueue: nil)
+        }
+        
+        return _urlSession!
+    }
+
 
     // MARK: - URLSessionDelegate
 
