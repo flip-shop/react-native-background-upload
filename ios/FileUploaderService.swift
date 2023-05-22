@@ -26,13 +26,12 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     var _filesMap: [String: URL] = [:]
     var _responsesData: [Int: NSMutableData] = [:]
     var _urlSession: URLSession? = nil
-    let _fileManager: FileManager
+    let fileManager: FileManager
+    static let BACKGROUND_SESSION_ID: String = "ReactNativeBackgroundUpload"
     
     public override init() { //WIP!!!
-        self._fileManager = FileManager()
+        self.fileManager = FileManager()
     }
-    
-    static let BACKGROUND_SESSION_ID: String = "ReactNativeBackgroundUpload"
     
     func saveMultipartUploadDataToDisk(uploadId: String, data: Data) throws -> URL {
         let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
@@ -45,8 +44,6 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         let filePath = uploaderDirectory.appendingPathComponent(path)
         
         print("Path to save: \(filePath.path)")
-        
-        let fileManager = FileManager.default
         
         // Remove file if needed
         if fileManager.fileExists(atPath: filePath.path) {
