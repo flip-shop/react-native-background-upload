@@ -10,6 +10,15 @@ import Foundation
 import Photos
 import MobileCoreServices
 
+
+//WIP: move to other place or external file.
+
+enum UploadError: Error {
+    case fileDeletionFailed
+    case directoryCreationFailed
+    case dataSavingFailed
+}
+
 @objc(FileUploaderService)
 @objcMembers
 public class FileUploaderService: NSObject, URLSessionDelegate {
