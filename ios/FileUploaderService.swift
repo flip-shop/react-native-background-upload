@@ -45,6 +45,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         }
         
         let fetchResult = PHAsset.fetchAssets(withALAssetURLs: [url], options: nil)
+
         guard let asset = fetchResult.lastObject else {
             let details = [NSLocalizedDescriptionKey: "Asset could not be fetched. Are you missing permissions?"]
             let error = NSError(domain: "RNUploader", code: 5, userInfo: details)
@@ -64,11 +65,11 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         let fileURI = pathURL.absoluteString
         
         let options = PHAssetResourceRequestOptions()
+        options.isNetworkAccessAllowed = true /// check availability for iOS 12 to 15
         
-//        if #available(iOS 15.0, *) ??? { WIP: see compability with Flip!!!!
-            options.isNetworkAccessAllowed = true
-    
-        PHAssetResourceManager.default().writeData(for: assetResource, toFile: pathURL, options: options) { error in
+        PHAssetResourceManager.default().writeData(for: assetResource,
+                                                   toFile: pathURL,
+                                                   options: options) { error in
             if let error = error {
                 completionHandler(nil, error)
             } else {
