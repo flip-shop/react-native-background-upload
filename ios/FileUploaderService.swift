@@ -31,37 +31,40 @@ public class FileUploaderService: NSObject {
 
     // MARK: - URLSessionDelegate
 
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        var data: [String: Any] = ["id": task.taskDescription ?? ""]
+    func urlSession(_ session: URLSession,
+                    task: URLSessionTask,
+                    didCompleteWithError error: Error?) {
+
+        guard let taskDescription = task.taskDescription else {
+            return
+        }
+        
+        var data: [String: Any] = ["id": taskDescription]
+
         if let uploadTask = task as? URLSessionDataTask,
            let response = uploadTask.response as? HTTPURLResponse {
             data["responseCode"] = response.statusCode
         }
         
-        // Add data that was collected earlier by the didReceiveData method
-        if let responseData = _responsesData[task.taskIdentifier] {
-            if let responseString = String(data: responseData as Data, encoding: .utf8) {
-                data["responseBody"] = responseString
-            } else {
-                data["responseBody"] = NSNull()
-            }
-            _responsesData.removeValue(forKey: task.taskIdentifier)
+        if let responseData = _responsesData.removeValue(forKey: task.taskIdentifier),
+           let responseString = String(data: responseData as Data, encoding: .utf8) {
+            data["responseBody"] = responseString
+        } else {
+            data["responseBody"] = NSNull()
         }
         
-        removeFilesForUpload(task.taskDescription ?? "")
+        removeFilesForUpload(taskDescription)
         
         if let error = error {
             data["error"] = error.localizedDescription
             
-            if (error as NSError).code == NSURLErrorCancelled {
-//                _sendEvent(withName: "RNFileUploader-cancelled", body: data)
-            } else {
-//                _sendEvent(withName: "RNFileUploader-error", body: data)
-            }
+            let eventName = (error as NSError).code == NSURLErrorCancelled ? "RNFileUploader-cancelled" : "RNFileUploader-error"
+//            _sendEvent(withName: eventName, body: data)
         } else {
 //            _sendEvent(withName: "RNFileUploader-completed", body: data)
         }
     }
+
     
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
