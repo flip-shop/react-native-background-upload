@@ -35,8 +35,19 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     public override init() { //WIP!!!
         self.fileManager = FileManager()
-//        var responseData = NSMutableDictionary()
-//        var filesMap = NSMutableDictionary()
+        //        var responseData = NSMutableDictionary()
+        //        var filesMap = NSMutableDictionary()
+    }
+    
+    /*
+     Gets file information for the path specified.  Example valid path is: file:///var/mobile/Containers/Data/Application/3C8A0EFB-A316-45C0-A30A-761BF8CCF2F8/tmp/trim.A5F76017-14E9-4890-907E-36A045AF9436.MOV
+     Returns an object such as: {mimeType: "video/quicktime", size: 2569900, exists: true, name: "trim.AF9A9225-FC37-416B-A25B-4EDB8275A625.MOV", extension: "MOV"}
+     */
+    
+    //MARK: - React Native Bridge - getFileInfo
+    
+    func getFileInfo() {
+        // PLACEHOLDER for "API"?
     }
     
     /*
@@ -51,7 +62,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         }
         
         let fetchResult = PHAsset.fetchAssets(withALAssetURLs: [url], options: nil)
-
+        
         guard let asset = fetchResult.lastObject else {
             let details = [NSLocalizedDescriptionKey: "Asset could not be fetched. Are you missing permissions?"]
             let error = NSError(domain: "RNUploader", code: 5, userInfo: details)
@@ -152,25 +163,55 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         return _urlSession!
     }
     
+    /*
+     * Starts a file upload.
+     * Options are passed in as the first argument as a js hash:
+     * {
+     *   url: string.  url to post to.
+     *   path: string.  path to the file on the device
+     *   headers: hash of name/value header pairs
+     * }
+     *
+     * Returns a promise with the string ID of the upload.
+     */
     
-//    @objc func cancelUpload(_ cancelUploadId: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-//        weak var weakSelf = self
-//
-//        urlSession.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
-//            guard let strongSelf = weakSelf else {
-//                return
-//            }
-//
-//            for task in uploadTasks {
-//                if task.taskDescription == cancelUploadId as String {
-//                    task.cancel()
-//                    strongSelf.removeFilesForUpload(cancelUploadId as String)
-//                }
-//            }
-//
-//            resolve(true)
-//        }
-//    }
+    //MARK: - React Native Bridge - startUpload
+    
+    func startUpload() {
+        // PLACEHOLDER for "API"?
+    }
+    
+    /*
+     * Cancels file upload
+     * Accepts upload ID as a first argument, this upload will be cancelled
+     * Event "cancelled" will be fired when upload is cancelled.
+     */
+    
+    //MARK: - React Native Bridge - cancelUpload
+    
+    func cancelUpload() {
+        // PLACEHOLDER for "API"?
+    }
+    
+    
+    //    @objc func cancelUpload(_ cancelUploadId: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    //        weak var weakSelf = self
+    //
+    //        urlSession.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
+    //            guard let strongSelf = weakSelf else {
+    //                return
+    //            }
+    //
+    //            for task in uploadTasks {
+    //                if task.taskDescription == cancelUploadId as String {
+    //                    task.cancel()
+    //                    strongSelf.removeFilesForUpload(cancelUploadId as String)
+    //                }
+    //            }
+    //
+    //            resolve(true)
+    //        }
+    //    }
     
     func createBody(withBoundary boundary: String, path: String, parameters: [String: String], fieldName: String) -> Result<Data, Error> {
         guard var components = URLComponents(string: path) else {
@@ -187,12 +228,12 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         do {
             let data = try Data(contentsOf: fileURL, options: .mappedIfSafe)
             let filename = (path as NSString).lastPathComponent
-            let mimetype = path.mimeType()
+            let mimetype = path.guessMimeType()
             
             appendFormData(to: &httpBody,
                            withBoundary: boundary,
                            parameters: parameters)
-
+            
             appendFileData(to: &httpBody,
                            withBoundary: boundary,
                            fieldName: fieldName,
@@ -205,7 +246,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
             return .failure(error)
         }
     }
-
+    
     func appendFormData(to httpBody: inout Data, withBoundary boundary: String, parameters: [String: String]) {
         for (parameterKey, parameterValue) in parameters {
             httpBody.append("--\(boundary)\r\n".data(using: .utf8)!)
