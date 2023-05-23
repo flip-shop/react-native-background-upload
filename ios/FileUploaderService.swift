@@ -211,6 +211,15 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         }
     }
     
+    func appendFileData(to httpBody: inout Data, withBoundary boundary: String, fieldName: String, filename: String, mimetype: String, data: Data) {
+        httpBody.append("--\(boundary)\r\n".data(using: .utf8)!)
+        httpBody.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
+        httpBody.append("Content-Type: \(mimetype)\r\n\r\n".data(using: .utf8)!)
+        httpBody.append(data)
+        httpBody.append("\r\n".data(using: .utf8)!)
+        httpBody.append("--\(boundary)--\r\n".data(using: .utf8)!)
+    }
+    
     // MARK: - URLSessionDelegate
     
     func urlSession(_ session: URLSession,
