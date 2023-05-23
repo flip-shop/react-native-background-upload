@@ -301,7 +301,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
 import UniformTypeIdentifiers
 
 extension String {
-    public func mimeTypeFromURL() -> String {
+    public func guessMimeType() -> String {
         if #available(iOS 14.0, *) {
             if let fileURL = URL(string: self),
                let uti = UTType(filenameExtension: fileURL.pathExtension),
@@ -313,7 +313,6 @@ extension String {
         } else {
             let url = NSURL(fileURLWithPath: self)
             let pathExtension = url.pathExtension
-
             if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension! as NSString, nil)?.takeRetainedValue() {
                 if let mimetype = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType)?.takeRetainedValue() {
                     return mimetype as String
@@ -326,35 +325,35 @@ extension String {
 
 // reference methods that created method above
 
-extension String {
-    public func guessMimeType() -> String {
-        let url = NSURL(fileURLWithPath: self)
-        let pathExtension = url.pathExtension
-
-        if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension! as NSString, nil)?.takeRetainedValue() {
-            if let mimetype = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType)?.takeRetainedValue() {
-                return mimetype as String
-            }
-        }
-        return "application/octet-stream"
-    }
-}
-
-@available(iOS 14, *)
-extension NSString {
-    public func mimeType() -> String {
-        if let mimeType = UTType(filenameExtension: self.pathExtension)?.preferredMIMEType {
-            return mimeType
-        }
-        else {
-            return "application/octet-stream"
-        }
-    }
-}
-
-@available(iOS 14, *)
-extension String {
-    public func mimeType() -> String {
-        return (self as NSString).mimeType()
-    }
-}
+//extension String {
+//    public func guessMimeType() -> String {
+//        let url = NSURL(fileURLWithPath: self)
+//        let pathExtension = url.pathExtension
+//
+//        if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension! as NSString, nil)?.takeRetainedValue() {
+//            if let mimetype = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType)?.takeRetainedValue() {
+//                return mimetype as String
+//            }
+//        }
+//        return "application/octet-stream"
+//    }
+//}
+//
+//@available(iOS 14, *)
+//extension NSString {
+//    public func mimeType() -> String {
+//        if let mimeType = UTType(filenameExtension: self.pathExtension)?.preferredMIMEType {
+//            return mimeType
+//        }
+//        else {
+//            return "application/octet-stream"
+//        }
+//    }
+//}
+//
+//@available(iOS 14, *)
+//extension String {
+//    public func mimeType() -> String {
+//        return (self as NSString).mimeType()
+//    }
+//}
