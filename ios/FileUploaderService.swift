@@ -300,30 +300,9 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
 
 import UniformTypeIdentifiers
 
-@available(iOS 14, *)
-extension NSString {
-    public func mimeType() -> String {
-        if let mimeType = UTType(filenameExtension: self.pathExtension)?.preferredMIMEType {
-            return mimeType
-        }
-        else {
-            return "application/octet-stream"
-        }
-    }
-}
-
-@available(iOS 14, *)
-extension String {
-    public func mimeType() -> String {
-        return (self as NSString).mimeType()
-    }
-}
-
-//test method to see if either of them works :D
-
 extension String {
     public func mimeTypeFromURL() -> String {
-        if (@available(iOS 14.0, *)) {
+        if #available(iOS 14.0, *) {
             if let fileURL = URL(string: self),
                let uti = UTType(filenameExtension: fileURL.pathExtension),
                let mimeType = uti.preferredMIMEType {
@@ -342,9 +321,10 @@ extension String {
             }
             return "application/octet-stream"
         }
-       
     }
 }
+
+// reference methods that created method above
 
 extension String {
     public func guessMimeType() -> String {
@@ -357,5 +337,24 @@ extension String {
             }
         }
         return "application/octet-stream"
+    }
+}
+
+@available(iOS 14, *)
+extension NSString {
+    public func mimeType() -> String {
+        if let mimeType = UTType(filenameExtension: self.pathExtension)?.preferredMIMEType {
+            return mimeType
+        }
+        else {
+            return "application/octet-stream"
+        }
+    }
+}
+
+@available(iOS 14, *)
+extension String {
+    public func mimeType() -> String {
+        return (self as NSString).mimeType()
     }
 }
