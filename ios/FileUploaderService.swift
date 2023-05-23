@@ -18,6 +18,10 @@ enum UploadError: Error {
     case dataSavingFailed
 }
 
+enum NetworkError: Error {
+    case invalidURL
+}
+
 @available(iOS 12, *)
 @objc(FileUploaderService)
 @objcMembers
@@ -165,26 +169,25 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         return _urlSession!
     }
     
-    
-    func createBody(withBoundary boundary: String, path: String, parameters: [String: String], fieldName: String) -> Data? {
-        guard let escapedPath = path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let fileUri = URL(string: escapedPath) else {
-            return nil
+    func createBody(withBoundary boundary: String, path: String, parameters: [String: String], fieldName: String) -> Result<Data, Error> {
+        guard var components = URLComponents(string: path) else {
+            return .failure(NetworkError.invalidURL)
+        }
+        
+        components.percentEncodedQuery = nil
+        guard let fileURL = components.url else {
+            return .failure(NetworkError.invalidURL)
         }
         
         var httpBody = Data()
         
         do {
-            let data = try Data(contentsOf: fileUri, options: .mappedIfSafe)
+            let data = try Data(contentsOf: fileURL, options: .mappedIfSafe)
             let filename = (path as NSString).lastPathComponent
 //            let mimetype = guessMIMETypeFromFileName(path)
             let mimetype = ""
             
-            for (parameterKey, parameterValue) in parameters {
-                httpBody.append("--\(boundary)\r\n".data(using: .utf8)!)
-                httpBody.append("Content-Disposition: form-data; name=\"\(parameterKey)\"\r\n\r\n".data(using: .utf8)!)
-                httpBody.append("\(parameterValue)\r\n".data(using: .utf8)!)
-            }
+            appendFormData(to: &httpBody, withBoundary: boundary, parameters: parameters)
             
             httpBody.append("--\(boundary)\r\n".data(using: .utf8)!)
             httpBody.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
@@ -193,15 +196,20 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
             httpBody.append("\r\n".data(using: .utf8)!)
             
             httpBody.append("--\(boundary)--\r\n".data(using: .utf8)!)
+            
+            return .success(httpBody)
         } catch {
-            print("Failed to read file: \(error)")
-            return nil
+            return .failure(error)
         }
-        
-        return httpBody
     }
-    
-    
+
+    func appendFormData(to httpBody: inout Data, withBoundary boundary: String, parameters: [String: String]) {
+        for (parameterKey, parameterValue) in parameters {
+            httpBody.append("--\(boundary)\r\n".data(using: .utf8)!)
+            httpBody.append("Content-Disposition: form-data; name=\"\(parameterKey)\"\r\n\r\n".data(using: .utf8)!)
+            httpBody.append("\(parameterValue)\r\n".data(using: .utf8)!)
+        }
+    }
     
     // MARK: - URLSessionDelegate
     
