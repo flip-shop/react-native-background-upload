@@ -35,6 +35,8 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     public override init() { //WIP!!!
         self.fileManager = FileManager()
+//        var responseData = NSMutableDictionary()
+//        var filesMap = NSMutableDictionary()
     }
     
     /*
@@ -187,15 +189,16 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
 //            let mimetype = guessMIMETypeFromFileName(path)
             let mimetype = ""
             
-            appendFormData(to: &httpBody, withBoundary: boundary, parameters: parameters)
-            
-            httpBody.append("--\(boundary)\r\n".data(using: .utf8)!)
-            httpBody.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
-            httpBody.append("Content-Type: \(mimetype)\r\n\r\n".data(using: .utf8)!)
-            httpBody.append(data)
-            httpBody.append("\r\n".data(using: .utf8)!)
-            
-            httpBody.append("--\(boundary)--\r\n".data(using: .utf8)!)
+            appendFormData(to: &httpBody,
+                           withBoundary: boundary,
+                           parameters: parameters)
+
+            appendFileData(to: &httpBody,
+                           withBoundary: boundary,
+                           fieldName: fieldName,
+                           filename: filename,
+                           mimetype: mimetype,
+                           data: data)
             
             return .success(httpBody)
         } catch {
