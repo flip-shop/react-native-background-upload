@@ -171,6 +171,26 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         return _urlSession!
     }
     
+    
+    @objc func cancelUpload(_ cancelUploadId: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        weak var weakSelf = self
+
+        urlSession.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
+            guard let strongSelf = weakSelf else {
+                return
+            }
+
+            for task in uploadTasks {
+                if task.taskDescription == cancelUploadId as String {
+                    task.cancel()
+                    strongSelf.removeFilesForUpload(cancelUploadId as String)
+                }
+            }
+
+            resolve(true)
+        }
+    }
+    
     func createBody(withBoundary boundary: String, path: String, parameters: [String: String], fieldName: String) -> Result<Data, Error> {
         guard var components = URLComponents(string: path) else {
             return .failure(NetworkError.invalidURL)
