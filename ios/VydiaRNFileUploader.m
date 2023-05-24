@@ -3,6 +3,7 @@
 #import <React/RCTEventEmitter.h>
 #import <React/RCTBridgeModule.h>
 #import <Photos/Photos.h>
+//#import "FileUploaderService-Swift.h"
 
 @interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate>
 {
@@ -21,6 +22,7 @@ static RCTEventEmitter* staticEventEmitter = nil;
 static NSString *BACKGROUND_SESSION_ID = @"ReactNativeBackgroundUpload";
 NSURLSession *_urlSession = nil;
 NSFileManager *fileManager = nil;
+FileUploaderService *fileUploader = nil;
 
 + (BOOL)requiresMainQueueSetup {
     return NO;
@@ -33,6 +35,7 @@ NSFileManager *fileManager = nil;
     _responsesData = [NSMutableDictionary dictionary];
     _filesMap = @{}.mutableCopy;
       fileManager = [NSFileManager defaultManager];
+      fileUploader = [FileUploader init];
   }
   return self;
 }
@@ -330,6 +333,12 @@ RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseRe
         }
         resolve(@(YES));
     }];
+}
+
+// MARK: - POC method to find out bridging
+
+RCT_EXPORT_METHOD(POCcancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
+  
 }
 
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
