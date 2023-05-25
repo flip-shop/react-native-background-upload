@@ -3,7 +3,7 @@
 #import <React/RCTEventEmitter.h>
 #import <React/RCTBridgeModule.h>
 #import <Photos/Photos.h>
-//#import "FileUploaderService-Swift.h"
+#import "react_native_background_upload-Swift.h"
 
 @interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate>
 {
@@ -35,7 +35,7 @@ FileUploaderService *fileUploader = nil;
     _responsesData = [NSMutableDictionary dictionary];
     _filesMap = @{}.mutableCopy;
       fileManager = [NSFileManager defaultManager];
-      fileUploader = [FileUploader init];
+      fileUploader = [FileUploaderService init];
   }
   return self;
 }
