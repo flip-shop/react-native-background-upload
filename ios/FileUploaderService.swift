@@ -9,7 +9,7 @@
 import Foundation
 import Photos
 import MobileCoreServices
-
+//import React?
 //WIP: move to other place or external file.
 
 enum UploadError: Error {
@@ -31,12 +31,30 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     var _responsesData: [Int: NSMutableData] = [:]
     var _urlSession: URLSession? = nil
     let fileManager: FileManager
+    static let uploadId: Int = 0; //change to var!
     static let BACKGROUND_SESSION_ID: String = "ReactNativeBackgroundUpload"
+//    static let staticEventEmitter: RCTEventEmitterstatic = nil
     
     public override init() { //WIP!!!
         self.fileManager = FileManager()
         //        var responseData = NSMutableDictionary()
         //        var filesMap = NSMutableDictionary()
+    }
+    
+//    func _sendEvent(withName eventName: String, body: Any?) {
+//        if staticEventEmitter == nil {
+//            return
+//        }
+//        staticEventEmitter.sendEvent(withName: eventName, body: body)
+//    }
+
+    func supportedEvents() -> [String] {
+        return [
+            "RNFileUploader-progress",
+            "RNFileUploader-error",
+            "RNFileUploader-cancelled",
+            "RNFileUploader-completed"
+        ]
     }
     
     /*
