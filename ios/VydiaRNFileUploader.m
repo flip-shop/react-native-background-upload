@@ -304,7 +304,8 @@ RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseRe
 // MARK: - POC method to find out bridging
 
 RCT_EXPORT_METHOD(POCcancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
-  
+
+    [fileUploader cancelUpload:cancelUploadId resolve:resolve reject:reject];
 }
 
 - (NSData *)createBodyWithBoundary:(NSString *)boundary

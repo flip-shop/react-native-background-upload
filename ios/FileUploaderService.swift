@@ -298,9 +298,9 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     //MARK: - React Native Bridge - cancelUpload
 
-//    public func cancelUpload(_ cancelUploadId: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
-//        weak var weakSelf = self
-//
+    public func cancelUpload(_ cancelUploadId: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+        weak var weakSelf = self
+
 //        urlSession.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
 //            guard let strongSelf = weakSelf else {
 //                return
@@ -315,7 +315,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
 //
 //            resolve(true)
 //        }
-//    }
+    }
     
     func createBody(withBoundary boundary: String, path: String, parameters: [String: String], fieldName: String) -> Result<Data, Error> {
         guard var components = URLComponents(string: path) else {
