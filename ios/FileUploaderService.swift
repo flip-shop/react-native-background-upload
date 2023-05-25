@@ -46,8 +46,6 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     //MARK: - React Native Bridge - getFileInfo
     
-    public func test() {}
-    
     public func getFileInfo(_ path: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if let escapedPath = path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
            let fileUrl = URL(string: escapedPath) {
@@ -202,7 +200,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     //MARK: - React Native Bridge - startUpload
     
-//    @objc func POCstartUpload(_ options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+//    public func POCstartUpload(_ options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
 //        var thisUploadId: Int = 0
 //        synchronized(self) {
 //            thisUploadId = uploadId
@@ -300,8 +298,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     //MARK: - React Native Bridge - cancelUpload
 
-//    @objc
-//    func cancelUpload(_ cancelUploadId: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+//    public func cancelUpload(_ cancelUploadId: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
 //        weak var weakSelf = self
 //
 //        urlSession.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
@@ -505,4 +502,3 @@ extension String {
 //        return (self as NSString).mimeType()
 //    }
 //}
-

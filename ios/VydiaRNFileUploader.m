@@ -62,9 +62,7 @@ FileUploaderService *fileUploader = nil;
 
 RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-    
-    [fileUploader test];
-//    [fileUploader getFileInfo:path resolve:resolve reject:reject];
+    [fileUploader getFileInfo:path resolve:resolve reject:reject];
 }
 
 /*
