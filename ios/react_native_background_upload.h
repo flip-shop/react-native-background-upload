@@ -5,8 +5,13 @@
 //  Created by Michael Czerniakowski on 25/05/2023.
 //
 
-#ifndef react_native_background_upload_h
-#define react_native_background_upload_h
+//#ifndef react_native_background_upload_h
+//#define react_native_background_upload_h
 
 
-#endif /* react_native_background_upload_h */
+//#endif /* react_native_background_upload_h */
+
+NS_ASSUME_NONNULL_BEGIN
+
+
+NS_ASSUME_NONNULL_END

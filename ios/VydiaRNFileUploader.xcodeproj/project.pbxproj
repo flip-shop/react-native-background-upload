@@ -27,6 +27,8 @@
 		014A3B5C1C6CF33500B6D375 /* libVydiaRNFileUploader.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libVydiaRNFileUploader.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		099C475C2A17F13C00F6ABF0 /* VydiaRNFileUploader-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VydiaRNFileUploader-Bridging-Header.h"; sourceTree = "<group>"; };
 		099C475D2A17F13C00F6ABF0 /* FileUploaderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileUploaderService.swift; sourceTree = "<group>"; };
+		09FBDD722A1FE3AE007EEC9F /* VydiaRNFileUploader-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VydiaRNFileUploader-Bridging-Header.h"; sourceTree = "<group>"; };
+		09FBDD732A1FE3AE007EEC9F /* react_native_background_upload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = react_native_background_upload.h; sourceTree = "<group>"; };
 		DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VydiaRNFileUploader.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -45,6 +47,8 @@
 			isa = PBXGroup;
 			children = (
 				DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */,
+				09FBDD732A1FE3AE007EEC9F /* react_native_background_upload.h */,
+				09FBDD722A1FE3AE007EEC9F /* VydiaRNFileUploader-Bridging-Header.h */,
 				099C475D2A17F13C00F6ABF0 /* FileUploaderService.swift */,
 				014A3B5D1C6CF33500B6D375 /* Products */,
 				099C475C2A17F13C00F6ABF0 /* VydiaRNFileUploader-Bridging-Header.h */,
