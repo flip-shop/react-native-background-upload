@@ -7,8 +7,8 @@
 
 @interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate>
 {
-  NSMutableDictionary *_responsesData;
-  NSMutableDictionary<NSString*, NSURL*> *_filesMap;
+    NSMutableDictionary *_responsesData;
+    NSMutableDictionary<NSString*, NSURL*> *_filesMap;
 }
 @end
 
@@ -62,41 +62,9 @@ FileUploaderService *fileUploader = nil;
 
 RCT_EXPORT_METHOD(getFileInfo:(NSString *)path resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject)
 {
-    @try {
-        // Escape non-latin characters in the filename
-        NSString *escapedPath = [path stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLQueryAllowedCharacterSet];
-        
-        NSURL *fileUri = [NSURL URLWithString:escapedPath];
-        
-        NSString *pathWithoutProtocol = [fileUri path];
-        NSString *name = [fileUri lastPathComponent];
-        NSString *extension = [name pathExtension];
-
-        bool exists = [fileManager fileExistsAtPath:pathWithoutProtocol];
-        
-        NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObject:name forKey:@"name"];
-        [params setObject:extension forKey:@"extension"];
-        [params setObject:@(exists) forKey:@"exists"];
-        
-        if (exists) {
-            NSString *mimeType = [self guessMIMETypeFromFileName:name];
-            [params setObject:mimeType forKey:@"mimeType"];
-            
-            NSError *error;
-            NSDictionary<NSFileAttributeKey, id> *attributes = [fileManager attributesOfItemAtPath:pathWithoutProtocol error:&error];
-            
-            if (error == nil) {
-                unsigned long long fileSize = [attributes fileSize];
-                [params setObject:@(fileSize) forKey:@"size"];
-            }
-        }
-        resolve(params);
-    }
     
-    @catch (NSException *exception) {
-        reject(@"RN Uploader", exception.name, nil);
-    }
-    
+    [fileUploader test];
+//    [fileUploader getFileInfo:path resolve:resolve reject:reject];
 }
 
 /*

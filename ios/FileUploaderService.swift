@@ -46,11 +46,9 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     //MARK: - React Native Bridge - getFileInfo
     
-    func getFileInfo() {
-        // PLACEHOLDER for "API"?
-    }
+    public func test() {}
     
-    @objc func POCgetFileInfo(_ path: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    public func getFileInfo(_ path: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if let escapedPath = path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
            let fileUrl = URL(string: escapedPath) {
             
@@ -204,99 +202,95 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     //MARK: - React Native Bridge - startUpload
     
-    func startUpload() {
-        // PLACEHOLDER for "API"?
-    }
-    
-    @objc func POCstartUpload(_ options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        var thisUploadId: Int = 0
-        synchronized(self) {
-            thisUploadId = uploadId
-            uploadId += 1
-        }
-        
-        guard let uploadUrl = options["url"] as? String else {
-            return reject("RN Uploader", "Missing upload URL", nil)
-        }
-        var fileURI = options["path"] as? String
-        let method = options["method"] as? String ?? "POST"
-        let uploadType = options["type"] as? String ?? "raw"
-        let fieldName = options["field"] as? String
-        let customUploadId = options["customUploadId"] as? String
-        let appGroup = options["appGroup"] as? String
-        let headers = options["headers"] as? NSDictionary
-        let parameters = options["parameters"] as? NSDictionary
-        
-        do {
-            guard let requestUrl = URL(string: uploadUrl) else {
-                return reject("RN Uploader", "URL not compliant with RFC 2396", nil)
-            }
-            
-            var request = URLRequest(url: requestUrl)
-            request.httpMethod = method
-            
-            if let headers = headers {
-                headers.forEach { (key, value) in
-                    if let stringValue = value as? String {
-                        request.setValue(stringValue, forHTTPHeaderField: key as! String)
-                    }
-                }
-            }
-            
-            // Asset library files have to be copied to a temporary file before uploading
-            if fileURI?.hasPrefix("assets-library") ?? false {
-                let group = DispatchGroup()
-                group.enter()
-                copyAssetToFile(assetUrl: fileURI!) { tempFileUrl, error in //WIP: remove forceCAST!!!!!
-                    if let error = error {
-                        group.leave()
-                        return reject("RN Uploader", "Asset could not be copied to temp file.", nil)
-                    }
-                    fileURI = tempFileUrl
-                    group.leave()
-                }
-                group.wait()
-            }
-            
-            var uploadTask: URLSessionUploadTask?
-            let taskDescription = customUploadId ?? "\(thisUploadId)"
-            
-            if uploadType == "multipart" {
-                let uuidStr = UUID().uuidString
-                request.setValue("multipart/form-data; boundary=\(uuidStr)", forHTTPHeaderField: "Content-Type")
-                
-                if let httpBody = createBody(withBoundary: uuidStr, path: fileURI, parameters: parameters, fieldName: fieldName) {
-                    let contentLength = "\(httpBody.count)"
-                    request.setValue(contentLength, forHTTPHeaderField: "Content-Length")
-                    
-                    let fileUrlOnDisk = saveMultipartUploadDataToDisk(uploadId: taskDescription, data: httpBody)
-                    if let fileUrlOnDisk = fileUrlOnDisk {
-                        filesMap[taskDescription] = fileUrlOnDisk
-                        uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrlOnDisk) //WIP: remove forceCAST!!!!!
-                    } else {
-                        NSLog("Cannot save multipart data file to disk. Falling back to the old method with stream.")
-                        request.httpBodyStream = InputStream(data: httpBody)
-                        uploadTask = urlSession(groupId: appGroup!).uploadTask(withStreamedRequest: request) //WIP: remove forceCAST!!!!! and also move to dedicated var haha
-                    }
-                }
-            } else {
-                if let parameters = parameters, parameters.count > 0 {
-                    return reject("RN Uploader", "Parameters are supported only in multipart type", nil)
-                }
-                
-                if let fileURI = fileURI {
-                    let fileUrl = URL(string: fileURI)
-                    uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrl!) //WIP: remove forceCAST!!!!!
-                }
-            }
-            
-            uploadTask?.taskDescription = taskDescription
-            uploadTask?.resume()
-            resolve(uploadTask?.taskDescription)
-        } catch let exception as NSError {
-            reject("RN Uploader", exception.localizedDescription, nil)
-        }
-    }
+//    @objc func POCstartUpload(_ options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+//        var thisUploadId: Int = 0
+//        synchronized(self) {
+//            thisUploadId = uploadId
+//            uploadId += 1
+//        }
+//
+//        guard let uploadUrl = options["url"] as? String else {
+//            return reject("RN Uploader", "Missing upload URL", nil)
+//        }
+//        var fileURI = options["path"] as? String
+//        let method = options["method"] as? String ?? "POST"
+//        let uploadType = options["type"] as? String ?? "raw"
+//        let fieldName = options["field"] as? String
+//        let customUploadId = options["customUploadId"] as? String
+//        let appGroup = options["appGroup"] as? String
+//        let headers = options["headers"] as? NSDictionary
+//        let parameters = options["parameters"] as? NSDictionary
+//
+//        do {
+//            guard let requestUrl = URL(string: uploadUrl) else {
+//                return reject("RN Uploader", "URL not compliant with RFC 2396", nil)
+//            }
+//
+//            var request = URLRequest(url: requestUrl)
+//            request.httpMethod = method
+//
+//            if let headers = headers {
+//                headers.forEach { (key, value) in
+//                    if let stringValue = value as? String {
+//                        request.setValue(stringValue, forHTTPHeaderField: key as! String)
+//                    }
+//                }
+//            }
+//
+//            // Asset library files have to be copied to a temporary file before uploading
+//            if fileURI?.hasPrefix("assets-library") ?? false {
+//                let group = DispatchGroup()
+//                group.enter()
+//                copyAssetToFile(assetUrl: fileURI!) { tempFileUrl, error in //WIP: remove forceCAST!!!!!
+//                    if let error = error {
+//                        group.leave()
+//                        return reject("RN Uploader", "Asset could not be copied to temp file.", nil)
+//                    }
+//                    fileURI = tempFileUrl
+//                    group.leave()
+//                }
+//                group.wait()
+//            }
+//
+//            var uploadTask: URLSessionUploadTask?
+//            let taskDescription = customUploadId ?? "\(thisUploadId)"
+//
+//            if uploadType == "multipart" {
+//                let uuidStr = UUID().uuidString
+//                request.setValue("multipart/form-data; boundary=\(uuidStr)", forHTTPHeaderField: "Content-Type")
+//
+//                if let httpBody = createBody(withBoundary: uuidStr, path: fileURI, parameters: parameters, fieldName: fieldName) {
+//                    let contentLength = "\(httpBody.count)"
+//                    request.setValue(contentLength, forHTTPHeaderField: "Content-Length")
+//
+//                    let fileUrlOnDisk = saveMultipartUploadDataToDisk(uploadId: taskDescription, data: httpBody)
+//                    if let fileUrlOnDisk = fileUrlOnDisk {
+//                        filesMap[taskDescription] = fileUrlOnDisk
+//                        uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrlOnDisk) //WIP: remove forceCAST!!!!!
+//                    } else {
+//                        NSLog("Cannot save multipart data file to disk. Falling back to the old method with stream.")
+//                        request.httpBodyStream = InputStream(data: httpBody)
+//                        uploadTask = urlSession(groupId: appGroup!).uploadTask(withStreamedRequest: request) //WIP: remove forceCAST!!!!! and also move to dedicated var haha
+//                    }
+//                }
+//            } else {
+//                if let parameters = parameters, parameters.count > 0 {
+//                    return reject("RN Uploader", "Parameters are supported only in multipart type", nil)
+//                }
+//
+//                if let fileURI = fileURI {
+//                    let fileUrl = URL(string: fileURI)
+//                    uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrl!) //WIP: remove forceCAST!!!!!
+//                }
+//            }
+//
+//            uploadTask?.taskDescription = taskDescription
+//            uploadTask?.resume()
+//            resolve(uploadTask?.taskDescription)
+//        } catch let exception as NSError {
+//            reject("RN Uploader", exception.localizedDescription, nil)
+//        }
+//    }
     
     /*
      * Cancels file upload
@@ -305,31 +299,26 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
      */
     
     //MARK: - React Native Bridge - cancelUpload
-    
-    //    func cancelUpload() {
-    //        // PLACEHOLDER for "API"?
-    //    }
-    
-    
-    @objc
-    func POCcancelUpload(_ cancelUploadId: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
-        weak var weakSelf = self
-        
-        urlSession.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
-            guard let strongSelf = weakSelf else {
-                return
-            }
-            
-            for task in uploadTasks {
-                if task.taskDescription == cancelUploadId as String {
-                    task.cancel()
-                    strongSelf.removeFilesForUpload(cancelUploadId as String)
-                }
-            }
-            
-            resolve(true)
-        }
-    }
+
+//    @objc
+//    func cancelUpload(_ cancelUploadId: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+//        weak var weakSelf = self
+//
+//        urlSession.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
+//            guard let strongSelf = weakSelf else {
+//                return
+//            }
+//
+//            for task in uploadTasks {
+//                if task.taskDescription == cancelUploadId as String {
+//                    task.cancel()
+//                    strongSelf.removeFilesForUpload(cancelUploadId as String)
+//                }
+//            }
+//
+//            resolve(true)
+//        }
+//    }
     
     func createBody(withBoundary boundary: String, path: String, parameters: [String: String], fieldName: String) -> Result<Data, Error> {
         guard var components = URLComponents(string: path) else {
@@ -516,3 +505,4 @@ extension String {
 //        return (self as NSString).mimeType()
 //    }
 //}
+
