@@ -35,7 +35,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     static var uploadId: Int = 0
     static let BACKGROUND_SESSION_ID: String = "ReactNativeBackgroundUpload"
     private static let synchronizationQueue = DispatchQueue(label: "com.example.synchronization")
-    //    static let staticEventEmitter: RCTEventEmitterstatic = nil
+//    static let staticEventEmitter: RCTEventEmitterstatic = nil
     
     private static func getNextUploadId() -> Int {
             defer {
@@ -46,8 +46,6 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     public override init() { //WIP!!!
         self.fileManager = FileManager()
-        //        var responseData = NSMutableDictionary()
-        //        var filesMap = NSMutableDictionary()
     }
     
     //    func _sendEvent(withName eventName: String, body: Any?) {
@@ -210,7 +208,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
             urlSession = URLSession(configuration: sessionConfiguration, delegate: self, delegateQueue: nil)
         }
         
-        return urlSession!
+        return urlSession! //remove force unwrap?
     }
     
     /*
