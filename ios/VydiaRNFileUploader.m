@@ -289,7 +289,6 @@ RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseRe
     [fileUploader cancelUpload:cancelUploadId resolve:resolve reject:reject];
 }
 
-
 - (NSData *)createBodyWithBoundary:(NSString *)boundary
                          path:(NSString *)path
                          parameters:(NSDictionary *)parameters

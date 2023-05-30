@@ -316,18 +316,16 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     //MARK: - React Native Bridge - cancelUpload
 
-    public func cancelUpload(_ cancelUploadId: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
-        weak var weakSelf = self
-
-        urlSession!.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
-            guard let strongSelf = weakSelf else {
+    public func cancelUpload(_ cancelUploadId: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        urlSession?.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
+            guard let strongSelf = self else {
                 return
             }
 
-            for task in uploadTasks {
-                if task.taskDescription == cancelUploadId as String {
-                    task.cancel()
-                    strongSelf.removeFilesForUpload(cancelUploadId as String)
+            for uploadTask in uploadTasks {
+                if uploadTask.taskDescription == cancelUploadId {
+                    uploadTask.cancel()
+                    strongSelf.removeFilesForUpload(cancelUploadId)
                 }
             }
 
