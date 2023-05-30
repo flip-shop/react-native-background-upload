@@ -231,14 +231,15 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
         guard let uploadUrl = options["url"] as? String else {
             return reject("RN Uploader", "Missing upload URL", nil)
         }
+        
         var fileURI = options["path"] as? String
         let method = options["method"] as? String ?? "POST"
         let uploadType = options["type"] as? String ?? "raw"
         let fieldName = options["field"] as? String
         let customUploadId = options["customUploadId"] as? String
         let appGroup = options["appGroup"] as? String
-        let headers = options["headers"] as? NSDictionary
-        let parameters = options["parameters"] as? NSDictionary
+        let headers = options["headers"] as? [String: String]
+        let parameters = options["parameters"] as? [String: String]
 
         do {
             guard let requestUrl = URL(string: uploadUrl) else {
@@ -277,6 +278,9 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
             if uploadType == "multipart" {
                 let uuidStr = UUID().uuidString
                 request.setValue("multipart/form-data; boundary=\(uuidStr)", forHTTPHeaderField: "Content-Type")
+                
+                guard let fileURI = fileURI, let fieldName = fieldName else { return } //better error handling
+//                guard let parameters = parameters else { return }//better error handling
 
                 if let httpBody = createBody(withBoundary: uuidStr,
                                              path: fileURI,
