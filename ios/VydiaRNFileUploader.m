@@ -1,3 +1,5 @@
+// This guard prevent this file to be compiled in the old architecture.
+#ifdef RCT_NEW_ARCH_ENABLED
 #import <Foundation/Foundation.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <React/RCTEventEmitter.h>
@@ -500,3 +502,5 @@ totalBytesExpectedToSend:(int64_t)totalBytesExpectedToSend {
 }
 
 @end
+
+#endif /* RCT_NEW_ARCH_ENABLED */
