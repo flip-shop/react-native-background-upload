@@ -17,34 +17,13 @@
 RCT_EXPORT_MODULE();
 
 @synthesize bridge = _bridge;
-static RCTEventEmitter* staticEventEmitter = nil;
-
-+ (BOOL)requiresMainQueueSetup {
-    return NO;
-}
 
 -(id) init {
   self = [super init];
   if (self) {
-    staticEventEmitter = self;
       fileUploader = [FileUploaderService init];
   }
   return self;
-}
-
-- (void)_sendEventWithName:(NSString *)eventName body:(id)body {
-  if (staticEventEmitter == nil)
-    return;
-  [staticEventEmitter sendEventWithName:eventName body:body];
-}
-
-- (NSArray<NSString *> *)supportedEvents {
-    return @[
-        @"RNFileUploader-progress",
-        @"RNFileUploader-error",
-        @"RNFileUploader-cancelled",
-        @"RNFileUploader-completed"
-    ];
 }
 
 /*

@@ -9,7 +9,6 @@
 import Foundation
 import Photos
 import MobileCoreServices
-//import React?
 //WIP: move to other place or external file.
 
 enum UploadError: Error {
@@ -26,36 +25,42 @@ enum NetworkError: Error {
 @available(iOS 12, *)
 @objc(FileUploaderService)
 @objcMembers
-public class FileUploaderService: NSObject, URLSessionDelegate {
+public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
+    
+    @objc public static var emitter: RCTEventEmitter?
     
     var filesMap: [String: URL] = [:]
     var _responsesData: [Int: NSMutableData] = [:]
     var urlSession: URLSession? = nil
-    let fileManager: FileManager
+    var fileManager: FileManager
     static var uploadId: Int = 0
     static let BACKGROUND_SESSION_ID: String = "ReactNativeBackgroundUpload"
     private static let synchronizationQueue = DispatchQueue(label: "com.example.synchronization")
-//    static let staticEventEmitter: RCTEventEmitterstatic = nil
     
     private static func getNextUploadId() -> Int {
-            defer {
-                uploadId += 1
-            }
-            return uploadId
+        defer {
+            uploadId += 1
         }
+        return uploadId
+    }
     
     public override init() { //WIP!!!
         self.fileManager = FileManager()
+        super.init()
+        FileUploaderService.emitter = self
     }
     
-    //    func _sendEvent(withName eventName: String, body: Any?) {
-    //        if staticEventEmitter == nil {
-    //            return
-    //        }
-    //        staticEventEmitter.sendEvent(withName: eventName, body: body)
-    //    }
+    override public static func requiresMainQueueSetup() -> Bool {
+        return true
+    }
     
-    func supportedEvents() -> [String] {
+    public override func sendEvent(withName eventName: String, body: Any?) {
+        if let emitter = FileUploaderService.emitter {
+            emitter.sendEvent(withName: eventName, body: body)
+        }
+    }
+    
+    @objc open override func supportedEvents() -> [String] {
         return [
             "RNFileUploader-progress",
             "RNFileUploader-error",
@@ -226,94 +231,94 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     //MARK: - React Native Bridge - startUpload
     
     public func startUpload(_ options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-
+        
         let thisUploadId: Int = FileUploaderService.getNextUploadId()
         
         do {
-             let jsonData = try JSONSerialization.data(withJSONObject: options, options: [])
-             let uploadOptions = try JSONDecoder().decode(UploadOptions.self, from: jsonData)
-             
+            let jsonData = try JSONSerialization.data(withJSONObject: options, options: [])
+            let uploadOptions = try JSONDecoder().decode(UploadOptions.self, from: jsonData)
+            
             var fileURI = uploadOptions.path
-             let method = uploadOptions.method ?? "POST"
-             let uploadType = uploadOptions.type ?? "raw"
-             let fieldName = uploadOptions.field
-             let customUploadId = uploadOptions.customUploadId
-             let appGroup = uploadOptions.appGroup
-             let headers = uploadOptions.headers
-             let parameters = uploadOptions.parameters
-             
-             guard let uploadUrl = URL(string: uploadOptions.url) else {
-                 return reject("RN Uploader", "URL not compliant with RFC 2396", nil)
-             }
-             
-             var request = URLRequest(url: uploadUrl)
-             request.httpMethod = method
-             
-             if let headers = headers {
-                 headers.forEach { (key, value) in
-                     request.setValue(value, forHTTPHeaderField: key)
-                 }
-             }
-             
-             if let newFileURI = fileURI {
-                 if newFileURI.hasPrefix("assets-library") {
-                     let group = DispatchGroup()
-                     group.enter()
-                     copyAssetToFile(assetUrl: newFileURI) { tempFileUrl, error in
-                         if let error = error {
-                             group.leave()
-                             return reject("RN Uploader", "Asset could not be copied to temp file.", nil)
-                         }
-                         fileURI = tempFileUrl
-                         group.leave()
-                     }
-                     group.wait()
-                 }
-                 
-                 var uploadTask: URLSessionUploadTask?
-                 let taskDescription = customUploadId ?? "\(FileUploaderService.uploadId)"
-                 
-                 if uploadType == "multipart" {
-                     let uuidStr = UUID().uuidString
-                     request.setValue("multipart/form-data; boundary=\(uuidStr)", forHTTPHeaderField: "Content-Type")
-                     
-                     if let httpBody = createBody(withBoundary: uuidStr,
-                                                  path: newFileURI,
-                                                  parameters: parameters!,
-                                                  fieldName: fieldName!) {
-                         let contentLength = "\(httpBody.count)"
-                         request.setValue(contentLength, forHTTPHeaderField: "Content-Length")
-                         
-                         do {
-                             if let fileUrlOnDisk = try saveMultipartUploadDataToDisk(uploadId: taskDescription, data: httpBody) {
-                                 filesMap[taskDescription] = fileUrlOnDisk
-                                 uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrlOnDisk)
-                             } else {
-                                 throw NetworkError.multipartDataSaveFailure
-                             }
-                         } catch NetworkError.multipartDataSaveFailure {
-                             NSLog("Cannot save multipart data file to disk. Falling back to the old method with stream.")
-                             request.httpBodyStream = InputStream(data: httpBody)
-                             uploadTask = urlSession(groupId: appGroup!).uploadTask(withStreamedRequest: request)
-                         } catch let error {
-                             NSLog("Error: \(error)")
-                         }
-                     }
-                 } else {
-                     if let parameters = parameters, !parameters.isEmpty {
-                         return reject("RN Uploader", "Parameters are supported only in multipart type", nil)
-                     }
-                         let fileUrl = URL(string: newFileURI)
-                         uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrl!)
-                 }
-                 
-                 uploadTask?.taskDescription = taskDescription
-                 uploadTask?.resume()
-                 resolve(uploadTask?.taskDescription)
-             }
-         } catch {
-             reject("RN Uploader", "Error decoding options", error)
-         }
+            let method = uploadOptions.method ?? "POST"
+            let uploadType = uploadOptions.type ?? "raw"
+            let fieldName = uploadOptions.field
+            let customUploadId = uploadOptions.customUploadId
+            let appGroup = uploadOptions.appGroup
+            let headers = uploadOptions.headers
+            let parameters = uploadOptions.parameters
+            
+            guard let uploadUrl = URL(string: uploadOptions.url) else {
+                return reject("RN Uploader", "URL not compliant with RFC 2396", nil)
+            }
+            
+            var request = URLRequest(url: uploadUrl)
+            request.httpMethod = method
+            
+            if let headers = headers {
+                headers.forEach { (key, value) in
+                    request.setValue(value, forHTTPHeaderField: key)
+                }
+            }
+            
+            if let newFileURI = fileURI {
+                if newFileURI.hasPrefix("assets-library") {
+                    let group = DispatchGroup()
+                    group.enter()
+                    copyAssetToFile(assetUrl: newFileURI) { tempFileUrl, error in
+                        if let error = error {
+                            group.leave()
+                            return reject("RN Uploader", "Asset could not be copied to temp file.", nil)
+                        }
+                        fileURI = tempFileUrl
+                        group.leave()
+                    }
+                    group.wait()
+                }
+                
+                var uploadTask: URLSessionUploadTask?
+                let taskDescription = customUploadId ?? "\(FileUploaderService.uploadId)"
+                
+                if uploadType == "multipart" {
+                    let uuidStr = UUID().uuidString
+                    request.setValue("multipart/form-data; boundary=\(uuidStr)", forHTTPHeaderField: "Content-Type")
+                    
+                    if let httpBody = createBody(withBoundary: uuidStr,
+                                                 path: newFileURI,
+                                                 parameters: parameters!,
+                                                 fieldName: fieldName!) {
+                        let contentLength = "\(httpBody.count)"
+                        request.setValue(contentLength, forHTTPHeaderField: "Content-Length")
+                        
+                        do {
+                            if let fileUrlOnDisk = try saveMultipartUploadDataToDisk(uploadId: taskDescription, data: httpBody) {
+                                filesMap[taskDescription] = fileUrlOnDisk
+                                uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrlOnDisk)
+                            } else {
+                                throw NetworkError.multipartDataSaveFailure
+                            }
+                        } catch NetworkError.multipartDataSaveFailure {
+                            NSLog("Cannot save multipart data file to disk. Falling back to the old method with stream.")
+                            request.httpBodyStream = InputStream(data: httpBody)
+                            uploadTask = urlSession(groupId: appGroup!).uploadTask(withStreamedRequest: request)
+                        } catch let error {
+                            NSLog("Error: \(error)")
+                        }
+                    }
+                } else {
+                    if let parameters = parameters, !parameters.isEmpty {
+                        return reject("RN Uploader", "Parameters are supported only in multipart type", nil)
+                    }
+                    let fileUrl = URL(string: newFileURI)
+                    uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrl!)
+                }
+                
+                uploadTask?.taskDescription = taskDescription
+                uploadTask?.resume()
+                resolve(uploadTask?.taskDescription)
+            }
+        } catch {
+            reject("RN Uploader", "Error decoding options", error)
+        }
     }
     
     /*
@@ -428,9 +433,9 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
             data["error"] = error.localizedDescription
             
             let eventName = (error as NSError).code == NSURLErrorCancelled ? "RNFileUploader-cancelled" : "RNFileUploader-error"
-            //            _sendEvent(withName: eventName, body: data)
+                        sendEvent(withName: eventName, body: data)
         } else {
-            //            _sendEvent(withName: "RNFileUploader-completed", body: data)
+                        sendEvent(withName: "RNFileUploader-completed", body: data)
         }
     }
     
@@ -446,7 +451,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
             "progress": progress
         ]
         
-        //_sendEvent(withName: "RNFileUploader-progress", body: bodyData)
+        sendEvent(withName: "RNFileUploader-progress", body: bodyData)
     }
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
