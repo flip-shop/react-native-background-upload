@@ -218,7 +218,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     //MARK: - React Native Bridge - startUpload
     
-//    public func POCstartUpload(_ options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    public func startUpload(_ options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
 //        var thisUploadId: Int = 0
 //        synchronized(self) {
 //            thisUploadId = uploadId
@@ -306,7 +306,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
 //        } catch let exception as NSError {
 //            reject("RN Uploader", exception.localizedDescription, nil)
 //        }
-//    }
+    }
     
     /*
      * Cancels file upload
@@ -317,7 +317,13 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     //MARK: - React Native Bridge - cancelUpload
 
     public func cancelUpload(_ cancelUploadId: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        urlSession?.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
+        guard let urlSession = urlSession else {
+               // Handle the case when urlSession is nil, e.g., by calling the reject block
+               reject("URLSessionError", "URLSession is nil", nil)
+               return
+           }
+
+        urlSession.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
             guard let strongSelf = self else {
                 return
             }
