@@ -4,7 +4,6 @@
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <React/RCTEventEmitter.h>
 #import <React/RCTBridgeModule.h>
-#import <Photos/Photos.h>
 #import "react_native_background_upload-Swift.h"
 
 @interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate>
@@ -19,8 +18,6 @@ RCT_EXPORT_MODULE();
 
 @synthesize bridge = _bridge;
 static RCTEventEmitter* staticEventEmitter = nil;
-static NSString *BACKGROUND_SESSION_ID = @"ReactNativeBackgroundUpload";
-NSURLSession *_urlSession = nil;
 
 + (BOOL)requiresMainQueueSetup {
     return NO;
