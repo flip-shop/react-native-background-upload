@@ -20,6 +20,7 @@ enum UploadError: Error {
 
 enum NetworkError: Error {
     case invalidURL
+    case multipartDataSaveFailure // move it to other case? it is not strictly networkerror... maybe connect both enums to one?
 }
 
 @available(iOS 12, *)
@@ -286,16 +287,18 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
                          request.setValue(contentLength, forHTTPHeaderField: "Content-Length")
                          
                          do {
-                              if let fileUrlOnDisk = try saveMultipartUploadDataToDisk(uploadId: taskDescription, data: httpBody) {
+                             if let fileUrlOnDisk = try saveMultipartUploadDataToDisk(uploadId: taskDescription, data: httpBody) {
                                  filesMap[taskDescription] = fileUrlOnDisk
                                  uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrlOnDisk)
                              } else {
-                                 NSLog("Cannot save multipart data file to disk. Falling back to the old method with stream.")
-                                 request.httpBodyStream = InputStream(data: httpBody)
-                                 uploadTask = urlSession(groupId: appGroup!).uploadTask(withStreamedRequest: request)
+                                 throw NetworkError.multipartDataSaveFailure
                              }
-                         } catch {
-                             //handle error
+                         } catch NetworkError.multipartDataSaveFailure {
+                             NSLog("Cannot save multipart data file to disk. Falling back to the old method with stream.")
+                             request.httpBodyStream = InputStream(data: httpBody)
+                             uploadTask = urlSession(groupId: appGroup!).uploadTask(withStreamedRequest: request)
+                         } catch let error {
+                             NSLog("Error: \(error)")
                          }
                      }
                  } else {
@@ -345,40 +348,6 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
             resolve(true)
         }
     }
-    
-//    func createBody(withBoundary boundary: String, path: String, parameters: [String: String], fieldName: String) -> Result<Data, Error> {
-//        guard var components = URLComponents(string: path) else {
-//            return .failure(NetworkError.invalidURL)
-//        }
-//
-//        components.percentEncodedQuery = nil
-//        guard let fileURL = components.url else {
-//            return .failure(NetworkError.invalidURL)
-//        }
-//
-//        var httpBody = Data()
-//
-//        do {
-//            let data = try Data(contentsOf: fileURL, options: .mappedIfSafe)
-//            let filename = (path as NSString).lastPathComponent
-//            let mimetype = path.guessMimeType()
-//
-//            appendFormData(to: &httpBody,
-//                           withBoundary: boundary,
-//                           parameters: parameters)
-//
-//            appendFileData(to: &httpBody,
-//                           withBoundary: boundary,
-//                           fieldName: fieldName,
-//                           filename: filename,
-//                           mimetype: mimetype,
-//                           data: data)
-//
-//            return .success(httpBody)
-//        } catch {
-//            return .failure(error)
-//        }
-//    }
     
     func createBody(withBoundary boundary: String, path: String, parameters: [String: String], fieldName: String) -> Data? {
         guard var components = URLComponents(string: path) else {
