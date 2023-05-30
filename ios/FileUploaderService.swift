@@ -29,7 +29,7 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     
     var _filesMap: [String: URL] = [:]
     var _responsesData: [Int: NSMutableData] = [:]
-    var _urlSession: URLSession? = nil
+    var urlSession: URLSession? = nil
     let fileManager: FileManager
     static let uploadId: Int = 0; //change to var!
     static let BACKGROUND_SESSION_ID: String = "ReactNativeBackgroundUpload"
@@ -192,16 +192,16 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     }
     
     func urlSession(groupId: String) -> URLSession {
-        if _urlSession == nil {
+        if urlSession == nil {
             let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: FileUploaderService.BACKGROUND_SESSION_ID) //check if this is ok.
             if !groupId.isEmpty {
                 sessionConfiguration.sharedContainerIdentifier = groupId
             }
             
-            _urlSession = URLSession(configuration: sessionConfiguration, delegate: self, delegateQueue: nil)
+            urlSession = URLSession(configuration: sessionConfiguration, delegate: self, delegateQueue: nil)
         }
         
-        return _urlSession!
+        return urlSession!
     }
     
     /*
@@ -319,20 +319,20 @@ public class FileUploaderService: NSObject, URLSessionDelegate {
     public func cancelUpload(_ cancelUploadId: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         weak var weakSelf = self
 
-//        urlSession.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
-//            guard let strongSelf = weakSelf else {
-//                return
-//            }
-//
-//            for task in uploadTasks {
-//                if task.taskDescription == cancelUploadId as String {
-//                    task.cancel()
-//                    strongSelf.removeFilesForUpload(cancelUploadId as String)
-//                }
-//            }
-//
-//            resolve(true)
-//        }
+        urlSession!.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
+            guard let strongSelf = weakSelf else {
+                return
+            }
+
+            for task in uploadTasks {
+                if task.taskDescription == cancelUploadId as String {
+                    task.cancel()
+                    strongSelf.removeFilesForUpload(cancelUploadId as String)
+                }
+            }
+
+            resolve(true)
+        }
     }
     
     func createBody(withBoundary boundary: String, path: String, parameters: [String: String], fieldName: String) -> Result<Data, Error> {
