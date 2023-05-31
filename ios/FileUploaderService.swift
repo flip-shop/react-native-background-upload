@@ -10,31 +10,6 @@ import Foundation
 import Photos
 import MobileCoreServices
 
-//WIP: move to external files?
-
-struct UploadOptions: Codable {
-    let url: String
-    let path: String?
-    let method: String?
-    let type: String?
-    let field: String?
-    let customUploadId: String?
-    let appGroup: String?
-    let headers: [String: String]?
-    let parameters: [String: String]?
-}
-
-enum UploadError: Error {
-    case fileDeletionFailed
-    case directoryCreationFailed
-    case dataSavingFailed
-}
-
-enum NetworkError: Error {
-    case invalidURL
-    case multipartDataSaveFailure // move it to other case? it is not strictly networkerror... maybe connect both enums to one?
-}
-
 @available(iOS 12, *)
 @objc(FileUploaderService)
 @objcMembers
@@ -43,7 +18,7 @@ public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
     @objc public static var emitter: RCTEventEmitter?
     
     var filesMap: [String: URL] = [:]
-    var _responsesData: [Int: NSMutableData] = [:]
+    var responsesData: [Int: NSMutableData] = [:]
     var urlSession: URLSession? = nil
     var fileManager: FileManager
     static var uploadId: Int = 0
@@ -307,9 +282,9 @@ public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
                                 filesMap[taskDescription] = fileUrlOnDisk
                                 uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrlOnDisk)
                             } else {
-                                throw NetworkError.multipartDataSaveFailure
+                                throw UploadError.multipartDataSaveFailure
                             }
-                        } catch NetworkError.multipartDataSaveFailure {
+                        } catch UploadError.multipartDataSaveFailure {
                             NSLog("Cannot save multipart data file to disk. Falling back to the old method with stream.")
                             request.httpBodyStream = InputStream(data: httpBody)
                             uploadTask = urlSession(groupId: appGroup!).uploadTask(withStreamedRequest: request)
@@ -433,7 +408,7 @@ public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
             data["responseCode"] = response.statusCode
         }
         
-        if let responseData = _responsesData.removeValue(forKey: task.taskIdentifier),
+        if let responseData = responsesData.removeValue(forKey: task.taskIdentifier),
            let responseString = String(data: responseData as Data, encoding: .utf8) {
             data["responseBody"] = responseString
         } else {
@@ -473,11 +448,11 @@ public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
         }
         
         // Hold returned data so it can be picked up by the didCompleteWithError method later
-        if var responseData = _responsesData[dataTask.taskIdentifier] {
+        if var responseData = responsesData[dataTask.taskIdentifier] {
             responseData.append(data)
         } else {
-            let responseData = NSMutableData(data: data)
-            _responsesData[dataTask.taskIdentifier] = responseData
+            let responseData = NSMutableData(data: data) // maybe move to other line?
+            responsesData[dataTask.taskIdentifier] = responseData
         }
     }
     
@@ -488,65 +463,3 @@ public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
     }
     
 }
-
-//WIP: move to external file?
-
-import UniformTypeIdentifiers
-
-extension String {
-    public func guessMimeType() -> String {
-        if #available(iOS 14.0, *) {
-            if let fileURL = URL(string: self),
-               let uti = UTType(filenameExtension: fileURL.pathExtension),
-               let mimeType = uti.preferredMIMEType {
-                return mimeType
-            } else {
-                return "application/octet-stream"
-            }
-        } else {
-            let url = NSURL(fileURLWithPath: self)
-            let pathExtension = url.pathExtension
-            if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension! as NSString, nil)?.takeRetainedValue() {
-                if let mimetype = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType)?.takeRetainedValue() {
-                    return mimetype as String
-                }
-            }
-            return "application/octet-stream"
-        }
-    }
-}
-
-// reference methods that created method above
-
-//extension String {
-//    public func guessMimeType() -> String {
-//        let url = NSURL(fileURLWithPath: self)
-//        let pathExtension = url.pathExtension
-//
-//        if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension! as NSString, nil)?.takeRetainedValue() {
-//            if let mimetype = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType)?.takeRetainedValue() {
-//                return mimetype as String
-//            }
-//        }
-//        return "application/octet-stream"
-//    }
-//}
-//
-//@available(iOS 14, *)
-//extension NSString {
-//    public func mimeType() -> String {
-//        if let mimeType = UTType(filenameExtension: self.pathExtension)?.preferredMIMEType {
-//            return mimeType
-//        }
-//        else {
-//            return "application/octet-stream"
-//        }
-//    }
-//}
-//
-//@available(iOS 14, *)
-//extension String {
-//    public func mimeType() -> String {
-//        return (self as NSString).mimeType()
-//    }
-//}

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		091FE8912A27903D00C14BE4 /* String+MimeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091FE8902A27903D00C14BE4 /* String+MimeType.swift */; };
+		091FE8932A27909700C14BE4 /* UploadOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091FE8922A27909700C14BE4 /* UploadOptions.swift */; };
+		091FE8952A2790BA00C14BE4 /* UploadError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091FE8942A2790BA00C14BE4 /* UploadError.swift */; };
 		099C475E2A17F13C00F6ABF0 /* FileUploaderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 099C475D2A17F13C00F6ABF0 /* FileUploaderService.swift */; };
 		DCC748851E044F8700EA453E /* VydiaRNFileUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */; };
 /* End PBXBuildFile section */
@@ -25,6 +28,9 @@
 
 /* Begin PBXFileReference section */
 		014A3B5C1C6CF33500B6D375 /* libVydiaRNFileUploader.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libVydiaRNFileUploader.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		091FE8902A27903D00C14BE4 /* String+MimeType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+MimeType.swift"; sourceTree = "<group>"; };
+		091FE8922A27909700C14BE4 /* UploadOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadOptions.swift; sourceTree = "<group>"; };
+		091FE8942A2790BA00C14BE4 /* UploadError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadError.swift; sourceTree = "<group>"; };
 		099C475C2A17F13C00F6ABF0 /* VydiaRNFileUploader-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VydiaRNFileUploader-Bridging-Header.h"; sourceTree = "<group>"; };
 		099C475D2A17F13C00F6ABF0 /* FileUploaderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileUploaderService.swift; sourceTree = "<group>"; };
 		09FBDD722A1FE3AE007EEC9F /* VydiaRNFileUploader-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VydiaRNFileUploader-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -47,9 +53,10 @@
 			isa = PBXGroup;
 			children = (
 				DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */,
-				09FBDD732A1FE3AE007EEC9F /* react_native_background_upload.h */,
-				09FBDD722A1FE3AE007EEC9F /* VydiaRNFileUploader-Bridging-Header.h */,
 				099C475D2A17F13C00F6ABF0 /* FileUploaderService.swift */,
+				09FBDD722A1FE3AE007EEC9F /* VydiaRNFileUploader-Bridging-Header.h */,
+				09FBDD732A1FE3AE007EEC9F /* react_native_background_upload.h */,
+				091FE88F2A278FE600C14BE4 /* Supporting Files */,
 				014A3B5D1C6CF33500B6D375 /* Products */,
 				099C475C2A17F13C00F6ABF0 /* VydiaRNFileUploader-Bridging-Header.h */,
 			);
@@ -61,6 +68,16 @@
 				014A3B5C1C6CF33500B6D375 /* libVydiaRNFileUploader.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		091FE88F2A278FE600C14BE4 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				091FE8902A27903D00C14BE4 /* String+MimeType.swift */,
+				091FE8922A27909700C14BE4 /* UploadOptions.swift */,
+				091FE8942A2790BA00C14BE4 /* UploadError.swift */,
+			);
+			path = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -121,8 +138,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				091FE8912A27903D00C14BE4 /* String+MimeType.swift in Sources */,
+				091FE8952A2790BA00C14BE4 /* UploadError.swift in Sources */,
 				DCC748851E044F8700EA453E /* VydiaRNFileUploader.m in Sources */,
 				099C475E2A17F13C00F6ABF0 /* FileUploaderService.swift in Sources */,
+				091FE8932A27909700C14BE4 /* UploadOptions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
