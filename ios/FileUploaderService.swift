@@ -9,7 +9,20 @@
 import Foundation
 import Photos
 import MobileCoreServices
-//WIP: move to other place or external file.
+
+//WIP: move to external files?
+
+struct UploadOptions: Codable {
+    let url: String
+    let path: String?
+    let method: String?
+    let type: String?
+    let field: String?
+    let customUploadId: String?
+    let appGroup: String?
+    let headers: [String: String]?
+    let parameters: [String: String]?
+}
 
 enum UploadError: Error {
     case fileDeletionFailed
@@ -433,9 +446,9 @@ public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
             data["error"] = error.localizedDescription
             
             let eventName = (error as NSError).code == NSURLErrorCancelled ? "RNFileUploader-cancelled" : "RNFileUploader-error"
-                        sendEvent(withName: eventName, body: data)
+            sendEvent(withName: eventName, body: data)
         } else {
-                        sendEvent(withName: "RNFileUploader-completed", body: data)
+            sendEvent(withName: "RNFileUploader-completed", body: data)
         }
     }
     
@@ -501,20 +514,6 @@ extension String {
             return "application/octet-stream"
         }
     }
-}
-
-//WIP: move to external file?
-
-struct UploadOptions: Codable {
-    let url: String
-    let path: String?
-    let method: String?
-    let type: String?
-    let field: String?
-    let customUploadId: String?
-    let appGroup: String?
-    let headers: [String: String]?
-    let parameters: [String: String]?
 }
 
 // reference methods that created method above

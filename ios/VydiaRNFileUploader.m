@@ -1,7 +1,6 @@
 // This guard prevent this file to be compiled in the old architecture.
 #ifdef RCT_NEW_ARCH_ENABLED
 #import <Foundation/Foundation.h>
-#import <MobileCoreServices/MobileCoreServices.h>
 #import <React/RCTEventEmitter.h>
 #import <React/RCTBridgeModule.h>
 #import "react_native_background_upload-Swift.h"
