@@ -6,7 +6,7 @@
 //  Copyright © 2023 Marc Shilling. All rights reserved.
 //
 
-import Foundation
+import MobileCoreServices
 import UniformTypeIdentifiers
 
 extension String {
