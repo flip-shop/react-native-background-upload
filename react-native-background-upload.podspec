@@ -11,7 +11,7 @@ require "json"
    s.authors = package[:author]
    s.summary = package[:description]
    s.source = { git: package[:repository][:url] }
-   s.source_files = "ios/*.{h,m,swift}"
+   s.source_files = "ios/**/*.{h,m,mm,swift}", "ios/*.{h,m,mm,swift}"
    s.platform = :ios, "9.0"
 
    s.dependency "React"
