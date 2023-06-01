@@ -191,10 +191,10 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         }
     }
     
-    func urlSession(groupId: String) -> URLSession {
+    func urlSession(groupId: String?) -> URLSession {
         if urlSession == nil {
             let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: VydiaRNFileUploader.BACKGROUND_SESSION_ID) //check if this is ok.
-            if !groupId.isEmpty {
+            if let groupId = groupId, !groupId.isEmpty {
                 sessionConfiguration.sharedContainerIdentifier = groupId
             }
             
@@ -280,14 +280,14 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                         do {
                             if let fileUrlOnDisk = try saveMultipartUploadDataToDisk(uploadId: taskDescription, data: httpBody) {
                                 filesMap[taskDescription] = fileUrlOnDisk
-                                uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrlOnDisk)
+                                uploadTask = urlSession(groupId: appGroup).uploadTask(with: request, fromFile: fileUrlOnDisk)
                             } else {
                                 throw UploadError.multipartDataSaveFailure
                             }
                         } catch UploadError.multipartDataSaveFailure {
                             NSLog("Cannot save multipart data file to disk. Falling back to the old method with stream.")
                             request.httpBodyStream = InputStream(data: httpBody)
-                            uploadTask = urlSession(groupId: appGroup!).uploadTask(withStreamedRequest: request)
+                            uploadTask = urlSession(groupId: appGroup).uploadTask(withStreamedRequest: request)
                         } catch let error {
                             NSLog("Error: \(error)")
                         }
@@ -297,7 +297,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                         return reject("RN Uploader", "Parameters are supported only in multipart type", nil)
                     }
                     let fileUrl = URL(string: newFileURI)
-                    uploadTask = urlSession(groupId: appGroup!).uploadTask(with: request, fromFile: fileUrl!)
+                    uploadTask = urlSession(groupId: appGroup).uploadTask(with: request, fromFile: fileUrl!)
                 }
                 
                 uploadTask?.taskDescription = taskDescription
