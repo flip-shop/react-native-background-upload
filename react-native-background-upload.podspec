@@ -12,6 +12,7 @@ require "json"
    s.summary = package[:description]
    s.source = { git: package[:repository][:url] }
    s.source_files = "ios/**/*.{h,m,mm,swift}", "ios/*.{h,m,mm,swift}"
+   s.header_dir     = 'react-native-background-upload'
    s.platform = :ios, "9.0"
 
    s.dependency "React"
