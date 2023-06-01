@@ -33,7 +33,6 @@
 		091FE8942A2790BA00C14BE4 /* UploadError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadError.swift; sourceTree = "<group>"; };
 		097BD6BE2A28A93400D2C144 /* VydiaRNFileUploader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VydiaRNFileUploader.swift; sourceTree = "<group>"; };
 		099C475C2A17F13C00F6ABF0 /* VydiaRNFileUploader-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VydiaRNFileUploader-Bridging-Header.h"; sourceTree = "<group>"; };
-		09FBDD722A1FE3AE007EEC9F /* VydiaRNFileUploader-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VydiaRNFileUploader-Bridging-Header.h"; sourceTree = "<group>"; };
 		DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VydiaRNFileUploader.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -53,10 +52,9 @@
 			children = (
 				DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */,
 				097BD6BE2A28A93400D2C144 /* VydiaRNFileUploader.swift */,
-				09FBDD722A1FE3AE007EEC9F /* VydiaRNFileUploader-Bridging-Header.h */,
+				099C475C2A17F13C00F6ABF0 /* VydiaRNFileUploader-Bridging-Header.h */,
 				091FE88F2A278FE600C14BE4 /* Supporting Files */,
 				014A3B5D1C6CF33500B6D375 /* Products */,
-				099C475C2A17F13C00F6ABF0 /* VydiaRNFileUploader-Bridging-Header.h */,
 			);
 			sourceTree = "<group>";
 		};

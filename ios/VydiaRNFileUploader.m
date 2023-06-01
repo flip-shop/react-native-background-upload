@@ -1,5 +1,3 @@
-//#import <React/RCTEventEmitter.h>
-#import "react_native_background_upload-Swift.h"
 #import <React/RCTBridgeModule.h>
 
 @interface RCT_EXTERN_MODULE(VydiaRNFileUploader, NSObject)
