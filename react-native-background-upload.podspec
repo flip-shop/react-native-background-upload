@@ -12,7 +12,16 @@ require "json"
    s.summary = package[:description]
    s.source = { git: package[:repository][:url] }
    s.source_files = "ios/**/*.{h,m,mm,swift}", "ios/*.{h,m,mm,swift}"
-   s.header_dir     = 'react-native-background-upload'
+   s.header_dir  = 'react-native-background-upload'
+   # Swift/Objective-C compatibility
+   s.pod_target_xcconfig = {
+     'USE_HEADERMAP' => 'YES',
+     'DEFINES_MODULE' => 'YES',
+     'SWIFT_COMPILATION_MODE' => 'wholemodule',
+   }
+   s.user_target_xcconfig = {
+     "HEADER_SEARCH_PATHS" => "\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-background-upload/Swift Compatibility Header\"",
+   }
    s.platform = :ios, "9.0"
 
    s.dependency "React"
