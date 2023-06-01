@@ -1,5 +1,5 @@
 //
-//  FileUploaderService.swift
+//  VydiaRNFileUploader.swift
 //  VydiaRNFileUploader
 //
 //  Created by Michael Czerniakowski on 19/05/2023.
@@ -11,9 +11,9 @@ import Photos
 import MobileCoreServices
 
 @available(iOS 12, *)
-@objc(FileUploaderService)
+@objc(VydiaRNFileUploader)
 @objcMembers
-public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
+public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
     
     @objc public static var emitter: RCTEventEmitter?
     
@@ -35,7 +35,7 @@ public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
     public override init() { //WIP!!!
         self.fileManager = FileManager()
         super.init()
-        FileUploaderService.emitter = self
+        VydiaRNFileUploader.emitter = self
     }
     
     override public static func requiresMainQueueSetup() -> Bool {
@@ -43,7 +43,7 @@ public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
     }
     
     public override func sendEvent(withName eventName: String, body: Any?) {
-        if let emitter = FileUploaderService.emitter {
+        if let emitter = VydiaRNFileUploader.emitter {
             emitter.sendEvent(withName: eventName, body: body)
         }
     }
@@ -193,7 +193,7 @@ public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
     
     func urlSession(groupId: String) -> URLSession {
         if urlSession == nil {
-            let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: FileUploaderService.BACKGROUND_SESSION_ID) //check if this is ok.
+            let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: VydiaRNFileUploader.BACKGROUND_SESSION_ID) //check if this is ok.
             if !groupId.isEmpty {
                 sessionConfiguration.sharedContainerIdentifier = groupId
             }
@@ -220,7 +220,7 @@ public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
     
     public func startUpload(_ options: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         
-        let thisUploadId: Int = FileUploaderService.getNextUploadId()
+        let thisUploadId: Int = VydiaRNFileUploader.getNextUploadId()
         
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: options, options: [])
@@ -264,7 +264,7 @@ public class FileUploaderService: RCTEventEmitter, URLSessionDelegate {
                 }
                 
                 var uploadTask: URLSessionUploadTask?
-                let taskDescription = customUploadId ?? "\(FileUploaderService.uploadId)"
+                let taskDescription = customUploadId ?? "\(VydiaRNFileUploader.uploadId)"
                 
                 if uploadType == "multipart" {
                     let uuidStr = UUID().uuidString
