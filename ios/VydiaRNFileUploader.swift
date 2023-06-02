@@ -46,6 +46,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         if let emitter = VydiaRNFileUploader.emitter {
             emitter.sendEvent(withName: eventName, body: body)
         }
+        print("VNRF: event sent: \(eventName)")
     }
     
     @objc open override func supportedEvents() -> [String] {
@@ -132,7 +133,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                 completionHandler(nil, error)
             } else {
                 completionHandler(fileURI, nil)
-                print("sxcore - asset files copied to \(fileURI)")
+                print("VNRF: asset files copied to \(fileURI)")
             }
         }
     }
@@ -147,7 +148,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         let uploaderDirectory = cacheDirectory.appendingPathComponent("uploader", isDirectory: true)
         let filePath = uploaderDirectory.appendingPathComponent(path)
         
-        print("Path to save: \(filePath.path)")
+        print("VNRF: path to save: \(filePath.path)")
         
         // Remove file if needed
         if fileManager.fileExists(atPath: filePath.path) {
@@ -164,7 +165,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             do {
                 try fileManager.createDirectory(at: uploaderDirectory, withIntermediateDirectories: false, attributes: nil)
             } catch {
-                print("Cannot save data at path \(filePath.path). Error: \(error.localizedDescription)")
+                print("VNRF: Cannot save data at path \(filePath.path). Error: \(error.localizedDescription)")
                 throw UploadError.directoryCreationFailed
             }
         }
@@ -172,8 +173,9 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         // Save Data to file
         do {
             try data.write(to: filePath, options: .atomic)
+            print("VNRF: Sucesfully saved data at path \(filePath.path))")
         } catch {
-            print("Cannot save data at path \(filePath.path). Error: \(error.localizedDescription)")
+            print("VNRF: Cannot save data at path \(filePath.path). Error: \(error.localizedDescription)")
             throw UploadError.dataSavingFailed
         }
         
@@ -186,7 +188,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             do {
                 try fileManager.default.removeItem(at: fileURL)
             } catch {
-                print("Cannot delete file at path \(fileURL.absoluteString). Error: \(error.localizedDescription)")
+                print("VNRF: Cannot delete file at path \(fileURL.absoluteString). Error: \(error.localizedDescription)")
             }
             filesMap.removeValue(forKey: uploadId)
         }
@@ -237,6 +239,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             }
             
             if let newFileURI = fileURI {
+                print("VNRF: - newfileuri - \(newFileURI)")
                 if newFileURI.hasPrefix("assets-library") {
                     let group = DispatchGroup()
                     group.enter()
@@ -273,11 +276,11 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                                 throw UploadError.multipartDataSaveFailure
                             }
                         } catch UploadError.multipartDataSaveFailure {
-                            NSLog("Cannot save multipart data file to disk. Falling back to the old method with stream.")
+                            NSLog("VNRF:Cannot save multipart data file to disk. Falling back to the old method with stream.")
                             request.httpBodyStream = InputStream(data: httpBody)
                             uploadTask = urlSession(groupId: appGroup).uploadTask(withStreamedRequest: request)
                         } catch let error {
-                            NSLog("Error: \(error)")
+                            NSLog("VNRF: Error: \(error)")
                         }
                     }
                 } else {
