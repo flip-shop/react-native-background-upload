@@ -33,7 +33,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
     }
     
     public override init() { //WIP!!!
-        self.fileManager = FileManager()
+        self.fileManager = FileManager.default
         super.init()
         VydiaRNFileUploader.emitter = self
     }
@@ -73,14 +73,14 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             let name = fileUrl.lastPathComponent
             let fileExtension = fileUrl.pathExtension
             
-            let exists = fileManager.default.fileExists(atPath: pathWithoutProtocol)
+            let exists = fileManager.fileExists(atPath: pathWithoutProtocol)
             
             var params: [String: Any] = ["name": name, "extension": fileExtension, "exists": exists]
             
             if exists {
                 params["mimeType"] = name.guessMimeType()
                 
-                if let attributes = try? fileManager.default.attributesOfItem(atPath: pathWithoutProtocol),
+                if let attributes = try? fileManager.attributesOfItem(atPath: pathWithoutProtocol),
                    let fileSize = attributes[.size] as? UInt64 {
                     params["size"] = fileSize
                 }
@@ -139,7 +139,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
     }
     
     func saveMultipartUploadDataToDisk(uploadId: String, data: Data) throws -> URL? {
-        let paths = fileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
+        let paths = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
         guard let cacheDirectory = paths.first else {
             throw UploadError.directoryCreationFailed
         }
@@ -186,7 +186,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         
         if let fileURL = filesMap[uploadId] {
             do {
-                try fileManager.default.removeItem(at: fileURL)
+                try fileManager.removeItem(at: fileURL)
             } catch {
                 print("VNRF: Cannot delete file at path \(fileURL.absoluteString). Error: \(error.localizedDescription)")
             }
