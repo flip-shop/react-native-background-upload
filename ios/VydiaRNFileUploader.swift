@@ -191,19 +191,6 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         }
     }
     
-    func urlSession(groupId: String?) -> URLSession {
-        if urlSession == nil {
-            let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: VydiaRNFileUploader.BACKGROUND_SESSION_ID) //check if this is ok.
-            if let groupId = groupId, !groupId.isEmpty {
-                sessionConfiguration.sharedContainerIdentifier = groupId
-            }
-            
-            urlSession = URLSession(configuration: sessionConfiguration, delegate: self, delegateQueue: nil)
-        }
-        
-        return urlSession! //remove force unwrap?
-    }
-    
     /*
      * Starts a file upload.
      * Options are passed in as the first argument as a js hash:
@@ -425,6 +412,19 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         } else {
             sendEvent(withName: "RNFileUploader-completed", body: data)
         }
+    }
+    
+    func urlSession(groupId: String?) -> URLSession {
+        if urlSession == nil {
+            let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: VydiaRNFileUploader.BACKGROUND_SESSION_ID) //check if this is ok.
+            if let groupId = groupId, !groupId.isEmpty {
+                sessionConfiguration.sharedContainerIdentifier = groupId
+            }
+            
+            urlSession = URLSession(configuration: sessionConfiguration, delegate: self, delegateQueue: nil)
+        }
+        
+        return urlSession! //remove force unwrap?
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
