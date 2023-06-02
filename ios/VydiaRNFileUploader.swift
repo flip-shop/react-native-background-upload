@@ -97,11 +97,21 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
      */
     
     func copyAssetToFile(assetUrl: String, completionHandler: @escaping (_ tempFileUrl: String?, _ error: Error?) -> Void) {
+        let assetUrl2 = "/Users/mczerniakowski/Library/Developer/CoreSimulator/Devices/73989304-97B4-43C6-A3B8-C996F6825A54/data/Containers/Data/Application/939FC9F5-1DC1-4B27-910F-6A7988925384/Library/Caches/VideoTools/F41AE396-5763-45B6-B7FE-217075C008AF.mp4"
+        
         guard let url = URL(string: assetUrl) else {
             let details = [NSLocalizedDescriptionKey: "Invalid asset URL"]
             let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
             completionHandler(nil, error)
             return
+        }
+        
+        fetchAllVideoAssets { assets in
+            // Use the 'assets' array of video assets as needed
+            for asset in assets {
+                // Do something with each video asset
+                print("VNRF: asset is \(asset)")
+            }
         }
         
         print("VNRF: assetURL is \(assetUrl)")
@@ -222,6 +232,10 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: options, options: [])
             let uploadOptions = try JSONDecoder().decode(UploadOptions.self, from: jsonData)
+            
+            print("VNRF: options from RN are \(options)")
+            print("VNRF: uploadOptions are  \(uploadOptions)")
+            print("VNRF: fileURI will be \(uploadOptions.path)")
             
             var fileURI = uploadOptions.path
             let method = uploadOptions.method ?? "POST"
@@ -475,6 +489,26 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         let inputStream = task.originalRequest?.httpBodyStream
         
         completionHandler(inputStream)
+    }
+    
+}
+
+extension VydiaRNFileUploader {
+    
+    func fetchAllVideoAssets(completionHandler: @escaping ([PHAsset]) -> Void) {
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.includeAssetSourceTypes = [.typeUserLibrary]
+        fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.video.rawValue)
+
+        let fetchResult = PHAsset.fetchAssets(with: fetchOptions)
+        
+        var assets: [PHAsset] = []
+        
+        fetchResult.enumerateObjects { asset, _, _ in
+            assets.append(asset)
+        }
+        
+        completionHandler(assets)
     }
     
 }
