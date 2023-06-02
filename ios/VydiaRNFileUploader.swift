@@ -108,9 +108,13 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         
         fetchAllVideoAssets { assets in
             // Use the 'assets' array of video assets as needed
+            var count = 0
             for asset in assets {
                 // Do something with each video asset
-                print("VNRF: asset is \(asset)")
+                print("VNRF: \(count).asset is \(asset.localIdentifier)")
+                print("VNRF: \(count).asset is \(asset.duration) long")
+                print("VNRF: \(count).asset is located at \(asset.location)")
+                count += 1
             }
         }
         
