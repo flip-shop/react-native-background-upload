@@ -72,14 +72,14 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             let name = fileUrl.lastPathComponent
             let fileExtension = fileUrl.pathExtension
             
-            let exists = FileManager.default.fileExists(atPath: pathWithoutProtocol)
+            let exists = fileManager.default.fileExists(atPath: pathWithoutProtocol)
             
             var params: [String: Any] = ["name": name, "extension": fileExtension, "exists": exists]
             
             if exists {
                 params["mimeType"] = name.guessMimeType()
                 
-                if let attributes = try? FileManager.default.attributesOfItem(atPath: pathWithoutProtocol),
+                if let attributes = try? fileManager.default.attributesOfItem(atPath: pathWithoutProtocol),
                    let fileSize = attributes[.size] as? UInt64 {
                     params["size"] = fileSize
                 }
@@ -132,12 +132,13 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                 completionHandler(nil, error)
             } else {
                 completionHandler(fileURI, nil)
+                print("sxcore - asset files copied to \(fileURI)")
             }
         }
     }
     
     func saveMultipartUploadDataToDisk(uploadId: String, data: Data) throws -> URL? {
-        let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
+        let paths = fileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
         guard let cacheDirectory = paths.first else {
             throw UploadError.directoryCreationFailed
         }
@@ -183,7 +184,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         
         if let fileURL = filesMap[uploadId] {
             do {
-                try FileManager.default.removeItem(at: fileURL)
+                try fileManager.default.removeItem(at: fileURL)
             } catch {
                 print("Cannot delete file at path \(fileURL.absoluteString). Error: \(error.localizedDescription)")
             }
