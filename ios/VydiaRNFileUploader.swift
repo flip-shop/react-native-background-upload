@@ -104,9 +104,12 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             return
         }
         
+        print("VNRF: assetURL is \(assetUrl)")
+        print("VNRF: URL is \(url)")
         print("VNRF: objects are \([url].last)")
         let fetchResults = PHAsset.fetchAssets(withALAssetURLs: [url], options: nil)
         print("VNRF: fetchResults is \(fetchResults)")
+        print("VNRF: fetchResults count is \(fetchResults.count)")
         print("VNRF: fetchResult is \(fetchResults.lastObject)")
         
         guard let asset = fetchResults.lastObject else {
