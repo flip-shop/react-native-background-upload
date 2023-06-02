@@ -95,7 +95,8 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
     /*
      Utility method to copy a PHAsset file into a local temp file, which can then be uploaded.
      */
-    func copyAssetToFile(assetUrl: String, completionHandler: @escaping (String?, Error?) -> Void) {
+    
+    func copyAssetToFile(assetUrl: String, completionHandler: @escaping (_ tempFileUrl: String?, _ error: Error?) -> Void) {
         guard let url = URL(string: assetUrl) else {
             let details = [NSLocalizedDescriptionKey: "Invalid asset URL"]
             let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
@@ -103,9 +104,12 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             return
         }
         
-        let fetchResult = PHAsset.fetchAssets(withALAssetURLs: [url], options: nil)
+        print("VNRF: objects are \([url].last)")
+        let fetchResults = PHAsset.fetchAssets(withALAssetURLs: [url], options: nil)
+        print("VNRF: fetchResults is \(fetchResults)")
+        print("VNRF: fetchResult is \(fetchResults.lastObject)")
         
-        guard let asset = fetchResult.lastObject else {
+        guard let asset = fetchResults.lastObject else {
             let details = [NSLocalizedDescriptionKey: "Asset could not be fetched. Are you missing permissions?"]
             let error = NSError(domain: "RNUploader", code: 5, userInfo: details)
             completionHandler(nil, error)
@@ -113,30 +117,30 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         }
         
         guard let assetResource = PHAssetResource.assetResources(for: asset).first else {
-            let details = [NSLocalizedDescriptionKey: "Failed to retrieve asset resource"]
+            let details = [NSLocalizedDescriptionKey: "Asset resource could not be retrieved"]
             let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
             completionHandler(nil, error)
             return
         }
         
         let pathToWrite = NSTemporaryDirectory().appending(UUID().uuidString)
-        let pathURL = URL(fileURLWithPath: pathToWrite)
-        let fileURI = pathURL.absoluteString
+        let pathUrl = URL(fileURLWithPath: pathToWrite)
+        let fileURI = pathUrl.absoluteString
         
         let options = PHAssetResourceRequestOptions()
         options.isNetworkAccessAllowed = true /// check availability for iOS 12 to 15
         
-        PHAssetResourceManager.default().writeData(for: assetResource,
-                                                   toFile: pathURL,
-                                                   options: options) { error in
+        PHAssetResourceManager.default().writeData(for: assetResource, toFile: pathUrl, options: options) { error in
             if let error = error {
+                print("VNRF: asset failed and not copied to \(fileURI)")
                 completionHandler(nil, error)
             } else {
-                completionHandler(fileURI, nil)
                 print("VNRF: asset files copied to \(fileURI)")
+                completionHandler(fileURI, nil)
             }
         }
     }
+    
     
     func saveMultipartUploadDataToDisk(uploadId: String, data: Data) throws -> URL? {
         let paths = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
@@ -240,22 +244,22 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             
             if let newFileURI = fileURI {
                 print("VNRF: - newfileuri - \(newFileURI)")
-//                if newFileURI.hasPrefix("assets-library") {
-                    let group = DispatchGroup()
-                    group.enter()
-                    copyAssetToFile(assetUrl: newFileURI) { tempFileUrl, error in
-                        if let error = error {
-                            group.leave()
-                            return reject("RN Uploader", "Asset could not be copied to temp file.", nil)
-                        }
-                        print("VNRF: - tempFileURL - \(tempFileUrl)")
-                        print("VNRF: - fileURL - \(fileURI)")
-                        fileURI = tempFileUrl
-                        print("VNRF: - changed fileURL - \(fileURI)")
+                //                if newFileURI.hasPrefix("assets-library") {
+                let group = DispatchGroup()
+                group.enter()
+                copyAssetToFile(assetUrl: newFileURI) { tempFileUrl, error in
+                    if let error = error {
                         group.leave()
+                        return reject("RN Uploader", "Asset could not be copied to temp file.", nil)
                     }
-                    group.wait()
-//                }
+                    print("VNRF: - tempFileURL - \(tempFileUrl)")
+                    print("VNRF: - fileURL - \(fileURI)")
+                    fileURI = tempFileUrl
+                    print("VNRF: - changed fileURL - \(fileURI)")
+                    group.leave()
+                }
+                group.wait()
+                //                }
                 
                 var uploadTask: URLSessionUploadTask?
                 let taskDescription = customUploadId ?? "\(VydiaRNFileUploader.uploadId)"
