@@ -240,7 +240,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             
             if let newFileURI = fileURI {
                 print("VNRF: - newfileuri - \(newFileURI)")
-                if newFileURI.hasPrefix("assets-library") {
+//                if newFileURI.hasPrefix("assets-library") {
                     let group = DispatchGroup()
                     group.enter()
                     copyAssetToFile(assetUrl: newFileURI) { tempFileUrl, error in
@@ -248,11 +248,14 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                             group.leave()
                             return reject("RN Uploader", "Asset could not be copied to temp file.", nil)
                         }
+                        print("VNRF: - tempFileURL - \(tempFileUrl)")
+                        print("VNRF: - fileURL - \(fileURI)")
                         fileURI = tempFileUrl
+                        print("VNRF: - changed fileURL - \(fileURI)")
                         group.leave()
                     }
                     group.wait()
-                }
+//                }
                 
                 var uploadTask: URLSessionUploadTask?
                 let taskDescription = customUploadId ?? "\(VydiaRNFileUploader.uploadId)"
@@ -276,7 +279,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                                 throw UploadError.multipartDataSaveFailure
                             }
                         } catch UploadError.multipartDataSaveFailure {
-                            NSLog("VNRF:Cannot save multipart data file to disk. Falling back to the old method with stream.")
+                            NSLog("VNRF: Cannot save multipart data file to disk. Falling back to the old method with stream.")
                             request.httpBodyStream = InputStream(data: httpBody)
                             uploadTask = urlSession(groupId: appGroup).uploadTask(withStreamedRequest: request)
                         } catch let error {
@@ -359,6 +362,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                            mimetype: mimetype,
                            data: data)
             
+            print("VNRF: body generated: httpbody: \(httpBody)")
             return httpBody
         } catch {
             return nil
