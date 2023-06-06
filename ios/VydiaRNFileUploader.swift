@@ -237,7 +237,6 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             let jsonData = try JSONSerialization.data(withJSONObject: options, options: [])
             let uploadOptions = try JSONDecoder().decode(UploadOptions.self, from: jsonData)
             
-            print("VNRF: options from RN are \(options)")
             print("VNRF: uploadOptions are  \(uploadOptions)")
             print("VNRF: fileURI will be \(uploadOptions.path)")
             
@@ -321,6 +320,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                 resolve(uploadTask?.taskDescription)
             }
         } catch {
+            NSLog("VNRF: startUpload error: \(error)")
             reject("RN Uploader", "Error decoding options", error)
         }
     }
@@ -444,7 +444,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         }
     }
     
-    func urlSession(groupId: String?) -> URLSession {
+    func urlSession(groupId: String?) -> URLSession? {
         if urlSession == nil {
             let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: VydiaRNFileUploader.BACKGROUND_SESSION_ID)
             if let groupId = groupId, !groupId.isEmpty {
@@ -454,8 +454,9 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             urlSession = URLSession(configuration: sessionConfiguration, delegate: self, delegateQueue: nil)
         }
         
-        return urlSession! //remove force unwrap?
+        return urlSession
     }
+
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
         var progress: Float = -1
