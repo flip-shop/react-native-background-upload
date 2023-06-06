@@ -13,7 +13,7 @@ import MobileCoreServices
 @available(iOS 12, *)
 @objc(VydiaRNFileUploader)
 @objcMembers
-public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
+public class VydiaRNFileUploader: RCTEventEmitter {
     
     @objc public static var emitter: RCTEventEmitter?
     
@@ -32,7 +32,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         return uploadId
     }
     
-    public override init() { //WIP!!!
+    @objc override init() { //WIP!!!
         self.fileManager = FileManager.default
         super.init()
         VydiaRNFileUploader.emitter = self
@@ -42,11 +42,14 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         return true
     }
     
-    public override func sendEvent(withName eventName: String, body: Any?) {
+    override public func sendEvent(withName eventName: String, body: Any?) {
         if let emitter = VydiaRNFileUploader.emitter {
             emitter.sendEvent(withName: eventName, body: body)
+            print("VNRF: event sent: \(eventName)")
+        } else {
+            print("VNRF: event emitter not initialized!!!!)")
         }
-        print("VNRF: event sent: \(eventName)")
+        
     }
     
     @objc open override func supportedEvents() -> [String] {
@@ -422,7 +425,12 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         httpBody.append("--\(boundary)--\r\n".data(using: .utf8)!)
     }
     
-    // MARK: - URLSessionDelegate
+
+}
+
+// MARK: - URLSessionDelegate
+
+extension VydiaRNFileUploader: URLSessionDelegate {
     
     func urlSession(_ session: URLSession,
                     task: URLSessionTask,
@@ -506,7 +514,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         
         completionHandler(inputStream)
     }
-    
+
 }
 
 extension VydiaRNFileUploader {
