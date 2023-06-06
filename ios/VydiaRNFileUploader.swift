@@ -97,8 +97,6 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
      */
     
     func copyAssetToFile(assetUrl: String, completionHandler: @escaping (_ tempFileUrl: String?, _ error: Error?) -> Void) {
-        let assetUrl2 = "/Users/mczerniakowski/Library/Developer/CoreSimulator/Devices/73989304-97B4-43C6-A3B8-C996F6825A54/data/Containers/Data/Application/939FC9F5-1DC1-4B27-910F-6A7988925384/Library/Caches/VideoTools/F41AE396-5763-45B6-B7FE-217075C008AF.mp4"
-        
         guard let url = URL(string: assetUrl) else {
             let details = [NSLocalizedDescriptionKey: "Invalid asset URL"]
             let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
@@ -117,14 +115,16 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                 count += 1
             }
         }
-        
-        print("VNRF: assetURL is \(assetUrl)")
-        print("VNRF: URL is \(url)")
-        print("VNRF: objects are \([url].last)")
+
         let fetchResults = PHAsset.fetchAssets(withALAssetURLs: [url], options: nil)
-        print("VNRF: fetchResults is \(fetchResults)")
-        print("VNRF: fetchResults count is \(fetchResults.count)")
         print("VNRF: fetchResult is \(fetchResults.lastObject)")
+        
+        guard fetchResults != nil else {
+            let details = [NSLocalizedDescriptionKey: "Asset were not fetched. Are you using good URL?"]
+            let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
+            completionHandler(nil, error)
+            return
+        }
         
         guard let asset = fetchResults.lastObject else {
             let details = [NSLocalizedDescriptionKey: "Asset could not be fetched. Are you missing permissions?"]
@@ -265,22 +265,19 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
             
             if let newFileURI = fileURI {
                 print("VNRF: - newfileuri - \(newFileURI)")
-                //                if newFileURI.hasPrefix("assets-library") {
-                let group = DispatchGroup()
-                group.enter()
-                copyAssetToFile(assetUrl: newFileURI) { tempFileUrl, error in
-                    if let error = error {
+                if newFileURI.hasPrefix("assets-library") {
+                    let group = DispatchGroup()
+                    group.enter()
+                    copyAssetToFile(assetUrl: newFileURI) { tempFileUrl, error in
+                        if let error = error {
+                            group.leave()
+                            return reject("RN Uploader", "Asset could not be copied to temp file.", nil)
+                        }
+                        fileURI = tempFileUrl
                         group.leave()
-                        return reject("RN Uploader", "Asset could not be copied to temp file.", nil)
                     }
-                    print("VNRF: - tempFileURL - \(tempFileUrl)")
-                    print("VNRF: - fileURL - \(fileURI)")
-                    fileURI = tempFileUrl
-                    print("VNRF: - changed fileURL - \(fileURI)")
-                    group.leave()
+                    group.wait()
                 }
-                group.wait()
-                //                }
                 
                 var uploadTask: URLSessionUploadTask?
                 let taskDescription = customUploadId ?? "\(VydiaRNFileUploader.uploadId)"
@@ -449,7 +446,7 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
     
     func urlSession(groupId: String?) -> URLSession {
         if urlSession == nil {
-            let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: VydiaRNFileUploader.BACKGROUND_SESSION_ID) //check if this is ok.
+            let sessionConfiguration = URLSessionConfiguration.background(withIdentifier: VydiaRNFileUploader.BACKGROUND_SESSION_ID)
             if let groupId = groupId, !groupId.isEmpty {
                 sessionConfiguration.sharedContainerIdentifier = groupId
             }
@@ -503,7 +500,7 @@ extension VydiaRNFileUploader {
         let fetchOptions = PHFetchOptions()
         fetchOptions.includeAssetSourceTypes = [.typeUserLibrary]
         fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.video.rawValue)
-
+        
         let fetchResult = PHAsset.fetchAssets(with: fetchOptions)
         
         var assets: [PHAsset] = []
