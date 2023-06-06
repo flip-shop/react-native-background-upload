@@ -281,11 +281,15 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                 var uploadTask: URLSessionUploadTask?
                 let taskDescription = customUploadId ?? "\(VydiaRNFileUploader.uploadId)"
                 
+                guard let urlSession = urlSession(groupId: appGroup) else {
+                    throw UploadError.urlSessionCreationFailure
+                }
+                
                 if uploadType == "multipart" {
                     let uuidStr = UUID().uuidString
                     request.setValue("multipart/form-data; boundary=\(uuidStr)", forHTTPHeaderField: "Content-Type")
                     
-                    print("VNRF: request is: ")
+                    print("VNRF: multipart request is: \(request)")
                     
                     if let httpBody = createBody(withBoundary: uuidStr,
                                                  path: newFileURI,
@@ -293,10 +297,6 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                                                  fieldName: fieldName!) {
                         let contentLength = "\(httpBody.count)"
                         request.setValue(contentLength, forHTTPHeaderField: "Content-Length")
-                        
-                        guard let urlSession = urlSession(groupId: appGroup) else {
-                            throw UploadError.multipartDataSaveFailure
-                        }
                         
                         do {
                             if let fileUrlOnDisk = try saveMultipartUploadDataToDisk(uploadId: taskDescription, data: httpBody) {
@@ -319,9 +319,6 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                     }
                     
                     let fileUrl = URL(string: newFileURI)
-                    guard let urlSession = urlSession(groupId: appGroup) else {
-                        throw UploadError.multipartDataSaveFailure
-                    }
                     uploadTask = urlSession.uploadTask(with: request, fromFile: fileUrl!)
                 }
                 

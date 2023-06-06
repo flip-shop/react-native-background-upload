@@ -14,4 +14,5 @@ enum UploadError: Error {
     case dataSavingFailed
     case invalidURL // use or remove
     case multipartDataSaveFailure
+    case urlSessionCreationFailure
 }
