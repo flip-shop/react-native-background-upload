@@ -19,7 +19,7 @@ public class VydiaRNFileUploader: RCTEventEmitter {
     
     var filesMap: [String: URL] = [:]
     var responsesData: [Int: NSMutableData] = [:]
-    var urlSession: URLSession? = nil
+    var urlSession: URLSession?
     var fileManager: FileManager
     static var uploadId: Int = 0
     static let BACKGROUND_SESSION_ID: String = "ReactNativeBackgroundUpload"
@@ -44,7 +44,7 @@ public class VydiaRNFileUploader: RCTEventEmitter {
     
     override public func sendEvent(withName eventName: String, body: Any?) {
         if let emitter = VydiaRNFileUploader.emitter {
-            emitter.sendEvent(withName: eventName, body: body)
+//            emitter.sendEvent(withName: eventName, body: body)
             print("VNRF: event sent: \(eventName)")
         } else {
             print("VNRF: event emitter not initialized!!!!)")
@@ -160,7 +160,6 @@ public class VydiaRNFileUploader: RCTEventEmitter {
             }
         }
     }
-    
     
     func saveMultipartUploadDataToDisk(uploadId: String, data: Data) throws -> URL? {
         let paths = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
@@ -430,35 +429,35 @@ public class VydiaRNFileUploader: RCTEventEmitter {
 
 // MARK: - URLSessionDelegate
 
-extension VydiaRNFileUploader: URLSessionDelegate {
+extension VydiaRNFileUploader: URLSessionDelegate, URLSessionTaskDelegate {
     
-    func urlSession(_ session: URLSession,
+    public func urlSession(_ session: URLSession,
                     task: URLSessionTask,
                     didCompleteWithError error: Error?) {
-        
+
         guard let taskDescription = task.taskDescription else {
             return
         }
-        
+
         var data: [String: Any] = ["id": taskDescription]
-        
+
         if let uploadTask = task as? URLSessionDataTask,
            let response = uploadTask.response as? HTTPURLResponse {
             data["responseCode"] = response.statusCode
         }
-        
+
         if let responseData = responsesData.removeValue(forKey: task.taskIdentifier),
            let responseString = String(data: responseData as Data, encoding: .utf8) {
             data["responseBody"] = responseString
         } else {
             data["responseBody"] = NSNull()
         }
-        
+
         removeFilesForUpload(taskDescription)
-        
+
         if let error = error {
             data["error"] = error.localizedDescription
-            
+
             let eventName = (error as NSError).code == NSURLErrorCancelled ? "RNFileUploader-cancelled" : "RNFileUploader-error"
             sendEvent(withName: eventName, body: data)
         } else {
@@ -480,7 +479,7 @@ extension VydiaRNFileUploader: URLSessionDelegate {
     }
 
     
-    func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
         var progress: Float = -1
         
         if totalBytesExpectedToSend > 0 {
@@ -509,7 +508,7 @@ extension VydiaRNFileUploader: URLSessionDelegate {
         }
     }
     
-    func urlSession(_ session: URLSession, task: URLSessionTask, needNewBodyStream completionHandler: @escaping (InputStream?) -> Void) {
+    public func urlSession(_ session: URLSession, task: URLSessionTask, needNewBodyStream completionHandler: @escaping (InputStream?) -> Void) {
         let inputStream = task.originalRequest?.httpBodyStream
         
         completionHandler(inputStream)
