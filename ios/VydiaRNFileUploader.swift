@@ -285,6 +285,8 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                     let uuidStr = UUID().uuidString
                     request.setValue("multipart/form-data; boundary=\(uuidStr)", forHTTPHeaderField: "Content-Type")
                     
+                    print("VNRF: request is: ")
+                    
                     if let httpBody = createBody(withBoundary: uuidStr,
                                                  path: newFileURI,
                                                  parameters: parameters!,
@@ -292,17 +294,21 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                         let contentLength = "\(httpBody.count)"
                         request.setValue(contentLength, forHTTPHeaderField: "Content-Length")
                         
+                        guard let urlSession = urlSession(groupId: appGroup) else {
+                            throw UploadError.multipartDataSaveFailure
+                        }
+                        
                         do {
                             if let fileUrlOnDisk = try saveMultipartUploadDataToDisk(uploadId: taskDescription, data: httpBody) {
                                 filesMap[taskDescription] = fileUrlOnDisk
-                                uploadTask = urlSession(groupId: appGroup).uploadTask(with: request, fromFile: fileUrlOnDisk)
+                                uploadTask = urlSession.uploadTask(with: request, fromFile: fileUrlOnDisk)
                             } else {
                                 throw UploadError.multipartDataSaveFailure
                             }
                         } catch UploadError.multipartDataSaveFailure {
                             NSLog("VNRF: Cannot save multipart data file to disk. Falling back to the old method with stream.")
                             request.httpBodyStream = InputStream(data: httpBody)
-                            uploadTask = urlSession(groupId: appGroup).uploadTask(withStreamedRequest: request)
+                            uploadTask = urlSession.uploadTask(withStreamedRequest: request)
                         } catch let error {
                             NSLog("VNRF: Error: \(error)")
                         }
@@ -311,8 +317,12 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
                     if let parameters = parameters, !parameters.isEmpty {
                         return reject("RN Uploader", "Parameters are supported only in multipart type", nil)
                     }
+                    
                     let fileUrl = URL(string: newFileURI)
-                    uploadTask = urlSession(groupId: appGroup).uploadTask(with: request, fromFile: fileUrl!)
+                    guard let urlSession = urlSession(groupId: appGroup) else {
+                        throw UploadError.multipartDataSaveFailure
+                    }
+                    uploadTask = urlSession.uploadTask(with: request, fromFile: fileUrl!)
                 }
                 
                 uploadTask?.taskDescription = taskDescription
@@ -391,7 +401,9 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         }
     }
     
-    func appendFormData(to httpBody: inout Data, withBoundary boundary: String, parameters: [String: String]) {
+    func appendFormData(to httpBody: inout Data,
+                        withBoundary boundary: String,
+                        parameters: [String: String]) {
         for (parameterKey, parameterValue) in parameters {
             httpBody.append("--\(boundary)\r\n".data(using: .utf8)!)
             httpBody.append("Content-Disposition: form-data; name=\"\(parameterKey)\"\r\n\r\n".data(using: .utf8)!)
@@ -399,7 +411,12 @@ public class VydiaRNFileUploader: RCTEventEmitter, URLSessionDelegate {
         }
     }
     
-    func appendFileData(to httpBody: inout Data, withBoundary boundary: String, fieldName: String, filename: String, mimetype: String, data: Data) {
+    func appendFileData(to httpBody: inout Data,
+                        withBoundary boundary: String,
+                        fieldName: String,
+                        filename: String,
+                        mimetype: String,
+                        data: Data) {
         httpBody.append("--\(boundary)\r\n".data(using: .utf8)!)
         httpBody.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
         httpBody.append("Content-Type: \(mimetype)\r\n\r\n".data(using: .utf8)!)
