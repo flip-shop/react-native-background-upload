@@ -25,14 +25,7 @@ public class VydiaRNFileUploader: RCTEventEmitter {
     static let BACKGROUND_SESSION_ID: String = "ReactNativeBackgroundUpload"
     private static let synchronizationQueue = DispatchQueue(label: "com.example.synchronization")
     
-    private static func getNextUploadId() -> Int {
-        defer {
-            uploadId += 1
-        }
-        return uploadId
-    }
-    
-    @objc override init() { //WIP!!!
+    @objc override init() {
         self.fileManager = FileManager.default
         super.init()
         VydiaRNFileUploader.emitter = self
@@ -42,17 +35,7 @@ public class VydiaRNFileUploader: RCTEventEmitter {
         return true
     }
     
-    override public func sendEvent(withName eventName: String, body: Any?) {
-        if let emitter = VydiaRNFileUploader.emitter {
-//            emitter.sendEvent(withName: eventName, body: body)
-            print("VNRF: event sent: \(eventName)")
-        } else {
-            print("VNRF: event emitter not initialized!!!!)")
-        }
-        
-    }
-    
-    @objc open override func supportedEvents() -> [String] {
+    override public func supportedEvents() -> [String] {
         return [
             "RNFileUploader-progress",
             "RNFileUploader-error",
@@ -60,6 +43,24 @@ public class VydiaRNFileUploader: RCTEventEmitter {
             "RNFileUploader-completed"
         ]
     }
+    
+    override public func sendEvent(withName eventName: String, body: Any?) {
+        if let emitter = VydiaRNFileUploader.emitter {
+            //            emitter.sendEvent(withName: eventName, body: body)
+            print("VNRF: event sent: \(eventName)")
+        } else {
+            print("VNRF: event emitter not initialized!!!!)")
+        }
+    }
+    
+    //    private static func sendSomeEvent(withName eventName: String, body: Any?) {
+    //        if let emitter = self.emitter {
+    //            emitter.sendEvent(withName: eventName, body: body)
+    //            print("VNRF: event sent: \(eventName)")
+    //        } else {
+    //            print("VNRF: event emitter not initialized!!!!)")
+    //        }
+    //    }
     
     /*
      Gets file information for the path specified.  Example valid path is: file:///var/mobile/Containers/Data/Application/3C8A0EFB-A316-45C0-A30A-761BF8CCF2F8/tmp/trim.A5F76017-14E9-4890-907E-36A045AF9436.MOV
@@ -92,128 +93,6 @@ public class VydiaRNFileUploader: RCTEventEmitter {
             resolve(params)
         } else {
             reject("RN Uploader", "Invalid file path", nil)
-        }
-    }
-    
-    /*
-     Utility method to copy a PHAsset file into a local temp file, which can then be uploaded.
-     */
-    
-    func copyAssetToFile(assetUrl: String, completionHandler: @escaping (_ tempFileUrl: String?, _ error: Error?) -> Void) {
-        guard let url = URL(string: assetUrl) else {
-            let details = [NSLocalizedDescriptionKey: "Invalid asset URL"]
-            let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
-            completionHandler(nil, error)
-            return
-        }
-        
-        fetchAllVideoAssets { assets in
-            // Use the 'assets' array of video assets as needed
-            var count = 0
-            for asset in assets {
-                // Do something with each video asset
-                print("VNRF: \(count).asset is \(asset.localIdentifier)")
-                print("VNRF: \(count).asset is \(asset.duration) long")
-                print("VNRF: \(count).asset is located at \(asset.location)")
-                count += 1
-            }
-        }
-
-        let fetchResults = PHAsset.fetchAssets(withALAssetURLs: [url], options: nil)
-        print("VNRF: fetchResult is \(fetchResults.lastObject)")
-        
-        guard fetchResults != nil else {
-            let details = [NSLocalizedDescriptionKey: "Asset were not fetched. Are you using good URL?"]
-            let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
-            completionHandler(nil, error)
-            return
-        }
-        
-        guard let asset = fetchResults.lastObject else {
-            let details = [NSLocalizedDescriptionKey: "Asset could not be fetched. Are you missing permissions?"]
-            let error = NSError(domain: "RNUploader", code: 5, userInfo: details)
-            completionHandler(nil, error)
-            return
-        }
-        
-        guard let assetResource = PHAssetResource.assetResources(for: asset).first else {
-            let details = [NSLocalizedDescriptionKey: "Asset resource could not be retrieved"]
-            let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
-            completionHandler(nil, error)
-            return
-        }
-        
-        let pathToWrite = NSTemporaryDirectory().appending(UUID().uuidString)
-        let pathUrl = URL(fileURLWithPath: pathToWrite)
-        let fileURI = pathUrl.absoluteString
-        
-        let options = PHAssetResourceRequestOptions()
-        options.isNetworkAccessAllowed = true /// check availability for iOS 12 to 15
-        
-        PHAssetResourceManager.default().writeData(for: assetResource, toFile: pathUrl, options: options) { error in
-            if let error = error {
-                print("VNRF: asset failed and not copied to \(fileURI)")
-                completionHandler(nil, error)
-            } else {
-                print("VNRF: asset files copied to \(fileURI)")
-                completionHandler(fileURI, nil)
-            }
-        }
-    }
-    
-    func saveMultipartUploadDataToDisk(uploadId: String, data: Data) throws -> URL? {
-        let paths = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
-        guard let cacheDirectory = paths.first else {
-            throw UploadError.directoryCreationFailed
-        }
-        
-        let path = "\(uploadId).multipart"
-        let uploaderDirectory = cacheDirectory.appendingPathComponent("uploader", isDirectory: true)
-        let filePath = uploaderDirectory.appendingPathComponent(path)
-        
-        print("VNRF: path to save: \(filePath.path)")
-        
-        // Remove file if needed
-        if fileManager.fileExists(atPath: filePath.path) {
-            do {
-                try fileManager.removeItem(at: filePath)
-            } catch {
-                print("Cannot delete file at path: \(filePath.path). Error: \(error.localizedDescription)")
-                throw UploadError.fileDeletionFailed
-            }
-        }
-        
-        // Create directory if needed
-        if !fileManager.fileExists(atPath: uploaderDirectory.path) {
-            do {
-                try fileManager.createDirectory(at: uploaderDirectory, withIntermediateDirectories: false, attributes: nil)
-            } catch {
-                print("VNRF: Cannot save data at path \(filePath.path). Error: \(error.localizedDescription)")
-                throw UploadError.directoryCreationFailed
-            }
-        }
-        
-        // Save Data to file
-        do {
-            try data.write(to: filePath, options: .atomic)
-            print("VNRF: Sucesfully saved data at path \(filePath.path))")
-        } catch {
-            print("VNRF: Cannot save data at path \(filePath.path). Error: \(error.localizedDescription)")
-            throw UploadError.dataSavingFailed
-        }
-        
-        return filePath
-    }
-    
-    func removeFilesForUpload(_ uploadId: String) {
-        
-        if let fileURL = filesMap[uploadId] {
-            do {
-                try fileManager.removeItem(at: fileURL)
-            } catch {
-                print("VNRF: Cannot delete file at path \(fileURL.absoluteString). Error: \(error.localizedDescription)")
-            }
-            filesMap.removeValue(forKey: uploadId)
         }
     }
     
@@ -334,38 +213,68 @@ public class VydiaRNFileUploader: RCTEventEmitter {
         }
     }
     
+    private static func getNextUploadId() -> Int {
+        defer {
+            uploadId += 1
+        }
+        return uploadId
+    }
+    
     /*
-     * Cancels file upload
-     * Accepts upload ID as a first argument, this upload will be cancelled
-     * Event "cancelled" will be fired when upload is cancelled.
+     Utility method to copy a PHAsset file into a local temp file, which can then be uploaded.
      */
     
-    //MARK: - React Native Bridge - cancelUpload
-    
-    public func cancelUpload(_ cancelUploadId: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        guard let urlSession = urlSession else {
-            // Handle the case when urlSession is nil, e.g., by calling the reject block
-            reject("URLSessionError", "URLSession is nil", nil)
+    private func copyAssetToFile(assetUrl: String, completionHandler: @escaping (_ tempFileUrl: String?, _ error: Error?) -> Void) {
+        guard let url = URL(string: assetUrl) else {
+            let details = [NSLocalizedDescriptionKey: "Invalid asset URL"]
+            let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
+            completionHandler(nil, error)
             return
         }
         
-        urlSession.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
-            guard let strongSelf = self else {
-                return
+        let fetchResults = PHAsset.fetchAssets(withALAssetURLs: [url], options: nil)
+        print("VNRF: fetchResult is \(fetchResults.lastObject)")
+        
+        guard fetchResults != nil else {
+            let details = [NSLocalizedDescriptionKey: "Asset were not fetched. Are you using good URL?"]
+            let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
+            completionHandler(nil, error)
+            return
+        }
+        
+        guard let asset = fetchResults.lastObject else {
+            let details = [NSLocalizedDescriptionKey: "Asset could not be fetched. Are you missing permissions?"]
+            let error = NSError(domain: "RNUploader", code: 5, userInfo: details)
+            completionHandler(nil, error)
+            return
+        }
+        
+        guard let assetResource = PHAssetResource.assetResources(for: asset).first else {
+            let details = [NSLocalizedDescriptionKey: "Asset resource could not be retrieved"]
+            let error = NSError(domain: "RNUploader", code: 0, userInfo: details)
+            completionHandler(nil, error)
+            return
+        }
+        
+        let pathToWrite = NSTemporaryDirectory().appending(UUID().uuidString)
+        let pathUrl = URL(fileURLWithPath: pathToWrite)
+        let fileURI = pathUrl.absoluteString
+        
+        let options = PHAssetResourceRequestOptions()
+        options.isNetworkAccessAllowed = true /// check availability for iOS 12 to 15
+        
+        PHAssetResourceManager.default().writeData(for: assetResource, toFile: pathUrl, options: options) { error in
+            if let error = error {
+                print("VNRF: asset failed and not copied to \(fileURI)")
+                completionHandler(nil, error)
+            } else {
+                print("VNRF: asset files copied to \(fileURI)")
+                completionHandler(fileURI, nil)
             }
-            
-            for uploadTask in uploadTasks {
-                if uploadTask.taskDescription == cancelUploadId {
-                    uploadTask.cancel()
-                    strongSelf.removeFilesForUpload(cancelUploadId)
-                }
-            }
-            
-            resolve(true)
         }
     }
     
-    func createBody(withBoundary boundary: String, path: String, parameters: [String: String], fieldName: String) -> Data? {
+    private func createBody(withBoundary boundary: String, path: String, parameters: [String: String], fieldName: String) -> Data? {
         guard var components = URLComponents(string: path) else {
             return nil
         }
@@ -400,9 +309,9 @@ public class VydiaRNFileUploader: RCTEventEmitter {
         }
     }
     
-    func appendFormData(to httpBody: inout Data,
-                        withBoundary boundary: String,
-                        parameters: [String: String]) {
+    private func appendFormData(to httpBody: inout Data,
+                                withBoundary boundary: String,
+                                parameters: [String: String]) {
         for (parameterKey, parameterValue) in parameters {
             httpBody.append("--\(boundary)\r\n".data(using: .utf8)!)
             httpBody.append("Content-Disposition: form-data; name=\"\(parameterKey)\"\r\n\r\n".data(using: .utf8)!)
@@ -410,12 +319,12 @@ public class VydiaRNFileUploader: RCTEventEmitter {
         }
     }
     
-    func appendFileData(to httpBody: inout Data,
-                        withBoundary boundary: String,
-                        fieldName: String,
-                        filename: String,
-                        mimetype: String,
-                        data: Data) {
+    private func appendFileData(to httpBody: inout Data,
+                                withBoundary boundary: String,
+                                fieldName: String,
+                                filename: String,
+                                mimetype: String,
+                                data: Data) {
         httpBody.append("--\(boundary)\r\n".data(using: .utf8)!)
         httpBody.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
         httpBody.append("Content-Type: \(mimetype)\r\n\r\n".data(using: .utf8)!)
@@ -424,7 +333,95 @@ public class VydiaRNFileUploader: RCTEventEmitter {
         httpBody.append("--\(boundary)--\r\n".data(using: .utf8)!)
     }
     
-
+    private func saveMultipartUploadDataToDisk(uploadId: String, data: Data) throws -> URL? {
+        let paths = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
+        guard let cacheDirectory = paths.first else {
+            throw UploadError.directoryCreationFailed
+        }
+        
+        let path = "\(uploadId).multipart"
+        let uploaderDirectory = cacheDirectory.appendingPathComponent("uploader", isDirectory: true)
+        let filePath = uploaderDirectory.appendingPathComponent(path)
+        
+        print("VNRF: path to save: \(filePath.path)")
+        
+        // Remove file if needed
+        if fileManager.fileExists(atPath: filePath.path) {
+            do {
+                try fileManager.removeItem(at: filePath)
+                print("VNRF: Sucesfully deleted data at path \(filePath.path))")
+            } catch {
+                print("Cannot delete file at path: \(filePath.path). Error: \(error.localizedDescription)")
+                throw UploadError.fileDeletionFailed
+            }
+        }
+        
+        // Create directory if needed
+        if !fileManager.fileExists(atPath: uploaderDirectory.path) {
+            do {
+                try fileManager.createDirectory(at: uploaderDirectory, withIntermediateDirectories: false, attributes: nil)
+                print("VNRF: Sucesfully created directory at path \(uploaderDirectory.path))")
+            } catch {
+                print("VNRF: Cannot delete directory at path \(uploaderDirectory.path). Error: \(error.localizedDescription)")
+                throw UploadError.directoryCreationFailed
+            }
+        }
+        
+        // Save Data to file
+        do {
+            try data.write(to: filePath, options: .atomic)
+            print("VNRF: Sucesfully saved data at path \(filePath.path))")
+        } catch {
+            print("VNRF: Cannot save data at path \(filePath.path). Error: \(error.localizedDescription)")
+            throw UploadError.dataSavingFailed
+        }
+        
+        return filePath
+    }
+    
+    /*
+     * Cancels file upload
+     * Accepts upload ID as a first argument, this upload will be cancelled
+     * Event "cancelled" will be fired when upload is cancelled.
+     */
+    
+    //MARK: - React Native Bridge - cancelUpload
+    
+    public func cancelUpload(_ cancelUploadId: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        guard let urlSession = urlSession else {
+            // Handle the case when urlSession is nil, e.g., by calling the reject block
+            reject("URLSessionError", "URLSession is nil", nil)
+            return
+        }
+        
+        urlSession.getTasksWithCompletionHandler { [weak self] (dataTasks, uploadTasks, downloadTasks) in
+            guard let strongSelf = self else {
+                return
+            }
+            
+            for uploadTask in uploadTasks {
+                if uploadTask.taskDescription == cancelUploadId {
+                    uploadTask.cancel()
+                    strongSelf.removeFilesForUpload(cancelUploadId)
+                }
+            }
+            
+            resolve(true)
+        }
+    }
+    
+    private func removeFilesForUpload(_ uploadId: String) {
+        
+        if let fileURL = filesMap[uploadId] {
+            do {
+                try fileManager.removeItem(at: fileURL)
+            } catch {
+                print("VNRF: Cannot delete file at path \(fileURL.absoluteString). Error: \(error.localizedDescription)")
+            }
+            filesMap.removeValue(forKey: uploadId)
+        }
+    }
+    
 }
 
 // MARK: - URLSessionDelegate
@@ -432,32 +429,32 @@ public class VydiaRNFileUploader: RCTEventEmitter {
 extension VydiaRNFileUploader: URLSessionDelegate, URLSessionTaskDelegate {
     
     public func urlSession(_ session: URLSession,
-                    task: URLSessionTask,
-                    didCompleteWithError error: Error?) {
-
+                           task: URLSessionTask,
+                           didCompleteWithError error: Error?) {
+        
         guard let taskDescription = task.taskDescription else {
             return
         }
-
+        
         var data: [String: Any] = ["id": taskDescription]
-
+        
         if let uploadTask = task as? URLSessionDataTask,
            let response = uploadTask.response as? HTTPURLResponse {
             data["responseCode"] = response.statusCode
         }
-
+        
         if let responseData = responsesData.removeValue(forKey: task.taskIdentifier),
            let responseString = String(data: responseData as Data, encoding: .utf8) {
             data["responseBody"] = responseString
         } else {
             data["responseBody"] = NSNull()
         }
-
+        
         removeFilesForUpload(taskDescription)
-
+        
         if let error = error {
             data["error"] = error.localizedDescription
-
+            
             let eventName = (error as NSError).code == NSURLErrorCancelled ? "RNFileUploader-cancelled" : "RNFileUploader-error"
             sendEvent(withName: eventName, body: data)
         } else {
@@ -477,7 +474,6 @@ extension VydiaRNFileUploader: URLSessionDelegate, URLSessionTaskDelegate {
         
         return urlSession
     }
-
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
         var progress: Float = -1
@@ -512,26 +508,6 @@ extension VydiaRNFileUploader: URLSessionDelegate, URLSessionTaskDelegate {
         let inputStream = task.originalRequest?.httpBodyStream
         
         completionHandler(inputStream)
-    }
-
-}
-
-extension VydiaRNFileUploader {
-    
-    func fetchAllVideoAssets(completionHandler: @escaping ([PHAsset]) -> Void) {
-        let fetchOptions = PHFetchOptions()
-        fetchOptions.includeAssetSourceTypes = [.typeUserLibrary]
-        fetchOptions.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.video.rawValue)
-        
-        let fetchResult = PHAsset.fetchAssets(with: fetchOptions)
-        
-        var assets: [PHAsset] = []
-        
-        fetchResult.enumerateObjects { asset, _, _ in
-            assets.append(asset)
-        }
-        
-        completionHandler(assets)
     }
     
 }
