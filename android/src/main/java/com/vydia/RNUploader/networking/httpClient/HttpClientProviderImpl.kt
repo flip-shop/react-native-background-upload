@@ -1,7 +1,6 @@
 package com.vydia.RNUploader.networking.httpClient
 
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
 class HttpClientProviderImpl: HttpClientProvider {
@@ -13,9 +12,5 @@ class HttpClientProviderImpl: HttpClientProvider {
             .connectTimeout(options.connectTimeout, TimeUnit.SECONDS)
             .writeTimeout(options.writeTimeout, TimeUnit.SECONDS)
             .readTimeout(options.readTimeout, TimeUnit.SECONDS)
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
-                }
-            ).build()
+            .build()
 }

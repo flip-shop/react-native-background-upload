@@ -2,10 +2,8 @@ package com.vydia.RNUploader.networking.request
 
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptions
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.Request
-import java.io.File
 
 class UploadRequestProviderImpl: UploadRequestProvider {
 
