@@ -9,8 +9,7 @@ import com.vydia.RNUploader.event_publisher.*
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.helpers.deserializeFromJson
 import com.vydia.RNUploader.files.helpers.serializeToJson
-import com.vydia.RNUploader.helpers.responseOk
-import com.vydia.RNUploader.helpers.unknownExceptionMessage
+import com.vydia.RNUploader.helpers.*
 import com.vydia.RNUploader.helpers.uploadCanceled
 import com.vydia.RNUploader.networking.UploadRepository
 import com.vydia.RNUploader.networking.UploadRepositoryImpl
@@ -159,7 +158,7 @@ class UploadWorker(
         notificationsCreator.removeNotification(NotificationType.Progress())
 
         //
-        if(response.code != responseOk) {
+        if(response.code !in successPool) {
             notificationsCreator.displayNotification(
                 notificationType = NotificationType.Error,
                 notificationsConfig = notificationsConfig
