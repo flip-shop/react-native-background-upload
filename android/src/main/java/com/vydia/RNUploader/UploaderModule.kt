@@ -14,8 +14,6 @@ import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
 import com.vydia.RNUploader.worker.UploadWorkerManager
 
-private const val TAG = "UploaderModule"
-
 class UploaderModule(
   reactContext: ReactApplicationContext,
   private val fileInfoProvider: FileInfoProvider,
@@ -24,9 +22,13 @@ class UploaderModule(
   private val notificationsConfigProvider: NotificationsConfigProvider,
   private val notificationChannelManager: NotificationChannelManager,
   private val uploadWorkerManager: UploadWorkerManager
-): ReactContextBaseJavaModule(reactContext) {
+): RNUPloaderSpec(reactContext) {
 
-  override fun getName() = moduleName
+  companion object {
+    const val NAME = "UploaderModule"
+  }
+
+  override fun getName() = NAME
 
   /*
   Gets file information for the path specified.  Example valid path is: /storage/extSdCard/DCIM/Camera/20161116_074726.mp4
@@ -146,7 +148,7 @@ class UploaderModule(
       promise.resolve(true)
     } catch (exc: java.lang.Exception) {
       exc.printStackTrace()
-      Log.e(TAG, exc.message, exc)
+      Log.e(NAME, exc.message, exc)
       promise.reject(exc)
     }
   }

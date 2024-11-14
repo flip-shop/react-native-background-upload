@@ -2,7 +2,7 @@
 /**
  * Handles HTTP background file uploads from an iOS or Android device.
  */
-import { NativeModules, DeviceEventEmitter } from 'react-native';
+import { NativeModules, DeviceEventEmitter, Platform } from 'react-native';
 
 export type UploadEvent = 'progress' | 'error' | 'completed' | 'cancelled';
 
@@ -25,16 +25,39 @@ export type StartUploadArgs = {
   notification?: NotificationArgs,
 };
 
-const NativeModule =
-  NativeModules.VydiaRNFileUploader || NativeModules.RNFileUploader; // iOS is VydiaRNFileUploader and Android is RNFileUploader
+
+const LINKING_ERROR =
+  `The package 'react-native-flip-socket' doesn't seem to be linked. Make sure: \n\n` +
+  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
+  '- You rebuilt the app after installing the package\n' +
+  '- You are not using Expo Go\n';
+
+// @ts-expect-error
+const isTurboModuleEnabled = global.__turboModuleProxy != null;
+
+const NativeBackgroundUploadModule = isTurboModuleEnabled
+  ? require('./NativeBackgroundUpload').default
+  : NativeModules.VydiaRNFileUploader || NativeModules.RNFileUploader; // iOS is VydiaRNFileUploader and Android is RNFileUploader
+
+const FlipUpload = NativeBackgroundUploadModule
+  ? NativeBackgroundUploadModule
+  : new Proxy(
+      {},
+      {
+        get() {
+          throw new Error(LINKING_ERROR);
+        },
+      }
+    );
+  
 const eventPrefix = 'RNFileUploader-';
 
 // for IOS, register event listeners or else they don't fire on DeviceEventEmitter
 if (NativeModules.VydiaRNFileUploader) {
-  NativeModule.addListener(eventPrefix + 'progress');
-  NativeModule.addListener(eventPrefix + 'error');
-  NativeModule.addListener(eventPrefix + 'cancelled');
-  NativeModule.addListener(eventPrefix + 'completed');
+  FlipUpload.addListener(eventPrefix + 'progress');
+  FlipUpload.addListener(eventPrefix + 'error');
+  FlipUpload.addListener(eventPrefix + 'cancelled');
+  FlipUpload.addListener(eventPrefix + 'completed');
 }
 
 /*
@@ -50,7 +73,7 @@ Returns an object:
 The promise should never be rejected.
 */
 export const getFileInfo = (path: string): Promise<Object> => {
-  return NativeModule.getFileInfo(path).then(data => {
+  return FlipUpload.getFileInfo(path).then(data => {
     if (data.size) {
       // size comes back as a string on android so we convert it here.  if it's already a number this won't hurt anything
       data.size = +data.size;
@@ -77,7 +100,7 @@ It is recommended to add listeners in the .then of this promise.
 
 */
 export const startUpload = (options: StartUploadArgs): Promise<string> =>
-  NativeModule.startUpload(options);
+  FlipUpload.startUpload(options);
 
 /*
 Cancels active upload by string ID of the upload.
@@ -95,7 +118,7 @@ export const cancelUpload = (cancelUploadId: string): Promise<boolean> => {
   if (typeof cancelUploadId !== 'string') {
     return Promise.reject(new Error('Upload ID must be a string'));
   }
-  return NativeModule.cancelUpload(cancelUploadId);
+  return FlipUpload.cancelUpload(cancelUploadId);
 };
 
 /*

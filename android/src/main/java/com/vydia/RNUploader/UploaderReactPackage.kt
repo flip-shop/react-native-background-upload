@@ -22,7 +22,7 @@ import org.koin.java.KoinJavaComponent.inject
 /**
  * Created by stephen on 12/8/16.
  */
-class UploaderReactPackage : ReactPackage {
+class UploaderReactPackage : TurboReactPackage {
 
     private val fileInfoProvider: FileInfoProvider
             by inject(FileInfoProviderImpl::class.java)
@@ -42,19 +42,9 @@ class UploaderReactPackage : ReactPackage {
     private val uploadWorkerManager: UploadWorkerManager
             by inject(UploadWorkerManagerImpl::class.java)
 
-    // Deprecated in RN 0.47, @todo remove after < 0.47 support remove
-    fun createJSModules(): List<Class<out JavaScriptModule?>> {
-        return emptyList()
-    }
-
-    override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
-        return emptyList()
-    }
-
-    override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        val modules: MutableList<NativeModule> = ArrayList()
-        modules.add(
-            UploaderModule(
+    override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {
+    return if (name == UploaderModule.NAME) {
+      UploaderModule(
                 reactContext = reactContext,
                 fileInfoProvider = fileInfoProvider,
                 httpClientOptionsProvider = httpClientOptionsProvider,
@@ -63,7 +53,25 @@ class UploaderReactPackage : ReactPackage {
                 notificationChannelManager = notificationChannelManager,
                 uploadWorkerManager = uploadWorkerManager
             )
-        )
-        return modules
+    } else {
+      null
     }
+  }
+
+  override fun getReactModuleInfoProvider(): ReactModuleInfoProvider {
+    return ReactModuleInfoProvider {
+      val moduleInfos: MutableMap<String, ReactModuleInfo> = HashMap()
+      val isTurboModule: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
+      moduleInfos[UploaderModule.NAME] = ReactModuleInfo(
+        UploaderModule.NAME,
+        UploaderModule.NAME,
+        false,  // canOverrideExistingModule
+        false,  // needsEagerInit
+        true,  // hasConstants
+        false,  // isCxxModule
+        isTurboModule // isTurboModule
+      )
+      moduleInfos
+    }
+  }
 }

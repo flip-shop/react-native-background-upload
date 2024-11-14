@@ -18,8 +18,24 @@ buildscript {
     }
 }
 
+def isNewArchitectureEnabled() {
+  return rootProject.hasProperty("newArchEnabled") && rootProject.getProperty("newArchEnabled") == "true"
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+
+if (isNewArchitectureEnabled()) {
+  apply plugin: "com.facebook.react"
+}
+
+def getExtOrDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["RNUPloader" + name]
+}
+
+def getExtOrIntegerDefault(name) {
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["RNUPloader" + name]).toInteger()
+}
 
 android {
     compileSdkVersion findProperty('compileSdkVersion') ?: 28
@@ -33,14 +49,21 @@ android {
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
+        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
     }
     lintOptions {
         abortOnError false
     }
     sourceSets {
         main {
-            java {
-                resources.srcDirs 'src/main/java', 'src/test', 'src/test/java'
+            if (isNewArchitectureEnabled()) {
+                java.srcDirs += [
+                "src/newarch",
+                // This is needed to build Kotlin project with NewArch enabled
+                "${project.buildDir}/generated/source/codegen/java"
+             ]
+            } else {
+            java.srcDirs += ["src/oldarch"]
             }
         }
     }
@@ -100,4 +123,12 @@ dependencies {
     testImplementation "io.insert-koin:koin-test:$koin_version"
     // Koin for JUnit 4
     testImplementation "io.insert-koin:koin-test-junit4:$koin_version"
+}
+
+if (isNewArchitectureEnabled()) {
+  react {
+    jsRootDir = file("../src/")
+    libraryName = "RNUPloader"
+    codegenJavaPackageName = "com.vydia"
+  }
 }
