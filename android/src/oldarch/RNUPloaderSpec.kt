@@ -2,7 +2,7 @@ package com.vydia.RNUploader
 
 import com.facebook.react.bridge.*
 
-abstract class RNUPloaderSpec internal constructor(context: ReactApplicationContext) :
+abstract class RNUploaderSpec internal constructor(context: ReactApplicationContext) :
   ReactContextBaseJavaModule(context) {
     abstract fun getFileInfo(path: String?, promise: Promise);
     abstract fun startUpload(options: ReadableMap, promise: Promise);

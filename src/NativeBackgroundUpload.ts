@@ -13,4 +13,4 @@ export interface Spec extends TurboModule {
   disconnect(): void;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('RNUPloader');
+export default TurboModuleRegistry.getEnforcing<Spec>('RNUploader');

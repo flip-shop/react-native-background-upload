@@ -1,10 +1,10 @@
 package com.vydia.RNUploader
 
-import com.facebook.react.ReactPackage
-import com.facebook.react.bridge.JavaScriptModule
+import com.facebook.react.TurboReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.uimanager.ViewManager
+import com.facebook.react.module.model.ReactModuleInfo
+import com.facebook.react.module.model.ReactModuleInfoProvider
 import com.vydia.RNUploader.files.FileInfoProvider
 import com.vydia.RNUploader.files.FileInfoProviderImpl
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
@@ -22,7 +22,7 @@ import org.koin.java.KoinJavaComponent.inject
 /**
  * Created by stephen on 12/8/16.
  */
-class UploaderReactPackage : TurboReactPackage {
+class UploaderReactPackage : TurboReactPackage() {
 
     private val fileInfoProvider: FileInfoProvider
             by inject(FileInfoProviderImpl::class.java)

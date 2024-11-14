@@ -22,7 +22,7 @@ class UploaderModule(
   private val notificationsConfigProvider: NotificationsConfigProvider,
   private val notificationChannelManager: NotificationChannelManager,
   private val uploadWorkerManager: UploadWorkerManager
-): RNUPloaderSpec(reactContext) {
+): RNUploaderSpec(reactContext) {
 
   companion object {
     const val NAME = "UploaderModule"
