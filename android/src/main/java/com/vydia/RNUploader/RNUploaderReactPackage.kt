@@ -22,7 +22,7 @@ import org.koin.java.KoinJavaComponent.inject
 /**
  * Created by stephen on 12/8/16.
  */
-class UploaderReactPackage : TurboReactPackage() {
+class RNUploaderReactPackage : TurboReactPackage() {
 
     private val fileInfoProvider: FileInfoProvider
             by inject(FileInfoProviderImpl::class.java)
@@ -43,8 +43,8 @@ class UploaderReactPackage : TurboReactPackage() {
             by inject(UploadWorkerManagerImpl::class.java)
 
     override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {
-    return if (name == UploaderModule.NAME) {
-      UploaderModule(
+    return if (name == RNUploaderModule.NAME) {
+      RNUploaderModule(
                 reactContext = reactContext,
                 fileInfoProvider = fileInfoProvider,
                 httpClientOptionsProvider = httpClientOptionsProvider,
@@ -62,9 +62,9 @@ class UploaderReactPackage : TurboReactPackage() {
     return ReactModuleInfoProvider {
       val moduleInfos: MutableMap<String, ReactModuleInfo> = HashMap()
       val isTurboModule: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
-      moduleInfos[UploaderModule.NAME] = ReactModuleInfo(
-        UploaderModule.NAME,
-        UploaderModule.NAME,
+      moduleInfos[RNUploaderModule.NAME] = ReactModuleInfo(
+        RNUploaderModule.NAME,
+        RNUploaderModule.NAME,
         false,  // canOverrideExistingModule
         false,  // needsEagerInit
         true,  // hasConstants

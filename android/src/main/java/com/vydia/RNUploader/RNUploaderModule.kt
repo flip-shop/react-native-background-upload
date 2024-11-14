@@ -14,7 +14,7 @@ import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
 import com.vydia.RNUploader.worker.UploadWorkerManager
 
-class UploaderModule(
+class RNUploaderModule(
   reactContext: ReactApplicationContext,
   private val fileInfoProvider: FileInfoProvider,
   private val httpClientOptionsProvider: HttpClientOptionsProvider,
@@ -25,7 +25,7 @@ class UploaderModule(
 ): RNUploaderSpec(reactContext) {
 
   companion object {
-    const val NAME = "UploaderModule"
+    const val NAME = "RNUploaderModule"
   }
 
   override fun getName() = NAME

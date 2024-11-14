@@ -55,7 +55,7 @@ class UploaderModuleTest {
     @Mock
     private lateinit var mockPromise: Promise
 
-    private lateinit var uploaderModule: UploaderModule
+    private lateinit var uploaderModule: RNUploaderModule
 
     private val fileInfo = FileInfo(
         name ="testFile.mp4",
@@ -75,7 +75,7 @@ class UploaderModuleTest {
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        uploaderModule = UploaderModule(
+        uploaderModule = RNUploaderModule(
             mockReactContext,
             mockFileInfoProvider,
             mockHttpClientOptionsProvider,

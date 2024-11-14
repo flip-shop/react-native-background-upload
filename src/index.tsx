@@ -36,7 +36,7 @@ const LINKING_ERROR =
 const isTurboModuleEnabled = global.__turboModuleProxy != null;
 
 const NativeBackgroundUploadModule = isTurboModuleEnabled
-  ? require('./NativeBackgroundUpload').default
+  ? require('./NativeRNUploader').default
   : NativeModules.VydiaRNFileUploader || NativeModules.RNFileUploader; // iOS is VydiaRNFileUploader and Android is RNFileUploader
 
 const FlipUpload = NativeBackgroundUploadModule
