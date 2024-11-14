@@ -4,7 +4,6 @@ import android.util.Log
 import com.facebook.react.bridge.*
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
-import com.vydia.RNUploader.helpers.*
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptions
@@ -22,7 +21,7 @@ class RNUploaderModule(
   private val notificationsConfigProvider: NotificationsConfigProvider,
   private val notificationChannelManager: NotificationChannelManager,
   private val uploadWorkerManager: UploadWorkerManager
-): RNUploaderSpec(reactContext) {
+): ReactContextBaseJavaModule(reactContext) {
 
   companion object {
     const val NAME = "RNUploaderModule"
