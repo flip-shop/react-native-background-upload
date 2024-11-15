@@ -30,11 +30,11 @@ if (isNewArchitectureEnabled()) {
 }
 
 def getExtOrDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["RNUPloader" + name]
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["RNUploader" + name]
 }
 
 def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["RNUPloader" + name]).toInteger()
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["RNUploader" + name]).toInteger()
 }
 
 android {
@@ -128,7 +128,7 @@ dependencies {
 if (isNewArchitectureEnabled()) {
   react {
     jsRootDir = file("../src/")
-    libraryName = "RNUPloader"
+    libraryName = "RNUploader"
     codegenJavaPackageName = "com.vydia"
   }
 }
