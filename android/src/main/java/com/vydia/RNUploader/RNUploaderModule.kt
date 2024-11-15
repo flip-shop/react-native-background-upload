@@ -21,7 +21,7 @@ class RNUploaderModule(
   private val notificationsConfigProvider: NotificationsConfigProvider,
   private val notificationChannelManager: NotificationChannelManager,
   private val uploadWorkerManager: UploadWorkerManager
-): ReactContextBaseJavaModule(reactContext) {
+): RNUploaderSpec(reactContext) {
 
   companion object {
     const val NAME = "RNUploaderModule"
@@ -34,7 +34,7 @@ class RNUploaderModule(
   Returns an object such as: {extension: "mp4", size: "3804316", exists: true, mimeType: "video/mp4", name: "20161116_074726.mp4"}
    */
   @ReactMethod
-  fun getFileInfo(path: String?, promise: Promise) {
+  override fun getFileInfo(path: String?, promise: Promise) {
     fileInfoProvider.getFileInfoFromPath(
       path = path,
       onFileInfoObtained = { promise.resolve(it.toArgumentsMap()) },
@@ -47,7 +47,7 @@ class RNUploaderModule(
    * Returns a promise with the string ID of the upload.
    */
   @ReactMethod
-  fun startUpload(options: ReadableMap, promise: Promise) {
+  override fun startUpload(options: ReadableMap, promise: Promise) {
 
     var uploadRequestOptions: UploadRequestOptions? = null
     var httpClientOptions: HttpClientOptions? = null
@@ -123,7 +123,7 @@ class RNUploaderModule(
    * Event "cancelled" will be fired when upload is cancelled.
    */
   @ReactMethod
-  fun cancelUpload(cancelUploadId: String?, promise: Promise) {
+  override fun cancelUpload(cancelUploadId: String?, promise: Promise) {
     if (cancelUploadId !is String) {
       promise.reject(java.lang.IllegalArgumentException("Upload ID must be a string"))
       return
@@ -141,7 +141,7 @@ class RNUploaderModule(
    * Cancels all file uploads
    */
   @ReactMethod
-  fun stopAllUploads(promise: Promise) {
+  override fun stopAllUploads(promise: Promise) {
     try {
       uploadWorkerManager.cancelAllWorkers()
       promise.resolve(true)
