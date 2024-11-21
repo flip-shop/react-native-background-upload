@@ -13,7 +13,7 @@
 
 @implementation VydiaRNFileUploader
 
-RCT_EXPORT_MODULE();
+RCT_EXPORT_MODULE(RNUploaderModule);
 
 @synthesize bridge = _bridge;
 static int uploadId = 0;
