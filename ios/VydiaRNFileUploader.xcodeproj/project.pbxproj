@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		091FE8912A27903D00C14BE4 /* String+MimeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091FE8902A27903D00C14BE4 /* String+MimeType.swift */; };
+		091FE8932A27909700C14BE4 /* UploadOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091FE8922A27909700C14BE4 /* UploadOptions.swift */; };
+		091FE8952A2790BA00C14BE4 /* UploadError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091FE8942A2790BA00C14BE4 /* UploadError.swift */; };
+		097BD6BF2A28A93400D2C144 /* VydiaRNFileUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 097BD6BE2A28A93400D2C144 /* VydiaRNFileUploader.swift */; };
 		DCC748851E044F8700EA453E /* VydiaRNFileUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */; };
 /* End PBXBuildFile section */
 
@@ -24,6 +28,11 @@
 
 /* Begin PBXFileReference section */
 		014A3B5C1C6CF33500B6D375 /* libVydiaRNFileUploader.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libVydiaRNFileUploader.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		091FE8902A27903D00C14BE4 /* String+MimeType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+MimeType.swift"; sourceTree = "<group>"; };
+		091FE8922A27909700C14BE4 /* UploadOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadOptions.swift; sourceTree = "<group>"; };
+		091FE8942A2790BA00C14BE4 /* UploadError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadError.swift; sourceTree = "<group>"; };
+		097BD6BE2A28A93400D2C144 /* VydiaRNFileUploader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VydiaRNFileUploader.swift; sourceTree = "<group>"; };
+		099C475C2A17F13C00F6ABF0 /* VydiaRNFileUploader-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "VydiaRNFileUploader-Bridging-Header.h"; sourceTree = "<group>"; };
 		DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VydiaRNFileUploader.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -42,6 +51,9 @@
 			isa = PBXGroup;
 			children = (
 				DCC748841E044F8700EA453E /* VydiaRNFileUploader.m */,
+				097BD6BE2A28A93400D2C144 /* VydiaRNFileUploader.swift */,
+				099C475C2A17F13C00F6ABF0 /* VydiaRNFileUploader-Bridging-Header.h */,
+				091FE88F2A278FE600C14BE4 /* Supporting Files */,
 				014A3B5D1C6CF33500B6D375 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,6 +64,16 @@
 				014A3B5C1C6CF33500B6D375 /* libVydiaRNFileUploader.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		091FE88F2A278FE600C14BE4 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				091FE8902A27903D00C14BE4 /* String+MimeType.swift */,
+				091FE8922A27909700C14BE4 /* UploadOptions.swift */,
+				091FE8942A2790BA00C14BE4 /* UploadError.swift */,
+			);
+			path = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -85,6 +107,7 @@
 				TargetAttributes = {
 					014A3B5B1C6CF33500B6D375 = {
 						CreatedOnToolsVersion = 7.2.1;
+						LastSwiftMigration = 1420;
 					};
 				};
 			};
@@ -93,6 +116,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 014A3B531C6CF33500B6D375;
@@ -110,7 +134,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				091FE8912A27903D00C14BE4 /* String+MimeType.swift in Sources */,
+				097BD6BF2A28A93400D2C144 /* VydiaRNFileUploader.swift in Sources */,
+				091FE8952A2790BA00C14BE4 /* UploadError.swift in Sources */,
 				DCC748851E044F8700EA453E /* VydiaRNFileUploader.m in Sources */,
+				091FE8932A27909700C14BE4 /* UploadOptions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -153,7 +181,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -190,7 +218,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -200,30 +228,39 @@
 		014A3B661C6CF33500B6D375 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRCROOT)/../Example/node_modules/react-native/React/**",
 					"$(SRCROOT)/../../../ios/Pods/Headers/Public/**",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "VydiaRNFileUploader-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		014A3B671C6CF33500B6D375 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../node_modules/react-native/React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRCROOT)/../Example/node_modules/react-native/React/**",
 					"$(SRCROOT)/../../../ios/Pods/Headers/Public/**",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "VydiaRNFileUploader-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
