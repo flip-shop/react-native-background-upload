@@ -6,9 +6,10 @@
 
 #ifdef RCT_NEW_ARCH_ENABLED
 #import <RNUploaderSpec/RNUploaderSpec.h>
-#endif
-
 @interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate, NativeRNUploaderSpec>
+#else
+@interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate>
+#endif
 {
   NSMutableDictionary *_responsesData;
   NSMutableDictionary<NSString*, NSURL*> *_filesMap;
