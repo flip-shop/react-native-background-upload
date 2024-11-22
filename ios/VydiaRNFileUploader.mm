@@ -4,7 +4,11 @@
 #import <React/RCTBridgeModule.h>
 #import <Photos/Photos.h>
 
-@interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate>
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <RNUploaderSpec/RNUploaderSpec.h>
+#endif
+
+@interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate, NativeRNUploaderSpec>
 {
   NSMutableDictionary *_responsesData;
   NSMutableDictionary<NSString*, NSURL*> *_filesMap;
@@ -20,6 +24,13 @@ static int uploadId = 0;
 static RCTEventEmitter* staticEventEmitter = nil;
 static NSString *BACKGROUND_SESSION_ID = @"ReactNativeBackgroundUpload";
 NSURLSession *_urlSession = nil;
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:(const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeRNUploaderSpecJSI>(params);
+}
+#endif
 
 + (BOOL)requiresMainQueueSetup {
     return NO;
@@ -295,10 +306,10 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
  * Event "cancelled" will be fired when upload is cancelled.
  */
 RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
-  __weak typeof(self) weakSelf = self;
+  __weak __typeof__(self) weakSelf = self;
 
     [_urlSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
-      __strong typeof(self) strongSelf = weakSelf;
+      __strong __typeof__(self) strongSelf = weakSelf;
 
         for (NSURLSessionTask *uploadTask in uploadTasks) {
             if ([uploadTask.taskDescription isEqualToString:cancelUploadId]){
