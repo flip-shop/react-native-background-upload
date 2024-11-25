@@ -6,7 +6,7 @@
 
 #ifdef RCT_NEW_ARCH_ENABLED
 #import <RNUploaderSpec/RNUploaderSpec.h>
-@interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate, NativeRNUploaderSpec>
+@interface VydiaRNFileUploader : RCTEventEmitter <NativeRNUploaderSpec, NSURLSessionTaskDelegate>
 #else
 @interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate>
 #endif
