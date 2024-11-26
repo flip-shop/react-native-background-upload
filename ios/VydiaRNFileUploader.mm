@@ -6,7 +6,7 @@
 
 #ifdef RCT_NEW_ARCH_ENABLED
 #import <RNUploaderSpec/RNUploaderSpec.h>
-@interface VydiaRNFileUploader : RCTEventEmitter <NativeRNUploaderSpec, NSURLSessionTaskDelegate>
+@interface VydiaRNFileUploader : NativeRNUploaderSpecBase <NativeRNUploaderSpec, NSURLSessionTaskDelegate>
 #else
 @interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate>
 #endif
@@ -44,7 +44,9 @@ NSURLSession *_urlSession = nil;
 -(id) init {
   self = [super init];
   if (self) {
+#ifndef RCT_NEW_ARCH_ENABLED
     staticEventEmitter = self;
+#endif
     _responsesData = [NSMutableDictionary dictionary];
     _filesMap = @{}.mutableCopy;
   }
@@ -52,9 +54,21 @@ NSURLSession *_urlSession = nil;
 }
 
 - (void)_sendEventWithName:(NSString *)eventName body:(id)body {
+#ifdef RCT_NEW_ARCH_ENABLED
+    if ([eventName isEqualToString:@"RNFileUploader-progress"]) {
+        [self emitOnProgress:body];
+    } else if ([eventName isEqualToString:@"RNFileUploader-error"]) {
+        [self emitOnError:body];
+    } else if ([eventName isEqualToString:@"RNFileUploader-cancelled"]) {
+        [self emitOnCancelled:body];
+    } else if ([eventName isEqualToString:@"RNFileUploader-completed"]) {
+        [self emitOnCompleted:body];
+    }
+#else
   if (staticEventEmitter == nil)
     return;
   [staticEventEmitter sendEventWithName:eventName body:body];
+#endif
 }
 
 - (NSArray<NSString *> *)supportedEvents {
