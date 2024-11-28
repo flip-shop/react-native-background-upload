@@ -10,6 +10,5 @@ export interface Spec extends TurboModule {
   readonly onError: EventEmitter<Object>
   readonly onCancelled: EventEmitter<Object>
   readonly onCompleted: EventEmitter<Object>
-
 }
 export default TurboModuleRegistry.getEnforcing<Spec>('RNUploaderModule');
