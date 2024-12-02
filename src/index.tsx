@@ -7,24 +7,23 @@ import { NativeModules, DeviceEventEmitter, Platform } from 'react-native';
 export type UploadEvent = 'progress' | 'error' | 'completed' | 'cancelled';
 
 export type NotificationArgs = {
-  enabled: boolean,
+  enabled: boolean;
 };
 
 export type StartUploadArgs = {
-  url: string,
-  path: string,
-  method?: 'PUT' | 'POST',
+  url: string;
+  path: string;
+  method?: 'PUT' | 'POST';
   // Optional, because raw is default
-  type?: 'raw' | 'multipart',
+  type?: 'raw' | 'multipart';
   // This option is needed for multipart type
-  field?: string,
-  customUploadId?: string,
+  field?: string;
+  customUploadId?: string;
   // parameters are supported only in multipart type
-  parameters?: { [key: string]: string },
-  headers?: Object,
-  notification?: NotificationArgs,
+  parameters?: { [key: string]: string };
+  headers?: Object;
+  notification?: NotificationArgs;
 };
-
 
 const LINKING_ERROR =
   `The package 'react-native-flip-socket' doesn't seem to be linked. Make sure: \n\n` +
@@ -47,9 +46,9 @@ const FlipUpload = NativeBackgroundUploadModule
         get() {
           throw new Error(LINKING_ERROR);
         },
-      }
+      },
     );
-  
+
 const eventPrefix = 'RNFileUploader-';
 
 // for IOS, register event listeners or else they don't fire on DeviceEventEmitter
@@ -142,4 +141,10 @@ export const addListener = (
   });
 };
 
-export default { startUpload, cancelUpload, addListener, getFileInfo };
+export default {
+  startUpload,
+  cancelUpload,
+  addListener,
+  getFileInfo,
+  FlipUpload,
+};
