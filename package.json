@@ -3,6 +3,29 @@
   "version": "6.6.0",
   "description": "Cross platform http post file uploader with android and iOS background support",
   "main": "src/index.js",
+  "module": "src/index.tsx",
+  "types": "lib/typescript/index.d.ts",
+  "react-native": "src/index",
+  "source": "src/index",
+  "files": [
+    "src",
+    "lib",
+    "android",
+    "ios",
+    "cpp",
+    "*.podspec",
+    "!lib/typescript/example",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*"
+  ],
   "scripts": {
     "lint": "yarn lint:ci --fix",
     "lint:ci": "eslint src example",
@@ -68,5 +91,11 @@
       ],
       "@semantic-release/release-notes-generator"
     ]
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610",
+  "codegenConfig": {
+    "name": "RNUploaderSpec",
+    "type": "modules",
+    "jsSrcsDir": "src"
   }
 }

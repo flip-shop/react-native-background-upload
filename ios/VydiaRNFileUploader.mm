@@ -4,7 +4,12 @@
 #import <React/RCTBridgeModule.h>
 #import <Photos/Photos.h>
 
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <RNUploaderSpec/RNUploaderSpec.h>
+@interface VydiaRNFileUploader : NativeRNUploaderSpecBase <NativeRNUploaderSpec, NSURLSessionTaskDelegate>
+#else
 @interface VydiaRNFileUploader : RCTEventEmitter <RCTBridgeModule, NSURLSessionTaskDelegate>
+#endif
 {
   NSMutableDictionary *_responsesData;
   NSMutableDictionary<NSString*, NSURL*> *_filesMap;
@@ -13,13 +18,24 @@
 
 @implementation VydiaRNFileUploader
 
+#ifdef RCT_NEW_ARCH_ENABLED
+RCT_EXPORT_MODULE(RNUploaderModule);
+#else
 RCT_EXPORT_MODULE();
+#endif
 
 @synthesize bridge = _bridge;
 static int uploadId = 0;
 static RCTEventEmitter* staticEventEmitter = nil;
 static NSString *BACKGROUND_SESSION_ID = @"ReactNativeBackgroundUpload";
 NSURLSession *_urlSession = nil;
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:(const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeRNUploaderSpecJSI>(params);
+}
+#endif
 
 + (BOOL)requiresMainQueueSetup {
     return NO;
@@ -28,7 +44,9 @@ NSURLSession *_urlSession = nil;
 -(id) init {
   self = [super init];
   if (self) {
+#ifndef RCT_NEW_ARCH_ENABLED
     staticEventEmitter = self;
+#endif
     _responsesData = [NSMutableDictionary dictionary];
     _filesMap = @{}.mutableCopy;
   }
@@ -36,9 +54,21 @@ NSURLSession *_urlSession = nil;
 }
 
 - (void)_sendEventWithName:(NSString *)eventName body:(id)body {
+#ifdef RCT_NEW_ARCH_ENABLED
+    if ([eventName isEqualToString:@"RNFileUploader-progress"]) {
+        [self emitOnProgress:body];
+    } else if ([eventName isEqualToString:@"RNFileUploader-error"]) {
+        [self emitOnError:body];
+    } else if ([eventName isEqualToString:@"RNFileUploader-cancelled"]) {
+        [self emitOnCancelled:body];
+    } else if ([eventName isEqualToString:@"RNFileUploader-completed"]) {
+        [self emitOnCompleted:body];
+    }
+#else
   if (staticEventEmitter == nil)
     return;
   [staticEventEmitter sendEventWithName:eventName body:body];
+#endif
 }
 
 - (NSArray<NSString *> *)supportedEvents {
@@ -295,10 +325,10 @@ RCT_EXPORT_METHOD(startUpload:(NSDictionary *)options resolve:(RCTPromiseResolve
  * Event "cancelled" will be fired when upload is cancelled.
  */
 RCT_EXPORT_METHOD(cancelUpload: (NSString *)cancelUploadId resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
-  __weak typeof(self) weakSelf = self;
+  __weak __typeof__(self) weakSelf = self;
 
     [_urlSession getTasksWithCompletionHandler:^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
-      __strong typeof(self) strongSelf = weakSelf;
+      __strong __typeof__(self) strongSelf = weakSelf;
 
         for (NSURLSessionTask *uploadTask in uploadTasks) {
             if ([uploadTask.taskDescription isEqualToString:cancelUploadId]){

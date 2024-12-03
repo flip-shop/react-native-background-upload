@@ -4,7 +4,6 @@ import android.util.Log
 import com.facebook.react.bridge.*
 import com.vydia.RNUploader.files.FileInfo
 import com.vydia.RNUploader.files.FileInfoProvider
-import com.vydia.RNUploader.helpers.*
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptions
 import com.vydia.RNUploader.networking.httpClient.HttpClientOptionsProvider
 import com.vydia.RNUploader.networking.request.options.UploadRequestOptions
@@ -14,9 +13,7 @@ import com.vydia.RNUploader.notifications.config.NotificationsConfigProvider
 import com.vydia.RNUploader.notifications.manager.NotificationChannelManager
 import com.vydia.RNUploader.worker.UploadWorkerManager
 
-private const val TAG = "UploaderModule"
-
-class UploaderModule(
+class RNUploaderModule(
   reactContext: ReactApplicationContext,
   private val fileInfoProvider: FileInfoProvider,
   private val httpClientOptionsProvider: HttpClientOptionsProvider,
@@ -24,16 +21,20 @@ class UploaderModule(
   private val notificationsConfigProvider: NotificationsConfigProvider,
   private val notificationChannelManager: NotificationChannelManager,
   private val uploadWorkerManager: UploadWorkerManager
-): ReactContextBaseJavaModule(reactContext) {
+): RNUploaderSpec(reactContext) {
 
-  override fun getName() = moduleName
+  companion object {
+    const val NAME = "RNUploaderModule"
+  }
+
+  override fun getName() = NAME
 
   /*
   Gets file information for the path specified.  Example valid path is: /storage/extSdCard/DCIM/Camera/20161116_074726.mp4
   Returns an object such as: {extension: "mp4", size: "3804316", exists: true, mimeType: "video/mp4", name: "20161116_074726.mp4"}
    */
   @ReactMethod
-  fun getFileInfo(path: String?, promise: Promise) {
+  override fun getFileInfo(path: String?, promise: Promise) {
     fileInfoProvider.getFileInfoFromPath(
       path = path,
       onFileInfoObtained = { promise.resolve(it.toArgumentsMap()) },
@@ -46,7 +47,7 @@ class UploaderModule(
    * Returns a promise with the string ID of the upload.
    */
   @ReactMethod
-  fun startUpload(options: ReadableMap, promise: Promise) {
+  override fun startUpload(options: ReadableMap, promise: Promise) {
 
     var uploadRequestOptions: UploadRequestOptions? = null
     var httpClientOptions: HttpClientOptions? = null
@@ -122,7 +123,7 @@ class UploaderModule(
    * Event "cancelled" will be fired when upload is cancelled.
    */
   @ReactMethod
-  fun cancelUpload(cancelUploadId: String?, promise: Promise) {
+  override fun cancelUpload(cancelUploadId: String?, promise: Promise) {
     if (cancelUploadId !is String) {
       promise.reject(java.lang.IllegalArgumentException("Upload ID must be a string"))
       return
@@ -140,13 +141,13 @@ class UploaderModule(
    * Cancels all file uploads
    */
   @ReactMethod
-  fun stopAllUploads(promise: Promise) {
+  override fun stopAllUploads(promise: Promise) {
     try {
       uploadWorkerManager.cancelAllWorkers()
       promise.resolve(true)
     } catch (exc: java.lang.Exception) {
       exc.printStackTrace()
-      Log.e(TAG, exc.message, exc)
+      Log.e(NAME, exc.message, exc)
       promise.reject(exc)
     }
   }
