@@ -14,7 +14,7 @@ class EventsPublisherImpl(
 ): EventsPublisher {
 
     override fun sendEvent(event: UploadEvents, params: WritableMap?) {
-        (context as? ReactApplication)?.reactNativeHost?.reactInstanceManager?.currentReactContext?.let { reactContext ->
+        (context as? ReactApplication)?.reactHost?.currentReactContext?.let { reactContext ->
             val jsModule = reactContext.getJSModule(
                 DeviceEventManagerModule.RCTDeviceEventEmitter::class.java
             )
