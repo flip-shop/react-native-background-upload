@@ -32,7 +32,8 @@ const LINKING_ERROR =
   '- You are not using Expo Go\n';
 
 // @ts-expect-error
-const isTurboModuleEnabled = global.__turboModuleProxy != null;
+const isTurboModuleEnabled =
+  global.__turboModuleProxy != null || global.RN$Bridgeless === true;
 
 const NativeBackgroundUploadModule = isTurboModuleEnabled
   ? require('./NativeRNUploader').default
